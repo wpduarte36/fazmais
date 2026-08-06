@@ -1,0 +1,323 @@
+FAZMAIS
+Catálogo Educacional Inteligente
+Product Requirements Document (PRD)
+v1.0 — Agosto 2026
+
+1. Visão Geral do Produto
+O FazMais é uma plataforma multi-tenant de catálogo educacional que permite municípios organizarem e disponibilizarem conteúdos pedagógicos (vídeos e PDFs) para professores da rede. A interface do professor segue o padrão Netflix de consumo de conteúdo, enquanto o administrador gerencia acervos, coleções e usuários. Um usuário Master tem visão global sobre todos os municípios.
+1.1 Objetivos
+• Centralizar o acervo educacional de cada município em uma plataforma única e organizada
+• Facilitar a descoberta de conteúdos relevantes pelo professor através de IA
+• Permitir gestão autônoma por cada município (multi-tenancy completa)
+• Oferecer experiência de consumo moderna e intuitiva para o professor
+1.2 Personas
+Master — Super administrador da plataforma. Cria municípios e seus admins. Visão global.
+Administrador — Diretoria de ensino do município. Gerencia acervos, coleções, conteúdos e usuários do seu tenant.
+Professor — Consumidor final. Navega, busca, favorita, avalia e consome conteúdos.
+
+2. Stack Técnica
+Arquitetura: Monorepo com Turborepo
+Frontend: React 18 + Vite + Tailwind CSS + React Router
+Backend: NestJS + TypeScript
+Banco de dados: PostgreSQL 15
+ORM: Prisma
+Autenticação: JWT próprio (access token + refresh token)
+IA (futuro): API Claude (Anthropic) para busca semântica e geração de tags
+Hospedagem de vídeos: Vimeo (embed via iframe + Player API)
+Viewer de PDF: PDF.js (Mozilla) para leitura in-app
+2.1 Estrutura do Monorepo
+fazmais/
+├── apps/
+│   ├── web/              → React + Vite (SPA do front-end)
+│   └── api/              → NestJS (backend REST API)
+├── packages/
+│   ├── shared/           → Tipos TypeScript compartilhados, DTOs, enums
+│   ├── ui/               → Componentes React reutilizáveis
+│   └── config/           → Configs de ESLint, Tailwind, Prettier
+├── prisma/               → Schema, migrations, seeds
+├── turbo.json
+├── package.json
+└── pnpm-workspace.yaml
+2.2 Modelo de Dados (PostgreSQL 15 + Prisma)
+ATENÇÃO: As migrations só devem ser criadas com autorização explícita do PO. O schema abaixo é referência.
+
+Tabela: tenants — id, name, createdAt, updatedAt
+Tabela: users — id, tenantId (FK), name, username, email, whatsapp, password (hash), role (ENUM: MASTER, ADMIN, PROFESSOR), status (ENUM: PENDENTE, ATIVO, INATIVO), createdAt, updatedAt
+Tabela: acervos (types) — id, tenantId (FK), name, icon, createdAt
+Tabela: colecoes (categories) — id, acervoId (FK), tenantId (FK), name, createdAt
+Tabela: conteudos (products) — id, colecaoId (FK), tenantId (FK), title, description, mediaType (ENUM: VIDEO, PDF), mediaUrl, imageUrl, isFeatured, tags (text[]), aiSummary, createdAt, updatedAt
+Tabela: favorites — id, userId (FK), conteudoId (FK), createdAt
+Tabela: ratings — id, userId (FK), conteudoId (FK), score (1-5), createdAt
+Tabela: progress — id, userId (FK), conteudoId (FK), progressPercent, lastPosition, updatedAt
+Tabela: refresh_tokens — id, userId (FK), token, expiresAt, createdAt
+
+3. Épicos e User Stories
+3.1 Épico: Autenticação e Acesso
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-001
+Professor
+Como professor, quero fazer login com meu usuário e senha para acessar o conteúdo do meu município
+Login valida credenciais via JWT; retorna access + refresh token; redireciona para a home Netflix do tenant
+US-002
+Professor
+Como professor sem cadastro, quero solicitar acesso clicando em &quot;Ainda não tenho acesso&quot; para me registrar na plataforma
+Formulário pede nome, e-mail, WhatsApp e município; cria user com status PENDENTE; exibe modal de confirmação
+US-003
+Admin
+Como administrador, quero aprovar ou recusar solicitações de acesso pendentes
+Seção &quot;Solicitações Pendentes&quot; na aba Usuários com botões Aprovar/Recusar; aprovar muda status para ATIVO
+US-004
+Todos
+Como usuário, quero ver o botão &quot;Esqueceu sua senha?&quot; na tela de login
+Botão abre modal informativo no MVP; no produto final enviará link de redefinição por e-mail
+US-005
+Todos
+Como usuário, quero que minha sessão persista via refresh token para não precisar fazer login toda vez
+Access token expira em 15min; refresh token em 7 dias; renovação automática e silenciosa
+
+3.2 Épico: Painel Master
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-010
+Master
+Como master, quero ver um dashboard com totais globais (municípios, admins, professores, conteúdos)
+Cards de stats no topo do painel; dados consolidados cross-tenant
+US-011
+Master
+Como master, quero criar um novo município
+Modal com campo nome; município aparece imediatamente nos selects de login e auto-cadastro
+US-012
+Master
+Como master, quero editar o nome de um município existente
+Botão editar na tabela; abre modal pré-preenchido; salvar atualiza em todos os pontos
+US-013
+Master
+Como master, quero excluir um município sem usuários vinculados
+Excluir remove tenant + acervos + coleções + conteúdos; bloqueia exclusão se houver usuários ativos
+US-014
+Master
+Como master, quero criar um administrador e vinculá-lo a um município
+Modal com nome, login, e-mail, WhatsApp e select de município; admin recebe e-mail de primeiro acesso
+US-015
+Master
+Como master, quero editar ou excluir administradores existentes
+Tabela de admins com ações de editar (abre modal) e excluir (remove user)
+
+3.3 Épico: Gestão de Acervos (Admin)
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-020
+Admin
+Como admin, quero ver stats do meu município (acervos, coleções, conteúdos, visualizações)
+Cards de métricas no topo da aba Acervo; dados filtrados pelo tenantId do admin
+US-021
+Admin
+Como admin, quero criar um novo acervo com nome e ícone
+Modal com nome e select de ícone; acervo aparece como pill no carrossel horizontal
+US-022
+Admin
+Como admin, quero excluir um acervo (remove coleções e conteúdos vinculados)
+Botão lixeira no pill; confirmação antes de excluir; remove em cascata
+US-023
+Admin
+Como admin, quero navegar entre acervos clicando nos pills do carrossel
+Pill ativo fica destacado; painel abaixo mostra coleções e conteúdos do acervo selecionado
+US-024
+Admin
+Como admin, quero criar coleções dentro de um acervo
+Botão &quot;+ Coleção&quot; abre modal com campo nome vinculado ao acervo selecionado
+US-025
+Admin
+Como admin, quero excluir uma coleção (remove conteúdos vinculados)
+Botão lixeira na coleção; confirmação; exclusão em cascata
+
+3.4 Épico: Gestão de Conteúdos (Admin)
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-030
+Admin
+Como admin, quero cadastrar um conteúdo com título, descrição, tipo de mídia, imagem e URL
+Modal de criação com campos; mediaType pode ser VIDEO ou PDF; imagem de capa obrigatória
+US-031
+Admin
+Como admin, quero editar um conteúdo existente
+Botão editar no card; abre modal pré-preenchido; salvar atualiza o registro
+US-032
+Admin
+Como admin, quero excluir um conteúdo
+Botão lixeira no card; remove o conteúdo e seus favoritos/ratings/progress vinculados
+US-033
+Admin
+Como admin, quero arrastar um conteúdo para outra coleção do mesmo acervo
+Drag &amp; drop entre coleções; card fica semi-transparente ao arrastar; zona de drop com destaque azul
+US-034
+Admin
+Como admin, quero arrastar um conteúdo para outro acervo soltando no pill
+Drop no pill do acervo destino; se 1 coleção, move direto; se múltiplas, abre modal para escolher
+US-035
+Admin
+Como admin, quero clicar em &quot;Gerar sugestões com IA&quot; para preencher tags e resumo automaticamente
+Botão no modal de conteúdo; envia título+descrição para a API de IA; retorna tags e resumo em campos editáveis
+US-036
+Admin
+Como admin, quero ver uma dica visual informando que posso arrastar conteúdos
+Banner azul claro abaixo do título do acervo com ícone de mão e texto explicativo
+
+3.5 Épico: Gestão de Usuários (Admin)
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-040
+Admin
+Como admin, quero alternar entre as abas &quot;Acervo&quot; e &quot;Usuários&quot; no painel
+Tabs no topo; troca instantânea sem recarregar; badge de pendentes na aba Usuários
+US-041
+Admin
+Como admin, quero ver stats de usuários (total, ativos, pendentes)
+Cards de métricas no topo da aba Usuários
+US-042
+Admin
+Como admin, quero criar um novo professor ou administrador com nome, login, e-mail e WhatsApp
+Modal sem campo de senha; nota &quot;o usuário definirá a própria senha no primeiro acesso&quot;
+US-043
+Admin
+Como admin, quero editar os dados de um usuário existente
+Botão editar na tabela; abre modal pré-preenchido
+US-044
+Admin
+Como admin, quero ativar ou desativar o acesso de um usuário sem excluí-lo
+Toggle ativo/inativo na tabela; inativo fica esmaecido; mantém histórico
+US-045
+Admin
+Como admin, quero resetar a senha de um usuário
+Botão de chave na tabela; gera link de redefinição de senha
+US-046
+Admin
+Como admin, quero buscar e filtrar usuários por nome, login ou perfil
+Campo de busca + select de filtro por perfil acima da tabela
+
+3.6 Épico: Consumo de Conteúdo (Professor)
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-050
+Professor
+Como professor, quero ver uma home estilo Netflix com hero banner e fileiras horizontais de conteúdo
+Hero com conteúdo destaque (isFeatured); fileiras: Continuar Assistindo, Recomendados, Populares, por Coleção
+US-051
+Professor
+Como professor, quero assistir a um vídeo em modal com player completo
+Modal fullscreen com controles; registra view; atualiza progresso; integração Vimeo Player API
+US-052
+Professor
+Como professor, quero ler um PDF em formato de livro aberto com animação de virar página
+Viewer com duas páginas lado a lado; flip animation em 3D; zoom ao passar o mouse; navegação por teclado (← →)
+US-053
+Professor
+Como professor, quero ver meu progresso de consumo (barra nos cards e fileira &quot;Continuar Assistindo&quot;)
+Barra de progresso amber no card; fileira dedicada para conteúdos com progresso &lt; 100%
+US-054
+Professor
+Como professor, quero favoritar conteúdos clicando no coração
+Toggle favorito no card e dentro do modal; estado persiste; pode ser usado para curadoria pessoal
+US-055
+Professor
+Como professor, quero avaliar conteúdos com estrelas (1-5)
+Rating por estrelas no card e dentro do modal; persiste no banco; alimenta ranking futuro
+US-056
+Professor
+Como professor, quero buscar conteúdos por título ou descrição
+Campo de busca no header; filtra em tempo real; exibe resultados como fileira
+
+3.7 Épico: Inteligência Artificial
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-060
+Professor
+Como professor, quero fazer uma pergunta em linguagem natural e receber conteúdos relevantes do acervo
+Campo &quot;O que você quer trabalhar em aula?&quot; abaixo do hero; resposta conversacional + cards ranqueados com % de relevância
+US-061
+Admin
+Como admin, quero gerar tags e resumo automaticamente a partir da descrição do conteúdo
+Botão &quot;Gerar sugestões com IA&quot; no formulário; retorna tags em input editável e resumo em textarea editável
+US-062
+Sistema
+Como sistema, quero indexar tags e resumos gerados pela IA para melhorar a busca semântica
+Tags salvas como array text[] no banco; resumo como campo aiSummary; busca full-text + semântica
+
+3.8 Épico: Multi-Tenancy
+ID
+Perfil
+User Story
+Critérios de Aceite
+US-070
+Sistema
+Como sistema, quero que todos os dados sejam isolados por tenant (município)
+Toda query inclui filtro tenantId; RLS (Row Level Security) no PostgreSQL como camada extra de proteção
+US-071
+Sistema
+Como sistema, quero que acervos, coleções e conteúdos sejam independentes por tenant
+Criação de acervo vincula tenantId automaticamente; admin só vê dados do próprio municipality
+US-072
+Sistema
+Como sistema, quero que um professor só veja conteúdos do município ao qual está vinculado
+Home do professor filtra por tenantId; busca e IA só retornam conteúdos do tenant
+
+4. Mapa de Telas (Ordem de Desenvolvimento)
+Cada tela deve ser desenvolvida e validada individualmente antes de avançar para a próxima.
+
+Tela 01: Login — campos município, login, senha; botões &quot;Entrar&quot;, &quot;Esqueceu sua senha?&quot; e &quot;Ainda não tenho acesso&quot;
+Tela 02: Modal &quot;Ainda não tenho acesso&quot; — formulário de solicitação (nome, e-mail, WhatsApp, município)
+Tela 03: Modal &quot;Esqueceu sua senha?&quot; — mensagem informativa no MVP
+Tela 04: Painel Master — dashboard global, tabela de municípios (CRUD), tabela de admins (CRUD)
+Tela 05: Painel Admin - Aba Acervo — stats, carrossel de acervos (pills), coleções com cards de conteúdo, drag &amp; drop
+Tela 06: Modal de Acervo — criação/edição de acervo (nome + ícone)
+Tela 07: Modal de Coleção — criação de coleção dentro do acervo
+Tela 08: Modal de Conteúdo — criação/edição com título, descrição, mídia, imagem, IA (tags + resumo)
+Tela 09: Modal de Mover Conteúdo — seleção de coleção destino ao mover entre acervos
+Tela 10: Painel Admin - Aba Usuários — stats, solicitações pendentes, tabela de usuários, filtros
+Tela 11: Modal de Usuário — criação/edição (nome, login, e-mail, WhatsApp, perfil)
+Tela 12: Home Professor (Netflix) — hero, campo IA, fileiras (continuar, recomendados, populares, por coleção)
+Tela 13: Modal de Vídeo — player com favorito e rating
+Tela 14: Viewer de PDF — livro aberto, navegação por página, progresso
+Tela 15: Resultado da busca IA — resposta conversacional + cards ranqueados
+
+5. Regras de Negócio Importantes
+RN-01: Senha nunca é definida pelo admin. O usuário sempre define a própria senha no primeiro acesso ou via link de redefinição.
+RN-02: Exclusão de município só é permitida se não houver usuários vinculados.
+RN-03: Exclusão de acervo remove em cascata todas as coleções e conteúdos vinculados.
+RN-04: Conteúdo pode ser movido entre coleções (drag &amp; drop) e entre acervos (drop no pill + seleção de coleção).
+RN-05: Professor com status PENDENTE não consegue fazer login.
+RN-06: Tags e resumo gerados pela IA são editáveis — o admin tem a palavra final.
+RN-07: O campo de busca inteligente (IA) só retorna conteúdos do tenant do professor logado.
+RN-08: Progresso de vídeo é salvo a cada pausa e ao fechar; progresso de PDF é salvo pela página atual.
+RN-09: Refresh token expira em 7 dias; access token em 15 minutos.
+RN-10: Todo endpoint da API valida tenantId via middleware para garantir isolamento de dados.
+
+6. Migrations (PostgreSQL 15 + Prisma)
+⚠️ IMPORTANTE: As migrations NÃO devem ser criadas automaticamente. O desenvolvedor deve apresentar o schema Prisma proposto ao PO para aprovação antes de executar prisma migrate dev.
+
+Ordem sugerida de migrations:
+Migration 01: create_tenants — tabela base de municípios
+Migration 02: create_users — tabela de usuários com roles e status (depende de tenants)
+Migration 03: create_acervos — tipos de conteúdo por tenant
+Migration 04: create_colecoes — categorias dentro dos acervos
+Migration 05: create_conteudos — produtos com metadados, tags e IA summary
+Migration 06: create_favorites — favoritos do professor
+Migration 07: create_ratings — avaliações por estrelas
+Migration 08: create_progress — progresso de consumo
+Migration 09: create_refresh_tokens — tokens de refresh para JWT
+Migration 10: create_rls_policies — Row Level Security por tenantId
