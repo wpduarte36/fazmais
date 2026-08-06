@@ -1,0 +1,307 @@
+// STATUS: PROPOSTA — aguardando aprovação do PO — NÃO EXECUTAR migrate dev
+//
+// Lote A (Checkpoint 1): tenants, users, catalogos, eixos, colecoes, conteudos,
+// tenant_catalogo_access, planos, conteudo_planos, favorites, ratings, progress,
+// refresh_tokens, password_reset_tokens.
+// RLS (migration 11) fica para o Checkpoint 5 (M16) — não faz parte deste lote.
+//
+// Pontos que dependem de SQL manual na migration (não expressáveis no DSL do
+// Prisma) estão marcados com "SQL MANUAL" nos comentários abaixo — ver também
+// a lista consolidada no final deste arquivo.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  MASTER
+  ADMIN
+  PROFESSOR
+}
+
+enum UserStatus {
+  PENDENTE
+  ATIVO
+  INATIVO
+}
+
+enum MediaType {
+  VIDEO
+  PDF
+  ARTIGO
+}
+
+enum PasswordTokenType {
+  FIRST_ACCESS
+  RESET
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users               User[]
+  catalogos           Catalogo[]
+  eixos               Eixo[]
+  colecoes            Colecao[]
+  conteudos           Conteudo[]
+  favorites           Favorite[]
+  ratings             Rating[]
+  progress            Progress[]
+  sharedCatalogAccess TenantCatalogoAccess[]
+
+  @@map("tenants")
+}
+
+model Plano {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users     User[]
+  conteudos ConteudoPlano[]
+
+  @@map("planos")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  tenantId  String?    @map("tenant_id") // nullable só para role MASTER — SQL MANUAL: CHECK
+  planoId   String?    @map("plano_id") // todo usuário tem um plano; nullable para acomodar MASTER/ADMIN (não consomem conteúdo via plano)
+  name      String
+  login     String // credencial de acesso, nunca é o e-mail — única no sistema inteiro (não por tenant)
+  email     String
+  whatsapp  String?
+  password  String? // null até o 1º acesso (RN-01) — ver PasswordResetToken
+  role      Role       @default(PROFESSOR)
+  status    UserStatus @default(PENDENTE)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  tenant              Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  plano               Plano?               @relation(fields: [planoId], references: [id], onDelete: Restrict)
+  favorites           Favorite[]
+  ratings             Rating[]
+  progress            Progress[]
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  // login é único globalmente (não por tenant) — o backend descobre o tenant
+  // do usuário só pelo login, sem precisar de seletor de município no login.
+  // email continua único só por tenant — SQL MANUAL: índice único parcial cobre
+  // o caso do Master (tenantId=NULL), onde Postgres não trata NULLs como iguais.
+  @@unique([login])
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@index([tenantId, role])
+  @@index([tenantId, status])
+  @@index([planoId])
+  @@map("users")
+}
+
+// Catálogo (nível 1). tenantId=NULL = catálogo global publicado por um Master,
+// disponível para qualquer tenant ativar via TenantCatalogoAccess. tenantId
+// preenchido = catálogo privado, criado pelo Admin daquele tenant.
+model Catalogo {
+  id        String   @id @default(uuid())
+  tenantId  String?  @map("tenant_id")
+  name      String
+  icon      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant       Tenant?                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eixos        Eixo[]
+  tenantAccess TenantCatalogoAccess[]
+
+  @@index([tenantId])
+  @@map("catalogos")
+}
+
+// Eixo (nível 2, agrupamento temático dentro do catálogo).
+model Eixo {
+  id         String   @id @default(uuid())
+  catalogoId String   @map("catalogo_id")
+  tenantId   String?  @map("tenant_id") // espelha o tenantId do Catalogo pai
+  name       String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  catalogo Catalogo  @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  colecoes Colecao[]
+
+  @@index([tenantId])
+  @@index([catalogoId])
+  @@map("eixos")
+}
+
+// Coleção (nível 3).
+model Colecao {
+  id        String   @id @default(uuid())
+  eixoId    String   @map("eixo_id")
+  tenantId  String?  @map("tenant_id") // espelha o tenantId do Eixo pai
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  eixo      Eixo       @relation(fields: [eixoId], references: [id], onDelete: Cascade)
+  tenant    Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conteudos Conteudo[]
+
+  @@index([tenantId])
+  @@index([eixoId])
+  @@map("colecoes")
+}
+
+// Conteúdo (nível 4, folha). VIDEO/PDF usam mediaUrl (link externo); ARTIGO usa
+// htmlContent (conteúdo salvo no próprio banco) — SQL MANUAL: CHECK garantindo
+// que o campo certo está preenchido conforme o mediaType (ver rodapé).
+model Conteudo {
+  id          String    @id @default(uuid())
+  colecaoId   String    @map("colecao_id")
+  tenantId    String?   @map("tenant_id") // espelha o tenantId da Colecao pai
+  title       String
+  description String
+  mediaType   MediaType @map("media_type")
+  mediaUrl    String?   @map("media_url") // obrigatório para VIDEO/PDF, nulo para ARTIGO
+  htmlContent String?   @map("html_content") // obrigatório para ARTIGO, nulo para VIDEO/PDF
+  imageUrl    String    @map("image_url")
+  isFeatured  Boolean   @default(false) @map("is_featured")
+  tags        String[]  @default([]) // SQL MANUAL: índice GIN para busca por tag (ver rodapé)
+  aiSummary   String?   @map("ai_summary")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  colecao   Colecao         @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
+  tenant    Tenant?         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  favorites Favorite[]
+  ratings   Rating[]
+  progress  Progress[]
+  planos    ConteudoPlano[]
+
+  @@index([tenantId])
+  @@index([colecaoId])
+  @@index([tenantId, isFeatured])
+  @@map("conteudos")
+}
+
+// Quais planos podem ver um determinado conteúdo (N:N).
+model ConteudoPlano {
+  id         String   @id @default(uuid())
+  conteudoId String   @map("conteudo_id")
+  planoId    String   @map("plano_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  conteudo Conteudo @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
+  plano    Plano    @relation(fields: [planoId], references: [id], onDelete: Cascade)
+
+  @@unique([conteudoId, planoId])
+  @@index([planoId])
+  @@map("conteudo_planos")
+}
+
+// Registra quais tenants ativaram (opt-in) quais catálogos compartilhados pelo
+// Master. Só existe para Catalogo com tenantId=NULL; a leitura combina "meus
+// catálogos" (tenantId = ctx.tenantId) com "catálogos compartilhados ativados"
+// (tenantId IS NULL AND catalogoId IN tenant_catalogo_access do meu tenant).
+model TenantCatalogoAccess {
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  catalogoId String   @map("catalogo_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  catalogo Catalogo @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, catalogoId])
+  @@index([catalogoId])
+  @@map("tenant_catalogo_access")
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  conteudoId String   @map("conteudo_id")
+  tenantId   String   @map("tenant_id") // tenant do professor, não do conteúdo (que pode ser compartilhado)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conteudo Conteudo @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conteudoId])
+  @@index([conteudoId])
+  @@map("favorites")
+}
+
+model Rating {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  conteudoId String   @map("conteudo_id")
+  tenantId   String   @map("tenant_id") // tenant do professor, não do conteúdo
+  score      Int // SQL MANUAL: CHECK (score BETWEEN 1 AND 5)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conteudo Conteudo @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conteudoId])
+  @@index([conteudoId])
+  @@map("ratings")
+}
+
+model Progress {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  conteudoId      String   @map("conteudo_id")
+  tenantId        String   @map("tenant_id") // tenant do professor, não do conteúdo
+  progressPercent Int      @default(0) @map("progress_percent")
+  lastPosition    Int      @default(0) @map("last_position")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conteudo Conteudo @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conteudoId])
+  @@index([userId])
+  @@map("progress")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash") // hash do refresh token, nunca texto plano
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String            @id @default(uuid())
+  userId    String            @map("user_id")
+  tokenHash String            @unique @map("token_hash")
+  type      PasswordTokenType @default(FIRST_ACCESS)
+  expiresAt DateTime          @map("expires_at")
+  usedAt    DateTime?         @map("used_at")
+  createdAt DateTime          @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
