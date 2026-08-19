@@ -1,4 +1,15 @@
+import DOMPurify from 'dompurify';
 import type { ConteudoSummary } from '@fazmais/shared';
+
+// Reforça rel="noopener noreferrer" em qualquer link com target="_blank" que
+// sobreviver à sanitização — evita reverse tabnabbing mesmo se o HTML de
+// origem esquecer o rel (import-legado.mjs já inclui, mas não dá pra confiar
+// nisso pra todo htmlContent futuro).
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+    node.setAttribute('rel', 'noopener noreferrer');
+  }
+});
 
 interface ArtigoModalProps {
   conteudo: ConteudoSummary;
@@ -7,6 +18,10 @@ interface ArtigoModalProps {
 
 export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
   const isExternal = Boolean(conteudo.externalUrl);
+  // htmlContent é autoral (hoje só MASTER cria conteúdo), mas sanitizamos
+  // mesmo assim: defesa em profundidade contra um MASTER comprometido e
+  // contra o dia em que Admins também puderem publicar conteúdo.
+  const sanitizedHtml = DOMPurify.sanitize(conteudo.htmlContent ?? '');
 
   return (
     <div
@@ -41,7 +56,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
 
         <div
           className="max-h-[65vh] overflow-y-auto text-[15px] leading-relaxed text-neutral-300 [&_a]:text-amber-400 [&_a]:underline [&_em]:text-neutral-500 [&_p]:mb-4 [&_p:last-child]:mb-0 light:text-neutral-700"
-          dangerouslySetInnerHTML={{ __html: conteudo.htmlContent ?? '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />
 
         {isExternal && (

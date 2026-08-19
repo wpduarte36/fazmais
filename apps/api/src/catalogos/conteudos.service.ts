@@ -10,8 +10,8 @@ export class ConteudosService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(colecaoId: string, dto: CreateConteudoDto) {
-    const colecao = await this.prisma.colecao.findUnique({
-      where: { id: colecaoId },
+    const colecao = await this.prisma.colecao.findFirst({
+      where: { id: colecaoId, tenantId: null },
     });
     if (!colecao) {
       throw new NotFoundException('Coleção não encontrada');
@@ -96,8 +96,8 @@ export class ConteudosService {
 
   async move(id: string, dto: MoveConteudoDto) {
     await this.findOrThrow(id);
-    const targetColecao = await this.prisma.colecao.findUnique({
-      where: { id: dto.colecaoId },
+    const targetColecao = await this.prisma.colecao.findFirst({
+      where: { id: dto.colecaoId, tenantId: null },
     });
     if (!targetColecao) {
       throw new NotFoundException('Coleção de destino não encontrada');
@@ -145,9 +145,12 @@ export class ConteudosService {
     };
   }
 
+  // tenantId: null restringe a catálogos globais, único tipo alcançável por
+  // essas rotas @Roles('MASTER') hoje — mesmo racional de
+  // ColecoesService/EixosService.findOrThrow.
   private async findOrThrow(id: string) {
-    const conteudo = await this.prisma.conteudo.findUnique({
-      where: { id },
+    const conteudo = await this.prisma.conteudo.findFirst({
+      where: { id, tenantId: null },
       include: { planos: { select: { planoId: true } } },
     });
     if (!conteudo) {

@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -36,30 +37,30 @@ export class TenantsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateTenantDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTenantDto) {
     return this.tenantsService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.tenantsService.remove(id);
   }
 
   @Get(':id/admins')
-  listAdmins(@Param('id') id: string) {
+  listAdmins(@Param('id', ParseUUIDPipe) id: string) {
     return this.tenantsService.listAdmins(id);
   }
 
   @Post(':id/admins')
-  createAdmin(@Param('id') id: string, @Body() dto: CreateAdminDto) {
+  createAdmin(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateAdminDto) {
     return this.tenantsService.createAdmin(id, dto);
   }
 
   @Patch(':id/admins/:userId')
   updateAdmin(
-    @Param('id') id: string,
-    @Param('userId') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: UpdateAdminDto,
   ) {
     return this.tenantsService.updateAdmin(id, userId, dto);
@@ -67,7 +68,7 @@ export class TenantsController {
 
   @Delete(':id/admins/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeAdmin(@Param('id') id: string, @Param('userId') userId: string) {
+  removeAdmin(@Param('id', ParseUUIDPipe) id: string, @Param('userId', ParseUUIDPipe) userId: string) {
     return this.tenantsService.removeAdmin(id, userId);
   }
 }

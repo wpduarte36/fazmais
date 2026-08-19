@@ -13,6 +13,12 @@ interface AccessTokenPayload {
   status: string;
 }
 
+// Hash bcrypt de um valor fixo, comparado quando o login não existe ou não
+// tem senha definida ainda — mantém o custo/tempo de resposta parecido com
+// o caso de senha errada, pra não dar um oráculo de timing que revele se um
+// login existe. Gerado uma vez em módulo, nunca corresponde a senha real.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync('senha-nao-existe-timing-guard', 10);
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,9 +27,20 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  // Mensagem de credenciais inválidas é sempre a mesma pra login inexistente,
+  // senha ainda não definida (1º acesso pendente) e senha errada — do
+  // contrário dá pra enumerar contas só tentando logar, já que login é único
+  // no sistema inteiro. Só revelamos o motivo específico (pendente/inativo)
+  // depois de confirmar que a senha bate, quando quem pergunta já provou que
+  // é o dono da conta.
   async validateUser(login: string, password: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { login } });
-    if (!user) {
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user?.password ?? DUMMY_PASSWORD_HASH,
+    );
+
+    if (!user || !user.password || !passwordMatches) {
       throw new UnauthorizedException('Login ou senha inválidos');
     }
     if (user.status === 'PENDENTE') {
@@ -31,13 +48,6 @@ export class AuthService {
     }
     if (user.status === 'INATIVO') {
       throw new UnauthorizedException('Seu acesso está inativo');
-    }
-    if (!user.password) {
-      throw new UnauthorizedException('Você ainda não definiu sua senha de acesso');
-    }
-    const passwordMatches = await bcrypt.compare(password, user.password);
-    if (!passwordMatches) {
-      throw new UnauthorizedException('Login ou senha inválidos');
     }
     return user;
   }
@@ -124,6 +134,17 @@ export class AuthService {
         data: { usedAt: new Date() },
       }),
     ]);
+  }
+
+  // Revoga o refresh token guardado (se o hash bater com algum não usado
+  // ainda) — não invalida o access token já emitido (fica valendo até
+  // expirar sozinho, ver JwtStrategy), mas evita que esse refresh token
+  // sirva pra tirar um novo access token depois do logout.
+  async revokeRefreshToken(token: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { tokenHash: this.hashToken(token), revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
   }
 
   private hashToken(token: string): string {

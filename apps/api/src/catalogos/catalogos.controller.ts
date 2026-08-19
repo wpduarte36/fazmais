@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -39,23 +40,23 @@ export class CatalogosController {
   }
 
   @Get(':id')
-  getTree(@Param('id') id: string) {
+  getTree(@Param('id', ParseUUIDPipe) id: string) {
     return this.catalogosService.getTree(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateCatalogoDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCatalogoDto) {
     return this.catalogosService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.catalogosService.remove(id);
   }
 
   @Post(':id/eixos')
-  createEixo(@Param('id') catalogoId: string, @Body() dto: EixoDto) {
+  createEixo(@Param('id', ParseUUIDPipe) catalogoId: string, @Body() dto: EixoDto) {
     return this.eixosService.create(catalogoId, dto);
   }
 }

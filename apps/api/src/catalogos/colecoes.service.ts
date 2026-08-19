@@ -7,7 +7,9 @@ export class ColecoesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(eixoId: string, dto: NameOnlyDto) {
-    const eixo = await this.prisma.eixo.findUnique({ where: { id: eixoId } });
+    const eixo = await this.prisma.eixo.findFirst({
+      where: { id: eixoId, tenantId: null },
+    });
     if (!eixo) {
       throw new NotFoundException('Eixo não encontrado');
     }
@@ -29,8 +31,15 @@ export class ColecoesService {
     await this.prisma.colecao.delete({ where: { id } });
   }
 
+  // tenantId: null restringe a catálogos globais — hoje o único tipo
+  // alcançável por essas rotas (@Roles('MASTER')). Mantém update/remove
+  // consistentes com o check que create() já fazia via o Eixo pai, pra não
+  // silenciosamente aceitar um id de coleção de tenant se isso um dia
+  // existir.
   private async findOrThrow(id: string) {
-    const colecao = await this.prisma.colecao.findUnique({ where: { id } });
+    const colecao = await this.prisma.colecao.findFirst({
+      where: { id, tenantId: null },
+    });
     if (!colecao) {
       throw new NotFoundException('Coleção não encontrada');
     }

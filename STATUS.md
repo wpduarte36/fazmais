@@ -200,6 +200,20 @@ Corrigido: `POST /auth/set-password` (público, sem guard — o usuário ainda n
 
 **Testado via API de ponta a ponta**: criei um admin de teste → peguei o token de 1º acesso no log do console → `POST /auth/set-password` (204) → login com a senha nova funcionou (JWT de ADMIN correto) → reaproveitar o mesmo token dá 400 → token inválido dá 400 → senha curta (`< 8`) dá 400 de validação. Admins de teste removidos depois via API.
 
+## Revisão de segurança e correções (2026-08-19)
+
+A pedido do usuário, revisão de código focada em bugs e falhas de segurança encontrou 7 problemas (ver lista completa na conversa). O bug do 1º acesso (`POST /auth/set-password`) já tinha sido corrigido antes; nesta rodada os outros 6 também foram:
+
+- **Enumeração de contas no login corrigida** (`auth.service.ts`, `validateUser`): a senha agora é sempre comparada primeiro (com um hash-dummy quando o login não existe ou não tem senha, pra não criar um oráculo de timing) — login inexistente, senha errada e senha ainda não definida sempre voltam a mesma mensagem genérica "Login ou senha inválidos". Só depois de confirmar que a senha bate é que o motivo específico (PENDENTE/INATIVO) é revelado, porque nesse ponto quem pergunta já provou que é o dono da conta.
+- **Rate limiting adicionado** (`@nestjs/throttler`, novo em `apps/api`): limite global de 120 req/min por IP (`app.module.ts`) e um limite bem mais estrito de 5 tentativas/min em `POST /auth/login` especificamente (`@Throttle` no `AuthController`). Testado: 6ª tentativa em menos de 1min já devolve 429.
+- **JWT revalidado contra o banco a cada request** (`JwtStrategy.validate`, agora `async`): antes o guard confiava cegamente no payload assinado no login; agora busca `role`/`tenantId`/`status` atuais do usuário no Prisma e rejeita (401) se o usuário sumiu ou não está mais `ATIVO`. Antes, desativar alguém não tinha efeito até o access token expirar sozinho (até 15min); agora é imediato.
+- **Logout de verdade adicionado**: `POST /auth/logout` marca o `RefreshToken` correspondente ao cookie como revogado (`revokedAt`) e limpa o cookie. Não invalida o access token já emitido (ele expira sozinho, ver ponto acima), mas fecha a lacuna do refresh token nunca poder ser revogado.
+- **Sanitização de HTML no Artigo** (`ArtigoModal.tsx`, nova dependência `dompurify`): `htmlContent` agora passa por `DOMPurify.sanitize()` antes do `dangerouslySetInnerHTML`, com um hook que força `rel="noopener noreferrer"` em qualquer link `target="_blank"` que sobreviver à sanitização. Defesa em profundidade — hoje só MASTER cria conteúdo, mas protege contra uma conta Master comprometida e contra quando Admins puderem publicar conteúdo próprio.
+- **IDs de rota validados como UUID** (`ParseUUIDPipe` em todo `:id`/`:catalogoId`/`:userId`/etc. dos controllers de tenants/catalogos/colecoes/eixos/conteudos/tenant-catalogos, e `@IsUUID()` no `colecaoId` de `MoveConteudoDto`): um id mal formado agora vira 400 limpo em vez de 500 cru vazando erro do Postgres.
+- **Checagem de propriedade tenant reforçada** em `ColecoesService`/`EixosService`/`ConteudosService` (`create`, `update`, `remove`, `move`): todo lookup por id agora filtra `tenantId: null`, igual o `create()` já fazia — antes só `create()` confirmava que o recurso pertencia a um catálogo global, então `update`/`remove`/`move` aceitariam silenciosamente qualquer id sem checar esse vínculo.
+
+**Não corrigido nesta rodada** (fora de escopo, exige mais decisão de produto): a Tela 03 (esqueceu senha) continua sem UI/endpoint de "pedir redefinição" — o backend de `set-password` já suporta o tipo `RESET`, só falta a metade que envia o link.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

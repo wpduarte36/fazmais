@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -27,18 +28,18 @@ export class EixosController {
   ) {}
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: EixoDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: EixoDto) {
     return this.eixosService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.eixosService.remove(id);
   }
 
   @Post(':id/colecoes')
-  createColecao(@Param('id') eixoId: string, @Body() dto: NameOnlyDto) {
+  createColecao(@Param('id', ParseUUIDPipe) eixoId: string, @Body() dto: NameOnlyDto) {
     return this.colecoesService.create(eixoId, dto);
   }
 }

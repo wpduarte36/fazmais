@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -28,13 +29,13 @@ export class TenantCatalogosController {
 
   @Post(':catalogoId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  ativar(@CurrentUser() user: JwtPayload, @Param('catalogoId') catalogoId: string) {
+  ativar(@CurrentUser() user: JwtPayload, @Param('catalogoId', ParseUUIDPipe) catalogoId: string) {
     return this.tenantCatalogosService.ativar(user.tenantId as string, catalogoId);
   }
 
   @Delete(':catalogoId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  desativar(@CurrentUser() user: JwtPayload, @Param('catalogoId') catalogoId: string) {
+  desativar(@CurrentUser() user: JwtPayload, @Param('catalogoId', ParseUUIDPipe) catalogoId: string) {
     return this.tenantCatalogosService.desativar(user.tenantId as string, catalogoId);
   }
 }

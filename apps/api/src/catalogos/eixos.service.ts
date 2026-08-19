@@ -36,8 +36,12 @@ export class EixosService {
     await this.prisma.eixo.delete({ where: { id } });
   }
 
+  // Mesmo racional de ColecoesService.findOrThrow: restringe a catálogos
+  // globais, consistente com o check que create() já faz.
   private async findOrThrow(id: string) {
-    const eixo = await this.prisma.eixo.findUnique({ where: { id } });
+    const eixo = await this.prisma.eixo.findFirst({
+      where: { id, tenantId: null },
+    });
     if (!eixo) {
       throw new NotFoundException('Eixo não encontrado');
     }

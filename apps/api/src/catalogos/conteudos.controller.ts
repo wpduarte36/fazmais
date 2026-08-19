@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -29,18 +30,18 @@ export class ConteudosController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateConteudoDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateConteudoDto) {
     return this.conteudosService.update(id, dto);
   }
 
   @Patch(':id/move')
-  move(@Param('id') id: string, @Body() dto: MoveConteudoDto) {
+  move(@Param('id', ParseUUIDPipe) id: string, @Body() dto: MoveConteudoDto) {
     return this.conteudosService.move(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.conteudosService.remove(id);
   }
 }

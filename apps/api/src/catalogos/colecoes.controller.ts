@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -27,19 +28,19 @@ export class ColecoesController {
   ) {}
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: NameOnlyDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: NameOnlyDto) {
     return this.colecoesService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.colecoesService.remove(id);
   }
 
   @Post(':id/conteudos')
   createConteudo(
-    @Param('id') colecaoId: string,
+    @Param('id', ParseUUIDPipe) colecaoId: string,
     @Body() dto: CreateConteudoDto,
   ) {
     return this.conteudosService.create(colecaoId, dto);
