@@ -6,6 +6,8 @@ interface ArtigoModalProps {
 }
 
 export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
+  const isExternal = Boolean(conteudo.externalUrl);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 py-10"
@@ -18,7 +20,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <span className="mb-1.5 inline-block rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
-              📰 Artigo
+              {isExternal ? `🔗 Conteúdo externo${conteudo.sourceName ? ` · ${conteudo.sourceName}` : ''}` : '📰 Artigo'}
             </span>
             <h1 className="text-xl font-bold leading-tight">{conteudo.title}</h1>
             {conteudo.tags.length > 0 && (
@@ -41,6 +43,20 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
           className="max-h-[65vh] overflow-y-auto text-[15px] leading-relaxed text-neutral-300 [&_a]:text-amber-400 [&_a]:underline [&_em]:text-neutral-500 [&_p]:mb-4 [&_p:last-child]:mb-0 light:text-neutral-700"
           dangerouslySetInnerHTML={{ __html: conteudo.htmlContent ?? '' }}
         />
+
+        {isExternal && (
+          <a
+            href={conteudo.externalUrl ?? undefined}
+            target="_blank"
+            rel="noopener"
+            className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-300"
+          >
+            Ler matéria completa{conteudo.sourceName ? ` em ${conteudo.sourceName}` : ''}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M7 17 17 7M9 7h8v8" />
+            </svg>
+          </a>
+        )}
       </div>
     </div>
   );

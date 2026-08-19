@@ -39,7 +39,7 @@ function ConteudoCard({
       <div className="relative flex h-24 items-start justify-between overflow-hidden p-2.5" style={{ background: GRADIENTS[index % GRADIENTS.length] }}>
         <img src={conteudo.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         <span className="relative rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white">
-          {MEDIA_BADGE[conteudo.mediaType]}
+          {conteudo.externalUrl ? '🔗 Externo' : MEDIA_BADGE[conteudo.mediaType]}
         </span>
         {isOpenable && (
           <span className="relative rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100">

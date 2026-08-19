@@ -91,4 +91,16 @@ export class UpdateConteudoDto {
     { message: 'downloadUrl deve ser uma URL válida' },
   )
   downloadUrl?: string;
+
+  @IsOptional()
+  @IsUrl(
+    { require_tld: false },
+    { message: 'externalUrl deve ser uma URL válida' },
+  )
+  externalUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  sourceName?: string;
 }

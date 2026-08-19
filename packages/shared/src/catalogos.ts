@@ -55,6 +55,8 @@ export interface ConteudoSummary {
   durationSeconds: number | null;
   pageCount: number | null;
   downloadUrl: string | null;
+  externalUrl: string | null;
+  sourceName: string | null;
   planoIds: string[];
   createdAt: string;
 }
@@ -94,6 +96,8 @@ export interface CreateConteudoRequest {
   durationSeconds?: number;
   pageCount?: number;
   downloadUrl?: string;
+  externalUrl?: string;
+  sourceName?: string;
 }
 
 export type UpdateConteudoRequest = Partial<CreateConteudoRequest>;

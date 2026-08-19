@@ -179,6 +179,8 @@ model Conteudo {
   durationSeconds Int?  @map("duration_seconds") // só p/ VIDEO
   pageCount       Int?  @map("page_count") // só p/ PDF
   downloadUrl     String? @map("download_url") // opcional, sem uso confirmado no produto ainda
+  externalUrl     String? @map("external_url") // ARTIGO de fonte externa (ex: notícia sindicada): link pra matéria completa no site de origem
+  sourceName      String? @map("source_name") // nome da fonte externa exibido junto do externalUrl (ex: "Canguru News")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 

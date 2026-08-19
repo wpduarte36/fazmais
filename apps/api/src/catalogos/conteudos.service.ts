@@ -33,6 +33,8 @@ export class ConteudosService {
         durationSeconds: dto.durationSeconds,
         pageCount: dto.pageCount,
         downloadUrl: dto.downloadUrl,
+        externalUrl: dto.externalUrl,
+        sourceName: dto.sourceName,
       },
     });
 
@@ -69,6 +71,8 @@ export class ConteudosService {
         durationSeconds: dto.durationSeconds,
         pageCount: dto.pageCount,
         downloadUrl: dto.downloadUrl,
+        externalUrl: dto.externalUrl,
+        sourceName: dto.sourceName,
       },
     });
 
@@ -164,6 +168,8 @@ export class ConteudosService {
       durationSeconds: conteudo.durationSeconds,
       pageCount: conteudo.pageCount,
       downloadUrl: conteudo.downloadUrl,
+      externalUrl: conteudo.externalUrl,
+      sourceName: conteudo.sourceName,
       planoIds: conteudo.planos.map((p) => p.planoId),
       createdAt: conteudo.createdAt,
     };

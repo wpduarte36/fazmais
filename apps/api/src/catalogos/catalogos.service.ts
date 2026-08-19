@@ -124,6 +124,8 @@ export class CatalogosService {
             durationSeconds: conteudo.durationSeconds,
             pageCount: conteudo.pageCount,
             downloadUrl: conteudo.downloadUrl,
+            externalUrl: conteudo.externalUrl,
+            sourceName: conteudo.sourceName,
             planoIds: conteudo.planos.map((p) => p.planoId),
             createdAt: conteudo.createdAt,
           })),
