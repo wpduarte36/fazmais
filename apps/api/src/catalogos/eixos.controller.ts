@@ -14,6 +14,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { EixosService } from './eixos.service';
 import { ColecoesService } from './colecoes.service';
+import { EixoDto } from './dto/eixo.dto';
 import { NameOnlyDto } from './dto/name-only.dto';
 
 @Controller('eixos')
@@ -26,7 +27,7 @@ export class EixosController {
   ) {}
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: NameOnlyDto) {
+  update(@Param('id') id: string, @Body() dto: EixoDto) {
     return this.eixosService.update(id, dto);
   }
 

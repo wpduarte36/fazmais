@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-// Eixo e Coleção só têm `name` no schema — um DTO serve pra criar e editar os dois.
+// Coleção só tem `name` no schema. Eixo ganhou `description` (ver eixo.dto.ts).
 export class NameOnlyDto {
   @IsString()
   @IsNotEmpty()

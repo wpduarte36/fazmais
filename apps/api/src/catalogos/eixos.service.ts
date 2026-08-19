@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { NameOnlyDto } from './dto/name-only.dto';
+import { EixoDto } from './dto/eixo.dto';
 
 @Injectable()
 export class EixosService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(catalogoId: string, dto: NameOnlyDto) {
+  async create(catalogoId: string, dto: EixoDto) {
     const catalogo = await this.prisma.catalogo.findFirst({
       where: { id: catalogoId, tenantId: null },
     });
@@ -14,13 +14,21 @@ export class EixosService {
       throw new NotFoundException('Catálogo não encontrado');
     }
     return this.prisma.eixo.create({
-      data: { catalogoId, tenantId: catalogo.tenantId, name: dto.name },
+      data: {
+        catalogoId,
+        tenantId: catalogo.tenantId,
+        name: dto.name,
+        description: dto.description,
+      },
     });
   }
 
-  async update(id: string, dto: NameOnlyDto) {
+  async update(id: string, dto: EixoDto) {
     await this.findOrThrow(id);
-    return this.prisma.eixo.update({ where: { id }, data: { name: dto.name } });
+    return this.prisma.eixo.update({
+      where: { id },
+      data: { name: dto.name, description: dto.description },
+    });
   }
 
   async remove(id: string): Promise<void> {

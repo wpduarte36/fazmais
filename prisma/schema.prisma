@@ -127,11 +127,12 @@ model Catalogo {
 
 // Eixo (nível 2, agrupamento temático dentro do catálogo).
 model Eixo {
-  id         String   @id @default(uuid())
-  catalogoId String   @map("catalogo_id")
-  tenantId   String?  @map("tenant_id") // espelha o tenantId do Catalogo pai
-  name       String
-  createdAt  DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid())
+  catalogoId  String   @map("catalogo_id")
+  tenantId    String?  @map("tenant_id") // espelha o tenantId do Catalogo pai
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
 
   catalogo Catalogo  @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
   tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)

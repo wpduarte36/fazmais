@@ -106,6 +106,7 @@ export class CatalogosService {
       eixos: catalogo.eixos.map((eixo) => ({
         id: eixo.id,
         name: eixo.name,
+        description: eixo.description,
         colecoes: eixo.colecoes.map((colecao) => ({
           id: colecao.id,
           name: colecao.name,

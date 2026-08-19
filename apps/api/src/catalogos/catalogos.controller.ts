@@ -17,7 +17,7 @@ import { CatalogosService } from './catalogos.service';
 import { EixosService } from './eixos.service';
 import { CreateCatalogoDto } from './dto/create-catalogo.dto';
 import { UpdateCatalogoDto } from './dto/update-catalogo.dto';
-import { NameOnlyDto } from './dto/name-only.dto';
+import { EixoDto } from './dto/eixo.dto';
 
 @Controller('catalogos')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -55,7 +55,7 @@ export class CatalogosController {
   }
 
   @Post(':id/eixos')
-  createEixo(@Param('id') catalogoId: string, @Body() dto: NameOnlyDto) {
+  createEixo(@Param('id') catalogoId: string, @Body() dto: EixoDto) {
     return this.eixosService.create(catalogoId, dto);
   }
 }

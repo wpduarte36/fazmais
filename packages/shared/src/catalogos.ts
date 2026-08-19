@@ -25,6 +25,11 @@ export interface NameOnlyRequest {
   name: string;
 }
 
+export interface EixoRequest {
+  name: string;
+  description?: string;
+}
+
 export interface CatalogoDisponivel {
   id: string;
   name: string;
@@ -63,6 +68,7 @@ export interface ColecaoNode {
 export interface EixoNode {
   id: string;
   name: string;
+  description: string | null;
   colecoes: ColecaoNode[];
 }
 
