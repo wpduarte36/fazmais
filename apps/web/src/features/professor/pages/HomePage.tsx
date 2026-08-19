@@ -34,7 +34,7 @@ function ConteudoCard({
       tabIndex={isOpenable ? 0 : undefined}
       onClick={isOpenable ? () => onOpen(conteudo) : undefined}
       onKeyDown={isOpenable ? (event) => event.key === 'Enter' && onOpen(conteudo) : undefined}
-      className={`group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition hover:border-white/20 light:border-black/10 light:bg-white ${isOpenable ? 'cursor-pointer' : ''}`}
+      className={`group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition duration-200 hover:z-10 hover:scale-110 hover:border-white/30 hover:shadow-2xl light:border-black/10 light:bg-white ${isOpenable ? 'cursor-pointer' : ''}`}
     >
       <div className="relative flex h-24 items-start justify-between overflow-hidden p-2.5" style={{ background: GRADIENTS[index % GRADIENTS.length] }}>
         <img src={conteudo.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
@@ -170,7 +170,7 @@ export function HomePage() {
         {rowsDoEixo.map((row) => (
           <section key={row.colecaoId} className="mb-8">
             <h2 className="mb-3 text-sm font-bold">{row.colecaoName}</h2>
-            <div className="-mx-2 flex gap-3 overflow-x-auto p-2">
+            <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
               {row.conteudos.map((conteudo, index) => (
                 <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />
               ))}
