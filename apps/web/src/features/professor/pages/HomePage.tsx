@@ -130,24 +130,6 @@ export function HomePage() {
           </p>
         )}
 
-        {feed?.featured && (
-          <div
-            role={heroIsOpenable ? 'button' : undefined}
-            tabIndex={heroIsOpenable ? 0 : undefined}
-            onClick={heroIsOpenable ? () => setConteudoAberto(feed.featured) : undefined}
-            className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
-            style={{ background: GRADIENTS[0] }}
-          >
-            <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-            <span className="relative mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
-              {MEDIA_BADGE[feed.featured.mediaType]} · destaque
-            </span>
-            <h1 className="relative max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
-            <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
-          </div>
-        )}
-
         {eixos.length > 0 && (
           <div className="mb-7 flex gap-2 overflow-x-auto pb-1">
             {eixos.map((eixo) => (
@@ -164,6 +146,24 @@ export function HomePage() {
                 {eixo.name}
               </button>
             ))}
+          </div>
+        )}
+
+        {feed?.featured && (
+          <div
+            role={heroIsOpenable ? 'button' : undefined}
+            tabIndex={heroIsOpenable ? 0 : undefined}
+            onClick={heroIsOpenable ? () => setConteudoAberto(feed.featured) : undefined}
+            className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
+            style={{ background: GRADIENTS[0] }}
+          >
+            <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+            <span className="relative mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
+              {MEDIA_BADGE[feed.featured.mediaType]} · destaque
+            </span>
+            <h1 className="relative max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
+            <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
           </div>
         )}
 
