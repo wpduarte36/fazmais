@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
@@ -64,11 +64,28 @@ export function HomePage() {
   const navigate = useNavigate();
   const { data: feed, isLoading, error } = useHomeFeed();
   const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
+  const [eixoAtivoId, setEixoAtivoId] = useState<string | null>(null);
 
   function handleLogout() {
     clearSession();
     navigate('/login', { replace: true });
   }
+
+  const eixos = useMemo(() => {
+    const vistos = new Map<string, string>();
+    for (const row of feed?.rows ?? []) {
+      if (!vistos.has(row.eixoId)) vistos.set(row.eixoId, row.eixoName);
+    }
+    return Array.from(vistos, ([id, name]) => ({ id, name }));
+  }, [feed]);
+
+  useEffect(() => {
+    if (!eixoAtivoId && eixos.length > 0) {
+      setEixoAtivoId(eixos[0].id);
+    }
+  }, [eixos, eixoAtivoId]);
+
+  const rowsDoEixo = feed?.rows.filter((row) => row.eixoId === eixoAtivoId) ?? [];
 
   const heroIsOpenable = feed?.featured ? OPENABLE_TYPES.has(feed.featured.mediaType) : false;
 
@@ -130,9 +147,28 @@ export function HomePage() {
           </div>
         )}
 
-        {feed?.rows.map((row) => (
-          <section key={row.title} className="mb-8">
-            <h2 className="mb-3 text-sm font-bold">{row.title}</h2>
+        {eixos.length > 0 && (
+          <div className="mb-7 flex gap-2 overflow-x-auto pb-1">
+            {eixos.map((eixo) => (
+              <button
+                key={eixo.id}
+                type="button"
+                onClick={() => setEixoAtivoId(eixo.id)}
+                className={
+                  eixo.id === eixoAtivoId
+                    ? 'shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+                    : 'shrink-0 rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
+                }
+              >
+                {eixo.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {rowsDoEixo.map((row) => (
+          <section key={row.colecaoId} className="mb-8">
+            <h2 className="mb-3 text-sm font-bold">{row.colecaoName}</h2>
             <div className="-mx-2 flex gap-3 overflow-x-auto p-2">
               {row.conteudos.map((conteudo, index) => (
                 <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />

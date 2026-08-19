@@ -1,7 +1,10 @@
 import type { ConteudoSummary } from './catalogos';
 
 export interface HomeRow {
-  title: string;
+  eixoId: string;
+  eixoName: string;
+  colecaoId: string;
+  colecaoName: string;
   conteudos: ConteudoSummary[];
 }
 

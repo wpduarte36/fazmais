@@ -61,10 +61,18 @@ export class HomeService {
       createdAt: conteudo.createdAt,
     });
 
-    const rowsByColecao = new Map<string, { title: string; conteudos: ReturnType<typeof toSummary>[] }>();
+    const rowsByColecao = new Map<
+      string,
+      { eixoId: string; eixoName: string; colecaoId: string; colecaoName: string; conteudos: ReturnType<typeof toSummary>[] }
+    >();
     for (const conteudo of conteudos) {
-      const rowTitle = `${conteudo.colecao.eixo.name} · ${conteudo.colecao.name}`;
-      const row = rowsByColecao.get(conteudo.colecaoId) ?? { title: rowTitle, conteudos: [] };
+      const row = rowsByColecao.get(conteudo.colecaoId) ?? {
+        eixoId: conteudo.colecao.eixo.id,
+        eixoName: conteudo.colecao.eixo.name,
+        colecaoId: conteudo.colecaoId,
+        colecaoName: conteudo.colecao.name,
+        conteudos: [],
+      };
       row.conteudos.push(toSummary(conteudo));
       rowsByColecao.set(conteudo.colecaoId, row);
     }
