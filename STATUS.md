@@ -110,7 +110,7 @@ Frontend (`useCatalogoBuilder.ts`, `useCatalogoTree`, `ConteudoModal.tsx`, `Name
 
 **Infra reaproveitável sem recriar**: `apiClient.ts`, `queryClient.ts`, `PrismaService`, padrão de módulo Nest (`auth/`, `tenants/`); o padrão de modal + toast + tokens de tema vale pras telas seguintes (Acervo do Admin, Usuários).
 
-## M5.5 — Opt-in de Catálogo Compartilhado (só backend, commit `[próximo]`)
+## M5.5 — Opt-in de Catálogo Compartilhado (só backend, commit `d19c0e8`)
 
 Fecha a lacuna que existia entre o commit anterior (`e20c3bf`) e o critério de "pronto" do M5.5 do plano: até aqui um Master conseguia criar um catálogo global, mas nenhum município tinha como ativá-lo — o bloqueio de exclusão em `CatalogosService.remove` (`tenant_catalogo_access`) só era alcançável inserindo a linha manualmente no banco. Agora existe o fluxo real.
 
