@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { useHomeFeed } from '../hooks/useHomeFeed';
+import { ArtigoModal } from '../components/ArtigoModal';
 
 const MEDIA_BADGE: Record<string, string> = { VIDEO: '▶ Vídeo', PDF: '📄 PDF', ARTIGO: '📰 Artigo' };
 const GRADIENTS = [
@@ -12,9 +14,24 @@ const GRADIENTS = [
   'linear-gradient(135deg,#ec4899,#831843)',
 ];
 
-function ConteudoCard({ conteudo, index }: { conteudo: ConteudoSummary; index: number }) {
+function ConteudoCard({
+  conteudo,
+  index,
+  onOpen,
+}: {
+  conteudo: ConteudoSummary;
+  index: number;
+  onOpen: (conteudo: ConteudoSummary) => void;
+}) {
+  const isArtigo = conteudo.mediaType === 'ARTIGO';
   return (
-    <div className="group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition hover:border-white/20 light:border-black/10 light:bg-white">
+    <div
+      role={isArtigo ? 'button' : undefined}
+      tabIndex={isArtigo ? 0 : undefined}
+      onClick={isArtigo ? () => onOpen(conteudo) : undefined}
+      onKeyDown={isArtigo ? (event) => event.key === 'Enter' && onOpen(conteudo) : undefined}
+      className={`group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition hover:border-white/20 light:border-black/10 light:bg-white ${isArtigo ? 'cursor-pointer' : ''}`}
+    >
       <div
         className="flex h-24 items-start justify-between p-2.5"
         style={{ background: GRADIENTS[index % GRADIENTS.length] }}
@@ -22,6 +39,11 @@ function ConteudoCard({ conteudo, index }: { conteudo: ConteudoSummary; index: n
         <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white">
           {MEDIA_BADGE[conteudo.mediaType]}
         </span>
+        {isArtigo && (
+          <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100">
+            Ler
+          </span>
+        )}
       </div>
       <div className="p-2.5">
         <p className="line-clamp-2 text-xs font-semibold">{conteudo.title}</p>
@@ -38,11 +60,14 @@ export function HomePage() {
   const clearSession = useAuthStore((state) => state.clearSession);
   const navigate = useNavigate();
   const { data: feed, isLoading, error } = useHomeFeed();
+  const [artigoAberto, setArtigoAberto] = useState<ConteudoSummary | null>(null);
 
   function handleLogout() {
     clearSession();
     navigate('/login', { replace: true });
   }
+
+  const heroIsArtigo = feed?.featured?.mediaType === 'ARTIGO';
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -88,7 +113,10 @@ export function HomePage() {
 
         {feed?.featured && (
           <div
-            className="relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10"
+            role={heroIsArtigo ? 'button' : undefined}
+            tabIndex={heroIsArtigo ? 0 : undefined}
+            onClick={heroIsArtigo ? () => setArtigoAberto(feed.featured) : undefined}
+            className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsArtigo ? 'cursor-pointer' : ''}`}
             style={{ background: GRADIENTS[0] }}
           >
             <span className="mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
@@ -104,12 +132,14 @@ export function HomePage() {
             <h2 className="mb-3 text-sm font-bold">{row.title}</h2>
             <div className="-mx-2 flex gap-3 overflow-x-auto p-2">
               {row.conteudos.map((conteudo, index) => (
-                <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} />
+                <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setArtigoAberto} />
               ))}
             </div>
           </section>
         ))}
       </main>
+
+      {artigoAberto && <ArtigoModal conteudo={artigoAberto} onClose={() => setArtigoAberto(null)} />}
     </div>
   );
 }
