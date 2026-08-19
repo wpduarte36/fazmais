@@ -214,6 +214,16 @@ A pedido do usuário, revisão de código focada em bugs e falhas de segurança 
 
 **Não corrigido nesta rodada** (fora de escopo, exige mais decisão de produto): a Tela 03 (esqueceu senha) continua sem UI/endpoint de "pedir redefinição" — o backend de `set-password` já suporta o tipo `RESET`, só falta a metade que envia o link.
 
+## Fotos reais em todo o acervo migrado (2026-08-19)
+
+Pedido do usuário ("popule todas as fotos do acervo para primeira demonstração"): os 66 itens do catálogo "Faz+ Legado" que ainda usavam placeholder genérico (`placehold.co`) — 24 vídeos-tutorial de iPad/acessibilidade, 42 recursos "Mão na massa" (3D print/biologia) e os 2 artigos pedagógicos originais — ganharam foto real.
+
+**Técnica**: dois agentes de pesquisa em paralelo (`Agent` com `subagent_type: fork`, rodados em background) buscaram, para cada título exato, uma imagem real e estável via Wikimedia Commons (`Special:FilePath/<arquivo>` ou URL direta `upload.wikimedia.org`, confirmada existente via busca/API antes de usar — nunca uma URL adivinhada) ou Pexels/Unsplash (fotos genéricas de sala de aula pros 2 artigos). Cada URL foi validada com uma requisição real antes de aplicar. Resultado: **68/68 encontradas** (26 tutoriais+artigos, 42 mão-na-massa), aplicadas via `PATCH /conteudos/:id` (scripts descartáveis, não ficaram no repo).
+
+**Só o item de teste** ("Demonstração > Player de vídeo funcionando") continua com placeholder — não é conteúdo real do catálogo, é o item criado pra provar que o player Vimeo funciona.
+
+**Qualidade**: a maioria ficou muito boa (fotos reais de aranha, joaninha, libélula, fazenda de galinhas, ícones oficiais de acessibilidade da Apple/VoiceOver/Wi-Fi etc.). Algumas são aproximações por falta de imagem exata no Commons — documentado pelo agente: `Fases da Lua`/`Fases da Lua 3D` e `Camadas da Atmosfera`/`Camadas da Atmosfera 3D` compartilham o mesmo diagrama; `Bacterioses`/`Reino Monera` compartilham uma foto de bactérias; `Ciclo Aedes Aegypti` usa foto do mosquito adulto (sem diagrama de ciclo de vida encontrado); `Ciclo da Galinha` usa foto de granja (sem diagrama de ciclo); `Mala Biomas` usa mapa mundial de biomas (sem mapa específico do Brasil); `Teclado` (tutorial) usa foto do acessório físico (mostra a placa Bluetooth, não o teclado em uso). Nenhuma dessas é errada, só não é o ideal — dá pra refinar item a item depois se for pra produção de verdade.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.
