@@ -8,17 +8,15 @@ Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para m
 
 ## Status atual (2026-08-19)
 
-**Feito e commitado em git** (até `e20c3bf`): bootstrap do monorepo + schema Prisma (Lote A) + Tela 01 (Login) + Painel Master (Municípios, Catálogos, Construtor de Catálogo/Tela 05, tema claro/escuro real).
+**Feito e commitado em git** (até `c800f1f`): bootstrap do monorepo + schema Prisma (Lote A) + Tela 01 (Login) + Painel Master (Municípios, Catálogos, Construtor de Catálogo/Tela 05, tema claro/escuro real) + opt-in de catálogo compartilhado (backend) + campos novos em Conteudo/Eixo pro import do legado + **migração real de dados do FazMais legado (Faz+)** + **primeira fatia da Home do Professor** (hero, menu horizontal de Eixos, fileiras por Coleção, leitura de Artigo, player de Vídeo). Ver seções "Migração do legado (Faz+)" e "Home do Professor" abaixo pros detalhes.
 
 **Mudança de ordem no roadmap**: as Telas 02 ("Ainda não tenho acesso") e 03 ("Esqueceu sua senha?") foram **adiadas** — ver seção "Backlog adiado" no final deste arquivo. Decidiu-se ir direto para a Tela 04 (Painel Master), que cresceu de escopo em cima do PRD original.
 
-**Trabalho em progresso, ainda não commitado**: o opt-in de catálogo compartilhado (M5.5 do plano — Admin ativa/desativa um catálogo global do Master pro próprio município) foi implementado só no backend. Ver seção "M5.5 — Opt-in de Catálogo Compartilhado" abaixo.
+**Gaps ainda abertos no escopo do Master** (levantados em 2026-08-19 comparando código vs. PRD/plano, ainda não resolvidos): dashboard de stats globais (US-010, é o critério de "pronto" do M4 no plano), CRUD de Planos (só leitura hoje), Master criar outro Master.
 
-**Gaps ainda abertos no escopo do Master** (levantados em 2026-08-19 comparando código vs. PRD/plano): dashboard de stats globais (US-010, é o critério de "pronto" do M4 no plano), CRUD de Planos (só leitura hoje), Master criar outro Master. Priorização sugerida ao usuário nesta ordem: opt-in (feito agora) → stats globais → CRUD de Planos → Master criar Master.
+**Bloqueio externo conhecido — vídeos do Vimeo não tocam fora do domínio da Faz Educação**: o player de vídeo (`VideoModal`) está implementado e correto no código, mas o Vimeo devolve **403** ao tentar embedar em `localhost` (ou qualquer domínio fora da lista de domínios permitidos configurada na conta Vimeo de origem — "Where can this be embedded?"). Não é bug nosso; só destrava pedindo pra quem administra a conta Vimeo da Faz Educação liberar o(s) domínio(s) do FazMais novo (dev e produção). Detalhe completo na seção "Home do Professor".
 
-**Testado via API (2026-08-19)**: subi o ambiente (`pnpm turbo run dev`) e validei por `curl`/Prisma todas as rotas novas de Catálogos/Eixos/Coleções/Conteúdos logado como `master` — criar/editar/excluir catálogo, criar eixo/coleção, criar conteúdo com `planoIds` (confirmado vínculo N:N com `Plano`), mover conteúdo entre coleções (`PATCH /conteudos/:id/move`), `POST /conteudos/ai-suggestions` (confirmado que é mock determinístico, tags batem com as palavras do título/descrição), e a regra de bloqueio de exclusão de catálogo (409) — inseri uma linha em `tenant_catalogo_access` direto via `prisma db execute` pra forçar o cenário "município já ativou" e confirmei o 409; depois removi a linha e o DELETE passou a dar 204. Tudo funcionou como esperado, nenhum bug encontrado no backend.
-
-**Não testado ainda**: a UI no navegador (tema, drag & drop visual no construtor). Tentei usar a extensão Claude in Chrome, mas ela controla o navegador real da sua máquina, que é um host diferente do ambiente isolado onde os servidores de dev deste projeto foram subidos — os dois `localhost` não se enxergam. Pra testar visualmente, suba o ambiente na sua própria máquina (seção abaixo) e acesse `http://localhost:5173` no seu navegador.
+**Ambiente de teste visual mudou de comportamento nesta sessão**: em sessões anteriores, a extensão Claude in Chrome não alcançava o `localhost` do ambiente de dev (hosts diferentes). Nesta sessão descobrimos que, além disso, **a extensão pode estar pareada com o Chrome de outra máquina** (mesma conta logada em 2 PCs) — nesse caso ela abre um navegador que nem é o seu, e navegar pra `localhost:5173` mostra o que quer que esteja rodando *naquela* outra máquina (nos deparamos com um projeto não relacionado chamado "Gerente"). Se isso acontecer de novo: `list_connected_browsers` lista os Chromes pareados; se o certo não aparecer, `switch_browser` manda um pedido de conexão pra todo Chrome com a extensão instalada, e você clica "Conectar" no PC certo.
 
 ## Como subir o ambiente
 
@@ -33,7 +31,7 @@ Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para m
 - `corepack enable`/`prepare` falha por permissão em `Program Files` no Windows — usar `npm install -g pnpm`.
 - Prisma resolveu para **v7.9.1**, não 5.x. A arquitetura mudou: a URL de conexão saiu do `datasource` do `schema.prisma` e foi para `prisma.config.ts`; `PrismaClient` exige um **driver adapter** (`@prisma/adapter-pg` + `pg`). `@prisma/client`/`@prisma/adapter-pg` precisam estar instalados **na raiz** do workspace (não só em `apps/api`), senão `prisma generate` não resolve o pacote.
 - bcrypt exige aprovação de build script no pnpm (`pnpm-workspace.yaml` → `allowBuilds`).
-- Sem ferramenta de navegador neste ambiente de desenvolvimento — verificação visual de UI é manual.
+- Ferramenta de navegador (Claude in Chrome) disponível, mas com ressalvas — ver "Ambiente de teste visual" no topo deste arquivo.
 
 ## Decisões de arquitetura importantes (resumo)
 
@@ -123,6 +121,41 @@ Backend novo (`apps/api/src/catalogos/tenant-catalogos.controller.ts` + `.servic
 **Testado via API (2026-08-19)** logado como `admin.demo`: listar com `ativo:false` → ativar (204, idempotente) → listar com `ativo:true` → confirmar que `DELETE /catalogos/:id` como Master agora dá 409 de verdade (sem precisar inserir linha manualmente) → desativar (204, idempotente) → listar volta `ativo:false` → `POST` em catálogo inexistente dá 404 → `master` chamando `/tenant-catalogos` dá 403 (guard de role confirmado). `pnpm --filter @fazmais/api typecheck` limpo.
 
 **Decisão consciente de escopo**: só backend nesta rodada — o Painel Admin ainda não existe (`/admin/acervo` continua `PlaceholderPage`), então não há onde encaixar um toggle de UI ainda sem construir uma tela nova fora de escopo. Quando o Painel Admin de verdade for construído, esses três endpoints já estão prontos pra consumir.
+
+## Migração do legado (Faz+) — dados reais no catálogo "Faz+ Legado"
+
+Contexto: já existe um FazMais legado no ar ("Faz+", `admfazmais.fazeducacao.com.br` admin / `fazmais.fazeducacao.com.br` app do usuário final), sem DB/API documentada disponível — só acesso visual (login manual do usuário, eu sigo a partir da aba autenticada, nunca toco em usuário/senha). Migração feita via automação de navegador (Claude in Chrome) + script de import contra a nossa própria API.
+
+**Mapeamento de estrutura combinado com o usuário**: `Catalogo` = "Faz+ Legado" (novo, global, ícone 📦) → `Eixo` = Módulo do legado (ex: Tecnológico) → `Colecao` = Categoria do legado (ex: Tutoriais) → `Conteudo` = Funcionalidade+Arquivo (nome da Funcionalidade vira `tags`).
+
+**Achados técnicos importantes durante a extração**:
+- A API por trás do admin (`ms-commons.fazeducacao.com.br/ms-admin/api/...`) existe mas não é chamável via `fetch` injetado (bloqueado por CORS/segurança da própria ferramenta) — extração teve que ser via leitura do DOM (`document.getElementById(...).value`), não da API.
+- **Índice GIN de `conteudos.tags`** (SQL manual, não representável no `schema.prisma`) é derrubado automaticamente pelo Prisma toda vez que uma migration nova é gerada (drift). Duas migrations desta sessão (`add_conteudo_duration_pages_download`, `add_eixo_description`) precisaram reafirmar `DROP INDEX IF EXISTS` + `CREATE INDEX` manualmente — **fazer isso em qualquer migration futura que mexer perto de `Conteudo`**, senão o índice some silenciosamente.
+- **`imageUrl` (foto de capa) e o link de Download são URLs assinadas** (S3 e Vimeo `progressive_redirect`, respectivamente) — temporárias/expiráveis, e a ferramenta de automação bloqueia a leitura desses valores por segurança (heurística de "query string suspeita"). Não dá pra extrair, e mesmo se desse, ficariam inúteis depois de expirar. Decisão: `imageUrl` usa um placeholder genérico por Eixo (`https://placehold.co/600x400?text={eixo}`); `downloadUrl` fica vazio (campo existe no schema, mas nada foi migrado pra ele — feature de download em si não existe no produto ainda).
+- **`mediaUrl` (Link url Visualização) é o link de gerenciamento do Vimeo** (`vimeo.com/manage/videos/{id}/{hash}`), não o link de player — precisou de conversão no frontend (ver seção "Home do Professor").
+- **"Total horas" do legado não bate com a duração real** do vídeo em pelo menos 1 caso observado (campo dizia "00:01", o vídeo real tinha 1min24s) — dado de origem pouco confiável, migrado do jeito que está (`durationSeconds`), sem tentar corrigir.
+
+**O que foi migrado** (script `scripts/import-legado.mjs`, idempotente — progresso em `scripts/import-legado.progress.json`, gitignorado, apagar força recriar tudo):
+- **Eixo Tecnológico → Coleção Tutoriais**: 24 conteúdos VIDEO (piloto completo de uma categoria pequena, usado pra validar o pipeline inteiro antes de decidir se valia expandir).
+- **Eixo Notícias → Coleção Educação**: 17 conteúdos ARTIGO. Essa seção do legado ("Artigos" no menu, na verdade um agregador de notícias) tinha uma mistura que só apareceu durante a extração: **2 artigos pedagógicos originais** da Faz Educação (autor nomeado, corpo completo, ex: "Documentação Pedagógica...") e **15 notícias de terceiro** sindicadas via "Canguru News" (link pra `escolanaminhacasa.com.br`, algumas com o artigo inteiro copiado no campo de corpo). Decisão tomada com o usuário por causa de direitos autorais: os 2 originais entraram com o corpo completo; os 15 de terceiro entraram só com um excerpt curto + link pra fonte + autor como citação — nunca o corpo inteiro reproduzido, independente do que a fonte tinha.
+- **Extração completa (todos os Eixos/Categorias do catálogo principal) foi tentada e abandonada** numa rodada anterior: só enumerar a lista (sem nem entrar no detalhe de cada item) consumiu ~470k tokens e não terminou — o catálogo real é uma biblioteca curricular grande (200-400+ itens, por série/matéria: Inglês, Avaliação, Plano de Aula por disciplina etc.), não um punhado de tutoriais. Se for migrar o resto, **não tentar via clique-a-clique de novo sem antes conseguir acesso melhor** (export/API/DB de verdade da equipe Faz Educação) — foi a própria recomendação do agente que tentou.
+- **Estado atual do banco local**: catálogo "Faz+ Legado" ativado (`tenant_catalogo_access`) pro tenant "Município Demo" (mesmo tenant de `admin.demo`/`professor.demo`); 1 conteúdo (`AirPlay`) marcado `isFeatured: true` pra popular o hero da Home do Professor.
+
+## Home do Professor — primeira fatia (US-050/051, parcial)
+
+Rota `/` trocada de `PlaceholderPage` pra `HomePage` de verdade, atrás de `RequireRole(PROFESSOR)`. Escopo combinado com o usuário: versão enxuta primeiro (visualização), sem favoritar/avaliar/progresso/busca ainda — isso é o resto do Épico 3.6 do PRD (US-053/054/055/056), fica pra quando fizer sentido.
+
+Backend (`apps/api/src/home/`, `GET /home/feed`, `@Roles('PROFESSOR')`):
+- Filtra `Conteudo` por **tenant** (próprio OU catálogo global ativado via `tenant_catalogo_access`, mesma regra OR usada no resto do app) **E plano** (conteúdo sem nenhum `Plano` associado = visível a todos; com `Plano` associado = só quem tem esse plano vê).
+- Devolve `{ featured, rows: [{ eixoId, eixoName, colecaoId, colecaoName, conteudos }] }` — cada `conteudo` já vem completo (`ConteudoSummary`, inclusive `htmlContent`), sem precisar de endpoint extra pra abrir um artigo.
+- `featured` = primeiro `isFeatured=true` encontrado, ou o primeiro conteúdo da lista como fallback.
+
+Frontend (`apps/web/src/features/professor/`):
+- **Menu horizontal de Eixos** (pills, mesmo padrão visual do Construtor de Catálogo do Master) logo abaixo do hero — inspirado na barra lateral vertical do legado, mas horizontal por pedido do usuário. Clicar num pill filtra as fileiras de Coleção mostradas embaixo; o primeiro Eixo (por ordem de aparição no feed) é selecionado por padrão.
+- **`ArtigoModal`**: cards `ARTIGO` (e o hero, quando for o caso) abrem um modal renderizando `htmlContent` via `dangerouslySetInnerHTML` — aceitável porque só Master/Admin (papéis confiáveis) criam esse HTML, não input de usuário final. Sem sanitização de HTML implementada (não existe biblioteca pra isso no projeto ainda).
+- **`VideoModal`**: cards `VIDEO` abrem modal com o player oficial `@vimeo/player` (pacote novo, adicionado nesta sessão). `apps/web/src/features/professor/lib/vimeo.ts` converte o `mediaUrl` (link de gerenciamento) pra URL de player real (`player.vimeo.com/video/{id}?h={hash}`) — parsing validado contra os dados reais migrados, inclusive o sufixo `/privacy` que alguns itens têm.
+  - **Vídeo não toca fora do domínio da Faz Educação (403 do Vimeo)** — ver aviso no topo deste arquivo. Confirmado pelo usuário testando de verdade: erro no console é `Failed to load resource: the server responded with a status of 403` na URL do player. É restrição de domínio de embed configurada na conta Vimeo de origem, não um bug de código.
+- Sem viewer de PDF ainda (nenhum conteúdo migrado até agora é PDF, então não foi priorizado).
 
 ## Backlog adiado
 
