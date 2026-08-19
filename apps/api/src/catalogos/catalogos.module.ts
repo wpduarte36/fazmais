@@ -7,6 +7,8 @@ import { ColecoesController } from './colecoes.controller';
 import { ColecoesService } from './colecoes.service';
 import { ConteudosController } from './conteudos.controller';
 import { ConteudosService } from './conteudos.service';
+import { TenantCatalogosController } from './tenant-catalogos.controller';
+import { TenantCatalogosService } from './tenant-catalogos.service';
 
 @Module({
   controllers: [
@@ -14,12 +16,14 @@ import { ConteudosService } from './conteudos.service';
     EixosController,
     ColecoesController,
     ConteudosController,
+    TenantCatalogosController,
   ],
   providers: [
     CatalogosService,
     EixosService,
     ColecoesService,
     ConteudosService,
+    TenantCatalogosService,
   ],
 })
 export class CatalogosModule {}

@@ -8,11 +8,13 @@ Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para m
 
 ## Status atual (2026-08-19)
 
-**Feito e commitado em git** (até `aeafbf4`): bootstrap do monorepo (Turborepo/pnpm) + schema Prisma (Lote A, 14 tabelas) aplicado no Postgres local + Tela 01 (Login) completa, testada ponta a ponta.
+**Feito e commitado em git** (até `e20c3bf`): bootstrap do monorepo + schema Prisma (Lote A) + Tela 01 (Login) + Painel Master (Municípios, Catálogos, Construtor de Catálogo/Tela 05, tema claro/escuro real).
 
 **Mudança de ordem no roadmap**: as Telas 02 ("Ainda não tenho acesso") e 03 ("Esqueceu sua senha?") foram **adiadas** — ver seção "Backlog adiado" no final deste arquivo. Decidiu-se ir direto para a Tela 04 (Painel Master), que cresceu de escopo em cima do PRD original.
 
-**Trabalho em progresso, ainda não commitado** (working tree tem tudo abaixo como modified/untracked desde `aeafbf4`): a fatia "Municípios" da Tela 04 evoluiu bastante — agora também tem a aba **Catálogos** funcional (não mais só o botão desabilitado) e a **Tela 05 (Construtor de Catálogo) saiu de mockup em Artifact e virou código de verdade**, com backend, frontend e drag & drop reais. O **tema claro/escuro real** também foi implementado (deixou de ser item pendente). Ver detalhes na seção "Tela 04" e "Tela 05" abaixo.
+**Trabalho em progresso, ainda não commitado**: o opt-in de catálogo compartilhado (M5.5 do plano — Admin ativa/desativa um catálogo global do Master pro próprio município) foi implementado só no backend. Ver seção "M5.5 — Opt-in de Catálogo Compartilhado" abaixo.
+
+**Gaps ainda abertos no escopo do Master** (levantados em 2026-08-19 comparando código vs. PRD/plano): dashboard de stats globais (US-010, é o critério de "pronto" do M4 no plano), CRUD de Planos (só leitura hoje), Master criar outro Master. Priorização sugerida ao usuário nesta ordem: opt-in (feito agora) → stats globais → CRUD de Planos → Master criar Master.
 
 **Testado via API (2026-08-19)**: subi o ambiente (`pnpm turbo run dev`) e validei por `curl`/Prisma todas as rotas novas de Catálogos/Eixos/Coleções/Conteúdos logado como `master` — criar/editar/excluir catálogo, criar eixo/coleção, criar conteúdo com `planoIds` (confirmado vínculo N:N com `Plano`), mover conteúdo entre coleções (`PATCH /conteudos/:id/move`), `POST /conteudos/ai-suggestions` (confirmado que é mock determinístico, tags batem com as palavras do título/descrição), e a regra de bloqueio de exclusão de catálogo (409) — inseri uma linha em `tenant_catalogo_access` direto via `prisma db execute` pra forçar o cenário "município já ativou" e confirmei o 409; depois removi a linha e o DELETE passou a dar 204. Tudo funcionou como esperado, nenhum bug encontrado no backend.
 
@@ -107,6 +109,20 @@ Frontend (`useCatalogoBuilder.ts`, `useCatalogoTree`, `ConteudoModal.tsx`, `Name
 - `ConteudoModal` cobre criação/edição de conteúdo (título, descrição, tipo de mídia VIDEO/PDF/ARTIGO, URL ou `htmlContent`, imagem, destaque, tags, planos, botão "Sugerir com IA" que chama o mock acima) — isso cobre boa parte do que seria a Tela 08 standalone, sem precisar dela como tela separada por enquanto.
 
 **Infra reaproveitável sem recriar**: `apiClient.ts`, `queryClient.ts`, `PrismaService`, padrão de módulo Nest (`auth/`, `tenants/`); o padrão de modal + toast + tokens de tema vale pras telas seguintes (Acervo do Admin, Usuários).
+
+## M5.5 — Opt-in de Catálogo Compartilhado (só backend, commit `[próximo]`)
+
+Fecha a lacuna que existia entre o commit anterior (`e20c3bf`) e o critério de "pronto" do M5.5 do plano: até aqui um Master conseguia criar um catálogo global, mas nenhum município tinha como ativá-lo — o bloqueio de exclusão em `CatalogosService.remove` (`tenant_catalogo_access`) só era alcançável inserindo a linha manualmente no banco. Agora existe o fluxo real.
+
+Backend novo (`apps/api/src/catalogos/tenant-catalogos.controller.ts` + `.service.ts`, registrado em `CatalogosModule`, `@Roles('ADMIN')`, sem UI ainda — decisão consciente, ver abaixo):
+- `GET /tenant-catalogos` — lista os catálogos globais (`tenantId: null`) com contagens (eixos/coleções/conteúdos) e um campo `ativo: boolean` indicando se o **tenant do usuário logado** (lido do JWT, nunca do body) já ativou aquele catálogo.
+- `POST /tenant-catalogos/:catalogoId` — ativa (idempotente via `upsert`, chamar duas vezes não duplica nem erra).
+- `DELETE /tenant-catalogos/:catalogoId` — desativa (idempotente via `deleteMany`, chamar já desativado não erra).
+- Tipo novo em `packages/shared/src/catalogos.ts`: `CatalogoDisponivel`.
+
+**Testado via API (2026-08-19)** logado como `admin.demo`: listar com `ativo:false` → ativar (204, idempotente) → listar com `ativo:true` → confirmar que `DELETE /catalogos/:id` como Master agora dá 409 de verdade (sem precisar inserir linha manualmente) → desativar (204, idempotente) → listar volta `ativo:false` → `POST` em catálogo inexistente dá 404 → `master` chamando `/tenant-catalogos` dá 403 (guard de role confirmado). `pnpm --filter @fazmais/api typecheck` limpo.
+
+**Decisão consciente de escopo**: só backend nesta rodada — o Painel Admin ainda não existe (`/admin/acervo` continua `PlaceholderPage`), então não há onde encaixar um toggle de UI ainda sem construir uma tela nova fora de escopo. Quando o Painel Admin de verdade for construído, esses três endpoints já estão prontos pra consumir.
 
 ## Backlog adiado
 

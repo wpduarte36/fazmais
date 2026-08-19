@@ -25,6 +25,16 @@ export interface NameOnlyRequest {
   name: string;
 }
 
+export interface CatalogoDisponivel {
+  id: string;
+  name: string;
+  icon: string;
+  eixosCount: number;
+  colecoesCount: number;
+  conteudosCount: number;
+  ativo: boolean;
+}
+
 export interface ConteudoSummary {
   id: string;
   colecaoId: string;
