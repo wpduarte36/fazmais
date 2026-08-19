@@ -1,0 +1,59 @@
+import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../../store/authStore';
+import { ThemeToggle } from '../../../components/ThemeToggle';
+
+interface MasterShellProps {
+  children: ReactNode;
+  maxWidthClassName?: string;
+}
+
+export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: MasterShellProps) {
+  const user = useAuthStore((state) => state.user);
+  const clearSession = useAuthStore((state) => state.clearSession);
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    clearSession();
+    navigate('/login', { replace: true });
+  }
+
+  return (
+    <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
+      <header className="flex items-center justify-between border-b border-white/10 px-7 py-3.5 light:border-black/10">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-sm font-black text-neutral-950">
+            F
+          </span>
+          <span className="text-base font-bold tracking-tight">
+            Faz<span className="text-amber-400">Mais</span>
+          </span>
+          <span className="ml-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
+            visão global
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-xs font-bold text-white">
+              {user?.name.charAt(0).toUpperCase()}
+            </span>
+            <div className="leading-tight">
+              <div className="text-sm font-semibold">{user?.name}</div>
+              <div className="text-[11px] text-neutral-500">Master</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-sm text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <main className={`mx-auto ${maxWidthClassName} px-7 py-8`}>{children}</main>
+    </div>
+  );
+}

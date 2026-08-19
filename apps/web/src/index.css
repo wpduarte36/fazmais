@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Escuro é o padrão do produto (sem classe extra). A classe "light" na <html>
+   liga as variantes light:, aplicadas pelo toggle de tema (useThemeStore). */
+@custom-variant light (&:where(.light, .light *));
+
 @keyframes fadeIn {
   from {
     opacity: 0;
