@@ -5,8 +5,11 @@ import { useAuthStore } from '../../../store/authStore';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { useHomeFeed } from '../hooks/useHomeFeed';
 import { ArtigoModal } from '../components/ArtigoModal';
+import { VideoModal } from '../components/VideoModal';
 
 const MEDIA_BADGE: Record<string, string> = { VIDEO: '▶ Vídeo', PDF: '📄 PDF', ARTIGO: '📰 Artigo' };
+const OPENABLE_TYPES = new Set(['ARTIGO', 'VIDEO']);
+const OPEN_HINT: Record<string, string> = { ARTIGO: 'Ler', VIDEO: 'Assistir' };
 const GRADIENTS = [
   'linear-gradient(135deg,#6366f1,#312e81)',
   'linear-gradient(135deg,#f59e0b,#92400e)',
@@ -23,14 +26,14 @@ function ConteudoCard({
   index: number;
   onOpen: (conteudo: ConteudoSummary) => void;
 }) {
-  const isArtigo = conteudo.mediaType === 'ARTIGO';
+  const isOpenable = OPENABLE_TYPES.has(conteudo.mediaType);
   return (
     <div
-      role={isArtigo ? 'button' : undefined}
-      tabIndex={isArtigo ? 0 : undefined}
-      onClick={isArtigo ? () => onOpen(conteudo) : undefined}
-      onKeyDown={isArtigo ? (event) => event.key === 'Enter' && onOpen(conteudo) : undefined}
-      className={`group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition hover:border-white/20 light:border-black/10 light:bg-white ${isArtigo ? 'cursor-pointer' : ''}`}
+      role={isOpenable ? 'button' : undefined}
+      tabIndex={isOpenable ? 0 : undefined}
+      onClick={isOpenable ? () => onOpen(conteudo) : undefined}
+      onKeyDown={isOpenable ? (event) => event.key === 'Enter' && onOpen(conteudo) : undefined}
+      className={`group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition hover:border-white/20 light:border-black/10 light:bg-white ${isOpenable ? 'cursor-pointer' : ''}`}
     >
       <div
         className="flex h-24 items-start justify-between p-2.5"
@@ -39,9 +42,9 @@ function ConteudoCard({
         <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white">
           {MEDIA_BADGE[conteudo.mediaType]}
         </span>
-        {isArtigo && (
+        {isOpenable && (
           <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100">
-            Ler
+            {OPEN_HINT[conteudo.mediaType]}
           </span>
         )}
       </div>
@@ -60,14 +63,14 @@ export function HomePage() {
   const clearSession = useAuthStore((state) => state.clearSession);
   const navigate = useNavigate();
   const { data: feed, isLoading, error } = useHomeFeed();
-  const [artigoAberto, setArtigoAberto] = useState<ConteudoSummary | null>(null);
+  const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
 
   function handleLogout() {
     clearSession();
     navigate('/login', { replace: true });
   }
 
-  const heroIsArtigo = feed?.featured?.mediaType === 'ARTIGO';
+  const heroIsOpenable = feed?.featured ? OPENABLE_TYPES.has(feed.featured.mediaType) : false;
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -113,10 +116,10 @@ export function HomePage() {
 
         {feed?.featured && (
           <div
-            role={heroIsArtigo ? 'button' : undefined}
-            tabIndex={heroIsArtigo ? 0 : undefined}
-            onClick={heroIsArtigo ? () => setArtigoAberto(feed.featured) : undefined}
-            className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsArtigo ? 'cursor-pointer' : ''}`}
+            role={heroIsOpenable ? 'button' : undefined}
+            tabIndex={heroIsOpenable ? 0 : undefined}
+            onClick={heroIsOpenable ? () => setConteudoAberto(feed.featured) : undefined}
+            className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
             style={{ background: GRADIENTS[0] }}
           >
             <span className="mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
@@ -132,14 +135,19 @@ export function HomePage() {
             <h2 className="mb-3 text-sm font-bold">{row.title}</h2>
             <div className="-mx-2 flex gap-3 overflow-x-auto p-2">
               {row.conteudos.map((conteudo, index) => (
-                <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setArtigoAberto} />
+                <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />
               ))}
             </div>
           </section>
         ))}
       </main>
 
-      {artigoAberto && <ArtigoModal conteudo={artigoAberto} onClose={() => setArtigoAberto(null)} />}
+      {conteudoAberto?.mediaType === 'ARTIGO' && (
+        <ArtigoModal conteudo={conteudoAberto} onClose={() => setConteudoAberto(null)} />
+      )}
+      {conteudoAberto?.mediaType === 'VIDEO' && (
+        <VideoModal conteudo={conteudoAberto} onClose={() => setConteudoAberto(null)} />
+      )}
     </div>
   );
 }
