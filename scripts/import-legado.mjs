@@ -42,6 +42,59 @@ function parsePageCount(totalPaginas) {
   return Number.isFinite(n) && n > 0 ? Math.trunc(n) : undefined;
 }
 
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function truncate(str, max) {
+  if (!str || str.length <= max) return str;
+  return str.slice(0, max - 1).trimEnd() + '…';
+}
+
+// Artigo original (autor nomeado, sem link externo real): corpo completo.
+// Artigo de terceiro (autor "Canguru News", com externalUrl): só o excerpt
+// curto + link pra fonte, nunca o corpo inteiro reproduzido — decisão
+// tomada com o usuário por causa de direitos autorais sobre o texto alheio.
+function buildArtigoPayload(item, modulo) {
+  const isOriginal = Boolean(item.htmlContentBody);
+  let htmlContent;
+  let description;
+
+  if (isOriginal) {
+    htmlContent = `<p>${escapeHtml(item.htmlContentBody)}</p><p><em>Autor: ${escapeHtml(item.autor)}</em></p>`;
+    description = truncate(item.htmlContentBody, 600);
+  } else {
+    const excerpt = item.excerpt || item.titulo;
+    htmlContent = `<p>${escapeHtml(excerpt)}</p><p>Fonte: <a href="${item.externalUrl}" target="_blank" rel="noopener">${escapeHtml(item.externalUrl)}</a> — ${escapeHtml(item.autor)}</p>`;
+    description = truncate(excerpt, 600);
+  }
+
+  return {
+    title: item.titulo,
+    description,
+    mediaType: 'ARTIGO',
+    htmlContent,
+    imageUrl: placeholderImage(modulo),
+    tags: item.autor ? [item.autor] : [],
+  };
+}
+
+function buildPayload(item, modulo) {
+  if (item.tipoArquivo === 'ARTIGO') {
+    return buildArtigoPayload(item, modulo);
+  }
+  return {
+    title: item.titulo,
+    description: item.sumario?.trim() || item.titulo,
+    mediaType: item.tipoArquivo,
+    mediaUrl: item.linkUrlVisualizacao || undefined,
+    imageUrl: placeholderImage(modulo),
+    tags: item.funcionalidade ? [item.funcionalidade] : [],
+    durationSeconds: item.tipoArquivo === 'VIDEO' ? parseDurationSeconds(item.totalHoras) : undefined,
+    pageCount: item.tipoArquivo === 'PDF' ? parsePageCount(item.totalPaginas) : undefined,
+  };
+}
+
 async function login() {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: 'POST',
@@ -104,10 +157,18 @@ function runDryRun(dataset) {
     }
   }
 
-  const semMediaUrl = dataset.itens.filter((i) => !i.linkUrlVisualizacao).length;
-  const semSumario = dataset.itens.filter((i) => !i.sumario?.trim()).length;
+  const naoArtigo = dataset.itens.filter((i) => i.tipoArquivo !== 'ARTIGO');
+  const semMediaUrl = naoArtigo.filter((i) => !i.linkUrlVisualizacao).length;
+  const semSumario = naoArtigo.filter((i) => !i.sumario?.trim()).length;
   if (semMediaUrl) console.log(`\n⚠ ${semMediaUrl} item(ns) sem linkUrlVisualizacao — vão falhar na criação (mediaUrl é obrigatório).`);
   if (semSumario) console.log(`⚠ ${semSumario} item(ns) sem sumário — vão usar o título como description.`);
+
+  const artigos = dataset.itens.filter((i) => i.tipoArquivo === 'ARTIGO');
+  const originais = artigos.filter((i) => i.htmlContentBody).length;
+  const terceiros = artigos.length - originais;
+  if (artigos.length) {
+    console.log(`\nArtigos: ${originais} original(is) com corpo completo, ${terceiros} de terceiro (só excerpt + link pra fonte).`);
+  }
 }
 
 async function runImport(dataset) {
@@ -166,17 +227,7 @@ async function runImport(dataset) {
       const eixoId = await getOrCreateEixo(item.modulo);
       const colecaoId = await getOrCreateColecao(eixoId, item.modulo, item.categoria);
 
-      const payload = {
-        title: item.titulo,
-        description: item.sumario?.trim() || item.titulo,
-        mediaType: item.tipoArquivo,
-        mediaUrl: item.linkUrlVisualizacao || undefined,
-        imageUrl: placeholderImage(item.modulo),
-        tags: item.funcionalidade ? [item.funcionalidade] : [],
-        durationSeconds: item.tipoArquivo === 'VIDEO' ? parseDurationSeconds(item.totalHoras) : undefined,
-        pageCount: item.tipoArquivo === 'PDF' ? parsePageCount(item.totalPaginas) : undefined,
-      };
-
+      const payload = buildPayload(item, item.modulo);
       const conteudo = await api(token, 'POST', `/colecoes/${colecaoId}/conteudos`, payload);
       progress.itens[item.id] = conteudo.id;
       created++;
