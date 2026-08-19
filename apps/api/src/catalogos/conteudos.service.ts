@@ -30,6 +30,9 @@ export class ConteudosService {
         isFeatured: dto.isFeatured ?? false,
         tags: dto.tags ?? [],
         aiSummary: dto.aiSummary,
+        durationSeconds: dto.durationSeconds,
+        pageCount: dto.pageCount,
+        downloadUrl: dto.downloadUrl,
       },
     });
 
@@ -63,6 +66,9 @@ export class ConteudosService {
         isFeatured: dto.isFeatured,
         tags: dto.tags,
         aiSummary: dto.aiSummary,
+        durationSeconds: dto.durationSeconds,
+        pageCount: dto.pageCount,
+        downloadUrl: dto.downloadUrl,
       },
     });
 
@@ -155,6 +161,9 @@ export class ConteudosService {
       isFeatured: conteudo.isFeatured,
       tags: conteudo.tags,
       aiSummary: conteudo.aiSummary,
+      durationSeconds: conteudo.durationSeconds,
+      pageCount: conteudo.pageCount,
+      downloadUrl: conteudo.downloadUrl,
       planoIds: conteudo.planos.map((p) => p.planoId),
       createdAt: conteudo.createdAt,
     };

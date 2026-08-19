@@ -175,6 +175,9 @@ model Conteudo {
   isFeatured  Boolean   @default(false) @map("is_featured")
   tags        String[]  @default([]) // SQL MANUAL: índice GIN para busca por tag (ver rodapé)
   aiSummary   String?   @map("ai_summary")
+  durationSeconds Int?  @map("duration_seconds") // só p/ VIDEO
+  pageCount       Int?  @map("page_count") // só p/ PDF
+  downloadUrl     String? @map("download_url") // opcional, sem uso confirmado no produto ainda
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 

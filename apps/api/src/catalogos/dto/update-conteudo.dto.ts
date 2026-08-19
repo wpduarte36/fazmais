@@ -3,8 +3,10 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsOptional,
+  IsPositive,
   IsString,
   IsUrl,
   MaxLength,
@@ -72,4 +74,21 @@ export class UpdateConteudoDto {
   @IsString()
   @MaxLength(600)
   aiSummary?: string;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  durationSeconds?: number;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  pageCount?: number;
+
+  @IsOptional()
+  @IsUrl(
+    { require_tld: false },
+    { message: 'downloadUrl deve ser uma URL válida' },
+  )
+  downloadUrl?: string;
 }

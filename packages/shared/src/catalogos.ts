@@ -47,6 +47,9 @@ export interface ConteudoSummary {
   isFeatured: boolean;
   tags: string[];
   aiSummary: string | null;
+  durationSeconds: number | null;
+  pageCount: number | null;
+  downloadUrl: string | null;
   planoIds: string[];
   createdAt: string;
 }
@@ -82,6 +85,9 @@ export interface CreateConteudoRequest {
   tags?: string[];
   planoIds?: string[];
   aiSummary?: string;
+  durationSeconds?: number;
+  pageCount?: number;
+  downloadUrl?: string;
 }
 
 export type UpdateConteudoRequest = Partial<CreateConteudoRequest>;
