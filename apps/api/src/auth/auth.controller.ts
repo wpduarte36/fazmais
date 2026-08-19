@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 const REFRESH_COOKIE_NAME = 'refreshToken';
 
@@ -29,5 +30,11 @@ export class AuthController {
     });
 
     return { accessToken, user: userSummary };
+  }
+
+  @Post('set-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  setPassword(@Body() dto: SetPasswordDto) {
+    return this.authService.setPasswordFromToken(dto.token, dto.password);
   }
 }

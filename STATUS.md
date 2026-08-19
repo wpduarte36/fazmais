@@ -192,6 +192,14 @@ O usuário notou que o legado (Faz+) já tratava essas 15 notícias do Canguru N
 - **Testado e confirmado no navegador** logado como `professor.demo`: cards de notícia mostram "🔗 Externo"; abrir um mostra o CTA de fonte externa correto; abrir um dos 2 artigos originais (sem `externalUrl`) continua mostrando "📰 Artigo" e o conteúdo completo, sem CTA.
 - **Pareamento de navegador**: nesta sessão a extensão voltou a mostrar 2 browsers conectados (o bug de "outra máquina" documentado acima voltou a acontecer) — resolvido simplesmente escolhendo o browser certo via `select_browser` a partir da lista, sem precisar fechar/reabrir a extensão desta vez.
 
+## Correção: fluxo de 1º acesso estava quebrado (2026-08-19)
+
+Revisão de código a pedido do usuário encontrou um bug real: `TenantsService.createAdmin` gerava e logava um token de "1º acesso" (`PasswordResetToken`, tipo `FIRST_ACCESS`), mas **não existia nenhuma rota que consumisse esse token** — todo admin/professor criado pelo painel ficava com `password: null` permanentemente, sem nenhum jeito de logar (`AuthService.validateUser` sempre rejeita senha nula).
+
+Corrigido: `POST /auth/set-password` (público, sem guard — o usuário ainda não está logado nesse ponto), `apps/api/src/auth/dto/set-password.dto.ts` (`token` + `password`, mínimo 8 caracteres) → `AuthService.setPasswordFromToken`: valida o hash do token contra `password_reset_tokens` (rejeita se não existir, já usado, ou expirado — mensagem genérica "Token inválido ou expirado" nos três casos, sem diferenciar pra não vazar informação), `bcrypt.hash` da nova senha, marca `usedAt` no token (não pode ser reaproveitado) e força `status: ATIVO` no `User` — numa transação. Serve tanto pra `FIRST_ACCESS` quanto pra `RESET` (mesma tabela), então já deixa a Tela 03 (esqueceu senha, ainda no backlog) com o backend pronto pra só faltar o endpoint de "pedir redefinição" + UI.
+
+**Testado via API de ponta a ponta**: criei um admin de teste → peguei o token de 1º acesso no log do console → `POST /auth/set-password` (204) → login com a senha nova funcionou (JWT de ADMIN correto) → reaproveitar o mesmo token dá 400 → token inválido dá 400 → senha curta (`< 8`) dá 400 de validação. Admins de teste removidos depois via API.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

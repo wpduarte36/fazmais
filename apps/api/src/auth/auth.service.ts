@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -92,6 +92,38 @@ export class AuthService {
     });
 
     return token;
+  }
+
+  // Consome um token de "1º acesso" (FIRST_ACCESS) ou de redefinição de
+  // senha (RESET) — mesma tabela pros dois casos. Usado hoje só pelo fluxo
+  // de 1º acesso; RESET fica pronto pra quando a Tela 03 (esqueceu senha)
+  // for implementada.
+  async setPasswordFromToken(token: string, newPassword: string): Promise<void> {
+    const tokenHash = this.hashToken(token);
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (
+      !resetToken ||
+      resetToken.usedAt ||
+      resetToken.expiresAt.getTime() < Date.now()
+    ) {
+      throw new BadRequestException('Token inválido ou expirado');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { password: passwordHash, status: 'ATIVO' },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
   }
 
   private hashToken(token: string): string {
