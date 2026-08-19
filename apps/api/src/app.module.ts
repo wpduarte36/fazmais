@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { PlanosModule } from './planos/planos.module';
 import { CatalogosModule } from './catalogos/catalogos.module';
+import { HomeModule } from './home/home.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CatalogosModule } from './catalogos/catalogos.module';
     TenantsModule,
     PlanosModule,
     CatalogosModule,
+    HomeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
