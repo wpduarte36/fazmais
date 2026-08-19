@@ -6,10 +6,11 @@ import { ThemeToggle } from '../../../components/ThemeToggle';
 import { useHomeFeed } from '../hooks/useHomeFeed';
 import { ArtigoModal } from '../components/ArtigoModal';
 import { VideoModal } from '../components/VideoModal';
+import { PdfModal } from '../components/PdfModal';
 
 const MEDIA_BADGE: Record<string, string> = { VIDEO: '▶ Vídeo', PDF: '📄 PDF', ARTIGO: '📰 Artigo' };
-const OPENABLE_TYPES = new Set(['ARTIGO', 'VIDEO']);
-const OPEN_HINT: Record<string, string> = { ARTIGO: 'Ler', VIDEO: 'Assistir' };
+const OPENABLE_TYPES = new Set(['ARTIGO', 'VIDEO', 'PDF']);
+const OPEN_HINT: Record<string, string> = { ARTIGO: 'Ler', VIDEO: 'Assistir', PDF: 'Abrir' };
 const GRADIENTS = [
   'linear-gradient(135deg,#6366f1,#312e81)',
   'linear-gradient(135deg,#f59e0b,#92400e)',
@@ -183,6 +184,9 @@ export function HomePage() {
       )}
       {conteudoAberto?.mediaType === 'VIDEO' && (
         <VideoModal conteudo={conteudoAberto} onClose={() => setConteudoAberto(null)} />
+      )}
+      {conteudoAberto?.mediaType === 'PDF' && (
+        <PdfModal conteudo={conteudoAberto} onClose={() => setConteudoAberto(null)} />
       )}
     </div>
   );
