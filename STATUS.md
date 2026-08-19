@@ -10,7 +10,7 @@ Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para m
 
 **Feito e commitado em git** (até `c800f1f`): bootstrap do monorepo + schema Prisma (Lote A) + Tela 01 (Login) + Painel Master (Municípios, Catálogos, Construtor de Catálogo/Tela 05, tema claro/escuro real) + opt-in de catálogo compartilhado (backend) + campos novos em Conteudo/Eixo pro import do legado + **migração real de dados do FazMais legado (Faz+)** + **Home do Professor completa nos 3 tipos de mídia** (hero, menu horizontal de Eixos, fileiras por Coleção, leitura de Artigo com HTML rico, player de Vídeo, viewer de PDF em formato de livro). Ver seções "Migração do legado (Faz+)" e "Home do Professor" abaixo pros detalhes.
 
-**Ainda não commitado**: o `PdfModal` (viewer de PDF) e o ajuste de conteúdo dos 2 artigos originais pra HTML rico em vez de texto puro — ver seção "Home do Professor" e a nota de HTML rico logo abaixo dela.
+**Ainda não commitado**: o `PdfModal` (viewer de PDF) e o ajuste de conteúdo dos 2 artigos originais pra HTML rico em vez de texto puro — ver seção "Home do Professor" e a nota de HTML rico logo abaixo dela. Também nesta rodada: fotos reais nos 15 artigos de terceiro (Canguru News) + correção de um bug real (`ConteudoCard`/hero nunca renderizavam `imageUrl`) — ver seção "Fotos reais nos artigos migrados" logo abaixo de "Home do Professor".
 
 **Mudança de ordem no roadmap**: as Telas 02 ("Ainda não tenho acesso") e 03 ("Esqueceu sua senha?") foram **adiadas** — ver seção "Backlog adiado" no final deste arquivo. Decidiu-se ir direto para a Tela 04 (Painel Master), que cresceu de escopo em cima do PRD original.
 
@@ -171,6 +171,15 @@ O usuário notou que os 2 artigos originais ("Documentação Pedagógica...", "P
 4. **Para migrações futuras que precisem do HTML de verdade** (não só texto): sempre tentar `innerHTML` primeiro; se bloquear, clonar o nó, remover `img`/`svg`/`figure`/`[contenteditable="false"]`, e tentar de novo; se ainda bloquear em pedaços grandes, reduzir o tamanho do pedaço até passar — é raro precisar chegar a texto puro como último recurso.
 
 **Testado e confirmado visualmente pelo usuário no navegador**: os dois artigos abrem no `ArtigoModal` com negrito, itálico, listas e links de referência clicáveis renderizando corretamente.
+
+## Fotos reais nos artigos migrados (2026-08-19, não commitado)
+
+Pedido do usuário: trocar os placeholders genéricos (`placehold.co`) dos artigos migrados por fotos reais.
+
+- **Os 2 artigos originais** (Documentação Pedagógica, Planejamento Pedagógico Inclusivo) **continuam com placeholder** — a imagem deles no legado é um upload direto em S3 com URL assinada/expirável, sem página pública equivalente de onde extrair uma foto estável. Não é um problema resolvível sem acesso de admin ao S3 de origem; sinalizado ao usuário como limitação conhecida, não é algo em aberto pra continuar tentando.
+- **Os 15 artigos de terceiro (Canguru News)** ganharam foto real: a página-fonte de cada notícia (`escolanaminhacasa.com.br`, o site parceiro que publica o conteúdo do Canguru News) hospeda a imagem em **Google Cloud Storage sem assinatura** (`storage.googleapis.com/escolanaminhacasa-h.appspot.com/articles/...`), ao contrário do S3 assinado do admin do legado — URL estável, sem expiração. Extraí a URL de cada uma das 15 páginas-fonte (`document.querySelector('article img, main img')?.src`) e apliquei via `PATCH /conteudos/:id` (script descartável, não ficou no repo, rodou "Atualizados: 15/15").
+- **Bug real encontrado e corrigido durante a verificação visual**: `ConteudoCard` e o hero da `HomePage` **nunca liam `conteudo.imageUrl`/`feed.featured.imageUrl`** — sempre mostravam um gradiente CSS fixo (`GRADIENTS[index % 4]`) como fundo do card, ignorando completamente o campo de imagem (bug pré-existente, não introduzido pela migração — as fotos reais só expuseram que ele nunca tinha sido implementado). Corrigido em `apps/web/src/features/professor/pages/HomePage.tsx`: adicionado `<img>` de verdade (`object-cover`, `absolute inset-0`) dentro do card e do hero, gradiente mantido como camada de fundo/fallback atrás da imagem, hero ganhou um overlay `bg-gradient-to-t from-black/85 via-black/30 to-transparent` pra manter o texto legível por cima da foto.
+- **Testado e confirmado pelo usuário no navegador**: todos os 15 cards de notícia mostram a foto real (inclusive os 4 que pareceram quebrados numa checagem intermediária — era só lazy-load ainda não tendo terminado no momento do screenshot, confirmado revisitando a fileira depois).
 
 ## Backlog adiado
 

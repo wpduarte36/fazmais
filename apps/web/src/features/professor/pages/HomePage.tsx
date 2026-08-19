@@ -36,15 +36,13 @@ function ConteudoCard({
       onKeyDown={isOpenable ? (event) => event.key === 'Enter' && onOpen(conteudo) : undefined}
       className={`group w-44 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] transition hover:border-white/20 light:border-black/10 light:bg-white ${isOpenable ? 'cursor-pointer' : ''}`}
     >
-      <div
-        className="flex h-24 items-start justify-between p-2.5"
-        style={{ background: GRADIENTS[index % GRADIENTS.length] }}
-      >
-        <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white">
+      <div className="relative flex h-24 items-start justify-between overflow-hidden p-2.5" style={{ background: GRADIENTS[index % GRADIENTS.length] }}>
+        <img src={conteudo.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+        <span className="relative rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white">
           {MEDIA_BADGE[conteudo.mediaType]}
         </span>
         {isOpenable && (
-          <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100">
+          <span className="relative rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100">
             {OPEN_HINT[conteudo.mediaType]}
           </span>
         )}
@@ -140,11 +138,13 @@ export function HomePage() {
             className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
             style={{ background: GRADIENTS[0] }}
           >
-            <span className="mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
+            <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+            <span className="relative mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
               {MEDIA_BADGE[feed.featured.mediaType]} · destaque
             </span>
-            <h1 className="max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
-            <p className="mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
+            <h1 className="relative max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
+            <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
           </div>
         )}
 
