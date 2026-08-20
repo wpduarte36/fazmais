@@ -8,6 +8,7 @@ import { ArtigoModal } from '../components/ArtigoModal';
 import { VideoModal } from '../components/VideoModal';
 import { PdfModal } from '../components/PdfModal';
 import { FavoriteButton } from '../components/FavoriteButton';
+import { StarRating } from '../components/StarRating';
 
 const MEDIA_BADGE: Record<string, string> = { VIDEO: '▶ Vídeo', PDF: '📄 PDF', ARTIGO: '📰 Artigo' };
 const OPENABLE_TYPES = new Set(['ARTIGO', 'VIDEO', 'PDF']);
@@ -61,6 +62,7 @@ function ConteudoCard({
         {conteudo.tags.length > 0 && (
           <p className="mt-1.5 truncate text-[10px] text-neutral-500">{conteudo.tags.join(', ')}</p>
         )}
+        <StarRating conteudo={conteudo} size={11} className="mt-1.5" />
       </div>
     </div>
   );
@@ -239,6 +241,7 @@ export function HomePage() {
                 </span>
                 <h1 className="relative max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
                 <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
+                <StarRating conteudo={feed.featured} size={17} className="relative mt-2" />
               </div>
             )}
 

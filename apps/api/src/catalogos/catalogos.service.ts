@@ -128,6 +128,7 @@ export class CatalogosService {
             sourceName: conteudo.sourceName,
             planoIds: conteudo.planos.map((p) => p.planoId),
             isFavorito: false,
+            myRating: null,
             createdAt: conteudo.createdAt,
           })),
         })),

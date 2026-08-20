@@ -255,6 +255,19 @@ A pedido do usuário, mais um pedaço do catálogo legado foi migrado — desta 
 
 **Testado no navegador**: novo pill "Pedagógico" aparece na Home, os 6 PDFs abrem no viewer FlipHTML5 normalmente (testado "Floresta", 64 páginas, capa carregando certo).
 
+## US-055 — Avaliar conteúdos com estrelas (2026-08-19)
+
+Modelo `Rating` já existia no schema desde o Lote A (com o CHECK `score BETWEEN 1 AND 5` já aplicado na migration inicial) — só faltava endpoint e UI, mesma situação do `Favorite` antes do US-054.
+
+Backend (`apps/api/src/ratings/`, novo módulo, `@Roles('PROFESSOR')`):
+- `POST /ratings/:conteudoId` com body `{ score: 1-5 }` (`AvaliarDto`, `@IsInt() @Min(1) @Max(5)`) — upsert (`@@unique([userId, conteudoId])` já garante 1 nota por usuário por conteúdo; reavaliar só atualiza o `score`).
+- `HomeService.getFeed` preenche `myRating` (a nota do usuário logado, `null` se não avaliou) em cada `ConteudoSummary`, mesmo padrão do `isFavorito`. Visão do Master (`CatalogosService.getTree`/`ConteudosService`) sempre devolve `myRating: null`.
+- Sem endpoint de remover nota — a US pede "avaliar", não "desfazer avaliação"; reavaliar com outra nota já cobre "mudar de ideia".
+
+Frontend: `StarRating.tsx` (5 estrelas clicáveis, estado local otimista + sincroniza com `myRating` do feed, mesmo padrão do `FavoriteButton`) wired no `ConteudoCard`, no hero e nos 3 modais — mesmos 5 pontos onde o `FavoriteButton` já estava.
+
+**Testado no navegador**: avaliei o hero (AirPlay) com 4 estrelas → recarreguei a página → nota persistiu. Avaliei um card ("Climas") com 3 estrelas direto na grade (sem abrir o conteúdo) → abri o modal do mesmo item → mostrou as mesmas 3 estrelas preenchidas, confirmando que card e modal convergem.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

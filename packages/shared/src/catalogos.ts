@@ -59,6 +59,7 @@ export interface ConteudoSummary {
   sourceName: string | null;
   planoIds: string[];
   isFavorito: boolean;
+  myRating: number | null;
   createdAt: string;
 }
 

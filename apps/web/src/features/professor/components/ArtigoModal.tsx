@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { FavoriteButton } from './FavoriteButton';
+import { StarRating } from './StarRating';
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
@@ -54,6 +55,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
               {conteudo.tags.length > 0 && (
                 <p className="mt-1 text-xs text-neutral-500">{conteudo.tags.join(', ')}</p>
               )}
+              <StarRating conteudo={conteudo} size={15} className="mt-2" />
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <FavoriteButton conteudo={conteudo} className={iconButtonClass} />

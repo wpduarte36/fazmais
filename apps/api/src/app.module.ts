@@ -11,6 +11,7 @@ import { PlanosModule } from './planos/planos.module';
 import { CatalogosModule } from './catalogos/catalogos.module';
 import { HomeModule } from './home/home.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { RatingsModule } from './ratings/ratings.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { FavoritesModule } from './favorites/favorites.module';
     CatalogosModule,
     HomeModule,
     FavoritesModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

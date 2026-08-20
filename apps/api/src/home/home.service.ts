@@ -48,6 +48,12 @@ export class HomeService {
     });
     const favoritoIds = new Set(favoritos.map((f) => f.conteudoId));
 
+    const ratings = await this.prisma.rating.findMany({
+      where: { userId },
+      select: { conteudoId: true, score: true },
+    });
+    const ratingByConteudoId = new Map(ratings.map((r) => [r.conteudoId, r.score]));
+
     const toSummary = (conteudo: (typeof conteudos)[number]) => ({
       id: conteudo.id,
       colecaoId: conteudo.colecaoId,
@@ -67,6 +73,7 @@ export class HomeService {
       sourceName: conteudo.sourceName,
       planoIds: conteudo.planos.map((p) => p.planoId),
       isFavorito: favoritoIds.has(conteudo.id),
+      myRating: ratingByConteudoId.get(conteudo.id) ?? null,
       createdAt: conteudo.createdAt,
     });
 
