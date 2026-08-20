@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MasterShell } from '../components/MasterShell';
+import { StatsCards } from '../components/StatsCards';
 import { MunicipiosTab } from '../components/MunicipiosTab';
 import { CatalogosTab } from '../components/CatalogosTab';
 
@@ -19,6 +20,8 @@ export function MasterPanelPage() {
           Visão global da plataforma: municípios e catálogos compartilhados.
         </p>
       </div>
+
+      <StatsCards />
 
       <div className="mb-6 inline-flex gap-1 rounded-full border border-white/15 bg-white/[0.03] p-1 light:border-black/10 light:bg-black/[0.03]">
         <button

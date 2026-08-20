@@ -414,6 +414,27 @@ demonstração começou a travar em buffering, provavelmente por causa do
 volume de recarregamentos do player durante a depuração) — não chegou a ser
 confirmado visualmente, mas a lógica foi validada por partes.
 
+## US-010 — Dashboard de stats no Painel Master (2026-08-20)
+
+Cards de totais globais no topo do Painel Master, acima das abas
+Municípios/Catálogos, como pedido no PRD ("Cards de stats no topo do
+painel; dados consolidados cross-tenant"): **Municípios**, **Admins**,
+**Professores**, **Conteúdos**.
+
+- **`apps/api/src/stats/`** (novo módulo): `GET /stats/master`,
+  `@Roles('MASTER')` — 4 `count()` em paralelo (`Tenant`, `User` por role
+  ADMIN/PROFESSOR, `Conteudo`). Sem filtro de tenant de propósito (é
+  exatamente o "cross-tenant" pedido).
+- **`packages/shared/src/stats.ts`**: `MasterStats` (novo).
+- **`apps/web/src/features/master/components/StatsCards.tsx`** (novo):
+  grid de 4 cards (ícone colorido + número + label), skeleton de loading,
+  mesmo padrão visual dos cards já usados no resto do Master. Renderizado no
+  topo de `MasterPanelPage.tsx`, antes das abas.
+
+Testado no navegador (login `master`/`fazmais123`) em dark e light: 1
+município, 1 admin, 1 professor, 90 conteúdos — bate com o que já existia
+no seed + migração do legado.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.
