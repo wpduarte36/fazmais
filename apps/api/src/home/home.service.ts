@@ -54,6 +54,12 @@ export class HomeService {
     });
     const ratingByConteudoId = new Map(ratings.map((r) => [r.conteudoId, r.score]));
 
+    const progressos = await this.prisma.progress.findMany({
+      where: { userId },
+      select: { conteudoId: true, progressPercent: true, lastPosition: true, updatedAt: true },
+    });
+    const progressByConteudoId = new Map(progressos.map((p) => [p.conteudoId, p]));
+
     const toSummary = (conteudo: (typeof conteudos)[number]) => ({
       id: conteudo.id,
       colecaoId: conteudo.colecaoId,
@@ -75,6 +81,8 @@ export class HomeService {
       isFavorito: favoritoIds.has(conteudo.id),
       myRating: ratingByConteudoId.get(conteudo.id) ?? null,
       viewCount: conteudo.viewCount,
+      progressPercent: progressByConteudoId.get(conteudo.id)?.progressPercent ?? 0,
+      lastPosition: progressByConteudoId.get(conteudo.id)?.lastPosition ?? 0,
       createdAt: conteudo.createdAt,
     });
 
@@ -102,14 +110,32 @@ export class HomeService {
       .slice(0, 10)
       .map(toSummary);
 
+    const continuarAssistindo = [...conteudos]
+      .filter((c) => {
+        const progresso = progressByConteudoId.get(c.id);
+        return progresso && progresso.progressPercent > 0 && progresso.progressPercent < 100;
+      })
+      .sort((a, b) => {
+        const atualizadoA = progressByConteudoId.get(a.id)!.updatedAt.getTime();
+        const atualizadoB = progressByConteudoId.get(b.id)!.updatedAt.getTime();
+        return atualizadoB - atualizadoA;
+      })
+      .slice(0, 10)
+      .map(toSummary);
+
     return {
       featured: featuredSource ? toSummary(featuredSource) : null,
       populares,
+      continuarAssistindo,
       rows: Array.from(rowsByColecao.values()),
     };
   }
 
-  async registrarView(conteudoId: string): Promise<void> {
+  // PDF/Artigo não têm um sinal real de "quanto foi consumido" (PDF é um
+  // iframe sem contagem de página; Artigo muitas vezes é só um link externo)
+  // — decisão do usuário foi tratar "abrir = concluído" pra esses dois tipos,
+  // só o vídeo reporta progresso real via ProgressController (player do Vimeo).
+  async registrarView(conteudoId: string, userId: string, tenantId: string): Promise<void> {
     const conteudo = await this.prisma.conteudo.findUnique({
       where: { id: conteudoId },
     });
@@ -120,5 +146,13 @@ export class HomeService {
       where: { id: conteudoId },
       data: { viewCount: { increment: 1 } },
     });
+
+    if (conteudo.mediaType === 'PDF' || conteudo.mediaType === 'ARTIGO') {
+      await this.prisma.progress.upsert({
+        where: { userId_conteudoId: { userId, conteudoId } },
+        update: { progressPercent: 100, lastPosition: 0 },
+        create: { userId, conteudoId, tenantId, progressPercent: 100, lastPosition: 0 },
+      });
+    }
   }
 }

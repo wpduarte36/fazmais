@@ -12,6 +12,7 @@ import { CatalogosModule } from './catalogos/catalogos.module';
 import { HomeModule } from './home/home.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { RatingsModule } from './ratings/ratings.module';
+import { ProgressModule } from './progress/progress.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { RatingsModule } from './ratings/ratings.module';
     HomeModule,
     FavoritesModule,
     RatingsModule,
+    ProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

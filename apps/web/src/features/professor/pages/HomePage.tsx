@@ -231,6 +231,17 @@ export function HomePage() {
               </div>
             )}
 
+            {feed && feed.continuarAssistindo.length > 0 && (
+              <section className="mb-8">
+                <h2 className="mb-3 text-sm font-bold">▶ Continuar assistindo</h2>
+                <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
+                  {feed.continuarAssistindo.map((conteudo, index) => (
+                    <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={abrirConteudo} />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {feed && feed.populares.length > 0 && (
               <section className="mb-8">
                 <h2 className="mb-3 text-sm font-bold">🔥 Mais assistidos</h2>

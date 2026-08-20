@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import Player from '@vimeo/player';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { parseVimeoUrl, toPlayerUrl } from '../lib/vimeo';
+import { useProgress } from '../hooks/useProgress';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
+
+const INTERVALO_SALVAR_PROGRESSO_MS = 10_000;
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
@@ -17,6 +20,7 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const vimeoRef = conteudo.mediaUrl ? parseVimeoUrl(conteudo.mediaUrl) : null;
+  const { salvarProgresso } = useProgress();
 
   useEffect(() => {
     if (!containerRef.current || !vimeoRef) return;
@@ -26,13 +30,47 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
       responsive: true,
     });
 
-    player.ready().catch(() => {
-      setError('Não foi possível carregar este vídeo.');
+    // Progresso real de vídeo: acompanha timeupdate do player e salva
+    // periodicamente (sem invalidar o feed a cada tick — só na saída/final,
+    // pra não recarregar a Home enquanto o professor ainda está assistindo).
+    const ultimoProgresso = { percent: 0, seconds: 0 };
+    let terminou = false;
+
+    player.on('timeupdate', (data: { percent: number; seconds: number }) => {
+      ultimoProgresso.percent = data.percent * 100;
+      ultimoProgresso.seconds = data.seconds;
     });
 
+    player.on('ended', () => {
+      terminou = true;
+      salvarProgresso(conteudo.id, 100, ultimoProgresso.seconds, true);
+    });
+
+    const intervalo = setInterval(() => {
+      if (ultimoProgresso.seconds > 0 && !terminou) {
+        salvarProgresso(conteudo.id, ultimoProgresso.percent, ultimoProgresso.seconds, false);
+      }
+    }, INTERVALO_SALVAR_PROGRESSO_MS);
+
+    player
+      .ready()
+      .then(() => {
+        if (conteudo.lastPosition > 0 && conteudo.progressPercent < 100) {
+          void player.setCurrentTime(conteudo.lastPosition);
+        }
+      })
+      .catch(() => {
+        setError('Não foi possível carregar este vídeo.');
+      });
+
     return () => {
+      clearInterval(intervalo);
+      if (!terminou && ultimoProgresso.seconds > 0) {
+        salvarProgresso(conteudo.id, ultimoProgresso.percent, ultimoProgresso.seconds, true);
+      }
       void player.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vimeoRef]);
 
   return (

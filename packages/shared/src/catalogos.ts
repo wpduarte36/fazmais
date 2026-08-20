@@ -61,6 +61,8 @@ export interface ConteudoSummary {
   isFavorito: boolean;
   myRating: number | null;
   viewCount: number;
+  progressPercent: number;
+  lastPosition: number;
   createdAt: string;
 }
 

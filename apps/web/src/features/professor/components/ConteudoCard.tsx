@@ -43,6 +43,11 @@ export function ConteudoCard({
           conteudo={conteudo}
           className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white transition hover:text-rose-400 aria-pressed:text-rose-400"
         />
+        {conteudo.progressPercent > 0 && conteudo.progressPercent < 100 && (
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-black/40">
+            <div className="h-full bg-amber-400" style={{ width: `${conteudo.progressPercent}%` }} />
+          </div>
+        )}
       </div>
       <div className="p-2.5">
         <p className="line-clamp-2 text-xs font-semibold">{conteudo.title}</p>

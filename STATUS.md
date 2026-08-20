@@ -324,6 +324,49 @@ positivo do bug de stopword). Pergunta de acompanhamento sem match
 esperada de substring, não bug) → fallback pros populares funcionou.
 Clicar num card sugerido → chat fecha, PDF abre normalmente.
 
+## US-053 — Progresso de consumo e "Continuar assistindo" (2026-08-20)
+
+Schema já tinha um model `Progress` pronto desde o Lote A (`progressPercent`,
+`lastPosition`), nunca usado até agora. Decisão combinada com o usuário antes
+de implementar: **vídeo tem progresso real** (via player do Vimeo); **PDF e
+Artigo não têm sinal confiável de "quanto foi consumido"** (PDF é um iframe
+sem contagem de página real; Artigo é frequentemente um link externo) — pra
+esses dois, "abrir = concluído" (100% direto), sem número aproximado/fake.
+
+Backend:
+- **`apps/api/src/progress/`** (novo módulo): `POST /progress/:conteudoId`
+  body `{ progressPercent: 0-100, lastPosition?: number }`, `@Roles('PROFESSOR')`,
+  upsert em `Progress` (unique `[userId, conteudoId]`, mesmo padrão de
+  `favorites`/`ratings`).
+- **`HomeService.registrarView`**: agora recebe `userId`/`tenantId`; se o
+  conteúdo é PDF ou ARTIGO, faz upsert do `Progress` pra 100% na hora de
+  abrir (além de incrementar `viewCount` como já fazia).
+- **`HomeService.getFeed`**: busca `Progress` do usuário, adiciona
+  `progressPercent`/`lastPosition` no `ConteudoSummary`, e monta
+  `continuarAssistindo` (conteúdos com `0 < progresso < 100`, ordenado por
+  `updatedAt` desc, top 10) — vídeo em andamento é o único jeito de aparecer
+  aí, já que PDF/Artigo pulam direto pra 100%.
+- **`packages/shared`**: `ConteudoSummary` ganhou `progressPercent`/`lastPosition`;
+  `HomeFeed` ganhou `continuarAssistindo`.
+
+Frontend:
+- **`VideoModal.tsx`**: escuta `timeupdate` do player do Vimeo, salva
+  progresso a cada 10s (sem invalidar o feed nesses ticks intermediários —
+  só na saída/fim do vídeo, pra não recarregar a Home no meio da reprodução)
+  via novo hook `useProgress`. Ao abrir, retoma de `conteudo.lastPosition`
+  se o vídeo não estava concluído (`player.setCurrentTime`).
+- **`ConteudoCard.tsx`**: barra de progresso amber no rodapé da miniatura
+  quando `0 < progressPercent < 100`.
+- **`HomePage.tsx`**: nova fileira "▶ Continuar assistindo" (mesmo padrão
+  visual das outras fileiras), acima de "🔥 Mais assistidos", só quando
+  `feed.continuarAssistindo` não está vazio.
+
+**Não testado no navegador desta vez**: os dois Chrome pareados com a
+extensão neste momento não enxergam o Vite local do FazMais (mostram outro
+projeto rodando na mesma porta) — provável desalinhamento de
+máquina/sandbox. Validado via `typecheck` limpo (api + web) e revisão de
+código; usuário optou por seguir sem teste visual e testar depois.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

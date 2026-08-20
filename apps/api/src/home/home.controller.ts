@@ -28,7 +28,7 @@ export class HomeController {
 
   @Post('view/:conteudoId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  registrarView(@Param('conteudoId', ParseUUIDPipe) conteudoId: string) {
-    return this.homeService.registrarView(conteudoId);
+  registrarView(@CurrentUser() user: JwtPayload, @Param('conteudoId', ParseUUIDPipe) conteudoId: string) {
+    return this.homeService.registrarView(conteudoId, user.sub, user.tenantId as string);
   }
 }
