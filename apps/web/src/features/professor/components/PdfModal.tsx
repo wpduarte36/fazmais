@@ -1,6 +1,5 @@
 import type { ConteudoSummary } from '@fazmais/shared';
 import { FavoriteButton } from './FavoriteButton';
-import { StarRating } from './StarRating';
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
@@ -14,18 +13,14 @@ export function PdfModal({ conteudo, onClose }: PdfModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={onClose}>
       <div
-        className="flex h-full max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl border border-white/15 bg-[#0d0d14] p-5 shadow-2xl light:border-black/10 light:bg-white"
+        className="flex h-full max-h-[96vh] w-full max-w-4xl flex-col rounded-2xl border border-white/15 bg-[#0d0d14] p-3 shadow-2xl light:border-black/10 light:bg-white"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-3 flex items-start justify-between gap-4">
-          <div>
-            <span className="mb-1.5 inline-block rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
-              📄 PDF{conteudo.pageCount ? ` · ${conteudo.pageCount} páginas` : ''}
-            </span>
-            <h1 className="text-lg font-bold leading-tight">{conteudo.title}</h1>
-            <StarRating conteudo={conteudo} size={15} className="mt-2" />
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
+        <div className="relative mb-2 flex shrink-0 items-center justify-center">
+          <h1 className="max-w-[75%] truncate text-center text-sm font-semibold text-neutral-300 light:text-neutral-600">
+            {conteudo.title}
+          </h1>
+          <div className="absolute right-0 flex items-center gap-2">
             <FavoriteButton conteudo={conteudo} className={iconButtonClass} />
             <button
               type="button"
