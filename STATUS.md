@@ -224,6 +224,12 @@ Pedido do usuário ("popule todas as fotos do acervo para primeira demonstraçã
 
 **Qualidade**: a maioria ficou muito boa (fotos reais de aranha, joaninha, libélula, fazenda de galinhas, ícones oficiais de acessibilidade da Apple/VoiceOver/Wi-Fi etc.). Algumas são aproximações por falta de imagem exata no Commons — documentado pelo agente: `Fases da Lua`/`Fases da Lua 3D` e `Camadas da Atmosfera`/`Camadas da Atmosfera 3D` compartilham o mesmo diagrama; `Bacterioses`/`Reino Monera` compartilham uma foto de bactérias; `Ciclo Aedes Aegypti` usa foto do mosquito adulto (sem diagrama de ciclo de vida encontrado); `Ciclo da Galinha` usa foto de granja (sem diagrama de ciclo); `Mala Biomas` usa mapa mundial de biomas (sem mapa específico do Brasil); `Teclado` (tutorial) usa foto do acessório físico (mostra a placa Bluetooth, não o teclado em uso). Nenhuma dessas é errada, só não é o ideal — dá pra refinar item a item depois se for pra produção de verdade.
 
+## US-056 — Busca de conteúdos na Home do Professor (2026-08-19)
+
+Campo de busca no header (`HomePage.tsx`), filtra em tempo real, sem round-trip de API — o `home/feed` já traz todo o catálogo visível pro professor de uma vez, então a busca é um filtro client-side sobre `feed.rows.flatMap(...)`. Match por múltiplas palavras (todas precisam aparecer, em qualquer ordem, em título+descrição concatenados) e sem distinção de acento (normalização NFD, mesmo padrão já usado em `conteudos.service.ts`). Enquanto há busca ativa, a Home troca a visão normal (hero + pills + fileiras por Eixo) por uma grade única "Resultados para "X"" com todos os itens de todos os Eixos que combinam — ou "Nenhum resultado para "X"" se não achar nada. Botão × limpa e volta pra visão normal.
+
+**Testado no navegador**: busca cross-Eixo ("borboleta" achou itens de Mão na massa mesmo com o pill "Demonstração" ativo), multi-palavra ("sono adolescentes" só bate no título que tem as duas, em ordem diferente/separadas por outras palavras), estado vazio, botão limpar.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

@@ -18,6 +18,10 @@ const GRADIENTS = [
   'linear-gradient(135deg,#ec4899,#831843)',
 ];
 
+function normalize(text: string): string {
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
 function ConteudoCard({
   conteudo,
   index,
@@ -64,6 +68,7 @@ export function HomePage() {
   const { data: feed, isLoading, error } = useHomeFeed();
   const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
   const [eixoAtivoId, setEixoAtivoId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   function handleLogout() {
     clearSession();
@@ -88,10 +93,21 @@ export function HomePage() {
 
   const heroIsOpenable = feed?.featured ? OPENABLE_TYPES.has(feed.featured.mediaType) : false;
 
+  const isSearching = searchQuery.trim().length > 0;
+  const searchResults = useMemo(() => {
+    const termos = normalize(searchQuery.trim()).split(/\s+/).filter(Boolean);
+    if (termos.length === 0) return [];
+    const todosConteudos = feed?.rows.flatMap((row) => row.conteudos) ?? [];
+    return todosConteudos.filter((conteudo) => {
+      const texto = normalize(`${conteudo.title} ${conteudo.description}`);
+      return termos.every((termo) => texto.includes(termo));
+    });
+  }, [feed, searchQuery]);
+
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
-      <header className="flex items-center justify-between border-b border-white/10 px-7 py-3.5 light:border-black/10">
-        <div className="flex items-center gap-2.5">
+      <header className="flex items-center gap-4 border-b border-white/10 px-7 py-3.5 light:border-black/10">
+        <div className="flex shrink-0 items-center gap-2.5">
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-sm font-black text-neutral-950">
             F
           </span>
@@ -99,7 +115,42 @@ export function HomePage() {
             Faz<span className="text-amber-400">Mais</span>
           </span>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="relative mx-auto w-full max-w-xs">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Buscar conteúdos..."
+            className="w-full rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-8 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Limpar busca"
+              className="absolute right-2.5 top-1/2 flex h-4 w-4 -translate-y-1/2 items-center justify-center rounded-full text-neutral-500 transition hover:text-neutral-100"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3">
           <ThemeToggle />
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-xs font-bold text-white">
@@ -130,53 +181,70 @@ export function HomePage() {
           </p>
         )}
 
-        {eixos.length > 0 && (
-          <div className="mb-7 flex gap-2 overflow-x-auto pb-1">
-            {eixos.map((eixo) => (
-              <button
-                key={eixo.id}
-                type="button"
-                onClick={() => setEixoAtivoId(eixo.id)}
-                className={
-                  eixo.id === eixoAtivoId
-                    ? 'shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
-                    : 'shrink-0 rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
-                }
-              >
-                {eixo.name}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {feed?.featured && (
-          <div
-            role={heroIsOpenable ? 'button' : undefined}
-            tabIndex={heroIsOpenable ? 0 : undefined}
-            onClick={heroIsOpenable ? () => setConteudoAberto(feed.featured) : undefined}
-            className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
-            style={{ background: GRADIENTS[0] }}
-          >
-            <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-            <span className="relative mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
-              {MEDIA_BADGE[feed.featured.mediaType]} · destaque
-            </span>
-            <h1 className="relative max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
-            <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
-          </div>
-        )}
-
-        {rowsDoEixo.map((row) => (
-          <section key={row.colecaoId} className="mb-8">
-            <h2 className="mb-3 text-sm font-bold">{row.colecaoName}</h2>
-            <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
-              {row.conteudos.map((conteudo, index) => (
+        {isSearching ? (
+          <section>
+            <h2 className="mb-4 text-sm font-bold">
+              {searchResults.length > 0
+                ? `Resultados para "${searchQuery.trim()}"`
+                : `Nenhum resultado para "${searchQuery.trim()}"`}
+            </h2>
+            <div className="flex flex-wrap gap-3 py-2">
+              {searchResults.map((conteudo, index) => (
                 <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />
               ))}
             </div>
           </section>
-        ))}
+        ) : (
+          <>
+            {eixos.length > 0 && (
+              <div className="mb-7 flex gap-2 overflow-x-auto pb-1">
+                {eixos.map((eixo) => (
+                  <button
+                    key={eixo.id}
+                    type="button"
+                    onClick={() => setEixoAtivoId(eixo.id)}
+                    className={
+                      eixo.id === eixoAtivoId
+                        ? 'shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+                        : 'shrink-0 rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
+                    }
+                  >
+                    {eixo.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {feed?.featured && (
+              <div
+                role={heroIsOpenable ? 'button' : undefined}
+                tabIndex={heroIsOpenable ? 0 : undefined}
+                onClick={heroIsOpenable ? () => setConteudoAberto(feed.featured) : undefined}
+                className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
+                style={{ background: GRADIENTS[0] }}
+              >
+                <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                <span className="relative mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
+                  {MEDIA_BADGE[feed.featured.mediaType]} · destaque
+                </span>
+                <h1 className="relative max-w-xl text-2xl font-bold text-white">{feed.featured.title}</h1>
+                <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{feed.featured.description}</p>
+              </div>
+            )}
+
+            {rowsDoEixo.map((row) => (
+              <section key={row.colecaoId} className="mb-8">
+                <h2 className="mb-3 text-sm font-bold">{row.colecaoName}</h2>
+                <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
+                  {row.conteudos.map((conteudo, index) => (
+                    <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </>
+        )}
       </main>
 
       {conteudoAberto?.mediaType === 'ARTIGO' && (
