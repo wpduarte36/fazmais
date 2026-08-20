@@ -280,6 +280,50 @@ Dos itens do Épico 3.6 ainda em aberto (US-053, progresso/"Continuar Assistindo
 
 **Testado no navegador**: abri "Climas" → fileira "Mais assistidos" apareceu imediatamente com esse item. Abri "Floresta" em seguida → apareceu como segundo item da fileira. Troquei de pill (Pedagógico → Tecnológico) → a fileira continuou mostrando os dois mesmos itens, confirmando que não é filtrada por Eixo.
 
+## Chat com IA simulado na Home (início do US-060, 2026-08-20)
+
+Planejado com o usuário antes de implementar (plano em
+`C:\Users\wagner.paula\.claude\plans\vectorized-exploring-pixel.md`). Campo
+novo "Consulte a IA" ao lado da busca no header — Enter abre um chat modal
+(mesmo padrão visual dos modais de conteúdo) com uma "IA" **inteiramente
+simulada no frontend**: sem chamada de backend, sem persistência, só
+rankeia o que já está carregado no `feed` usando o mesmo casamento de
+termos da busca local.
+
+- **`apps/web/src/lib/textSearch.ts`** (novo): `normalize()` (antes vivia só
+  dentro de `HomePage.tsx`) + `extrairTermos()` + `matchScore()`. Achado e
+  corrigido no processo: a busca local e o novo mock de IA sofriam do mesmo
+  bug — palavras curtas/stopwords tipo "a", "o", "sobre" batiam como
+  substring em qualquer texto e inflavam relevância de itens sem relação
+  nenhuma (ex: perguntar sobre "a galinha" retornava um artigo sobre
+  adolescentes com 74% de relevância). `extrairTermos()` descarta stopwords
+  (mesma lista já usada em `ConteudosService.aiSuggest` no Master) e
+  palavras com 2 caracteres ou menos.
+- **`apps/web/src/features/professor/components/ConteudoCard.tsx`** (novo):
+  extraído de dentro de `HomePage.tsx` (não era exportado antes) pra poder
+  ser reaproveitado dentro do chat também.
+- **`apps/web/src/features/professor/lib/mockAiChat.ts`** (novo):
+  `buildMockAiResponse(pergunta, feed)` — rankeia por `matchScore` contra
+  título+descrição+tags, converte a proporção de termos batidos numa % fake
+  (60-97%), com fallback pros "Mais assistidos" (sem %) quando nada bate —
+  nunca devolve uma resposta vazia.
+- **`apps/web/src/features/professor/components/AiChatModal.tsx`** (novo):
+  chat multi-turno com "digitando..." simulado (~700ms) antes de cada
+  resposta, auto-scroll, cards de sugestão reaproveitando `ConteudoCard` com
+  uma legenda de % abaixo. Clicar num card sugerido fecha o chat e abre o
+  conteúdo de verdade (via `abrirConteudo`, mesmo handler da Home).
+
+**Fora de escopo por enquanto** (documentado no plano): chamada de IA real,
+persistência de histórico de conversa, % de relevância vinda de um modelo
+de verdade em vez de contagem de termos.
+
+**Testado no navegador**: pergunta com match óbvio ("quero ensinar sobre a
+galinha") → só "Ciclo da Galinha" sugerido, 72% relevante (sem o falso
+positivo do bug de stopword). Pergunta de acompanhamento sem match
+("borboletas" no plural não bate com "Borboleta" no singular — limitação
+esperada de substring, não bug) → fallback pros populares funcionou.
+Clicar num card sugerido → chat fecha, PDF abre normalmente.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.
