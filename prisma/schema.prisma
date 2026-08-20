@@ -181,6 +181,7 @@ model Conteudo {
   downloadUrl     String? @map("download_url") // opcional, sem uso confirmado no produto ainda
   externalUrl     String? @map("external_url") // ARTIGO de fonte externa (ex: notícia sindicada): link pra matéria completa no site de origem
   sourceName      String? @map("source_name") // nome da fonte externa exibido junto do externalUrl (ex: "Canguru News")
+  viewCount       Int     @default(0) @map("view_count") // incrementado toda vez que um professor abre o conteúdo — alimenta a fileira "Mais assistidos"
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 

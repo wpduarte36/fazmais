@@ -10,5 +10,6 @@ export interface HomeRow {
 
 export interface HomeFeed {
   featured: ConteudoSummary | null;
+  populares: ConteudoSummary[];
   rows: HomeRow[];
 }

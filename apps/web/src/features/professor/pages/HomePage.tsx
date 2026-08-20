@@ -4,6 +4,7 @@ import type { ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { useHomeFeed } from '../hooks/useHomeFeed';
+import { useRegistrarView } from '../hooks/useRegistrarView';
 import { ArtigoModal } from '../components/ArtigoModal';
 import { VideoModal } from '../components/VideoModal';
 import { PdfModal } from '../components/PdfModal';
@@ -76,6 +77,12 @@ export function HomePage() {
   const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
   const [eixoAtivoId, setEixoAtivoId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const registrarView = useRegistrarView();
+
+  function abrirConteudo(conteudo: ConteudoSummary) {
+    setConteudoAberto(conteudo);
+    registrarView.mutate(conteudo.id);
+  }
 
   function handleLogout() {
     clearSession();
@@ -197,7 +204,7 @@ export function HomePage() {
             </h2>
             <div className="flex flex-wrap gap-3 py-2">
               {searchResults.map((conteudo, index) => (
-                <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />
+                <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={abrirConteudo} />
               ))}
             </div>
           </section>
@@ -226,7 +233,7 @@ export function HomePage() {
               <div
                 role={heroIsOpenable ? 'button' : undefined}
                 tabIndex={heroIsOpenable ? 0 : undefined}
-                onClick={heroIsOpenable ? () => setConteudoAberto(feed.featured) : undefined}
+                onClick={heroIsOpenable ? () => abrirConteudo(feed.featured!) : undefined}
                 className={`relative mb-8 flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 p-6 light:border-black/10 ${heroIsOpenable ? 'cursor-pointer' : ''}`}
                 style={{ background: GRADIENTS[0] }}
               >
@@ -245,12 +252,23 @@ export function HomePage() {
               </div>
             )}
 
+            {feed && feed.populares.length > 0 && (
+              <section className="mb-8">
+                <h2 className="mb-3 text-sm font-bold">🔥 Mais assistidos</h2>
+                <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
+                  {feed.populares.map((conteudo, index) => (
+                    <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={abrirConteudo} />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {rowsDoEixo.map((row) => (
               <section key={row.colecaoId} className="mb-8">
                 <h2 className="mb-3 text-sm font-bold">{row.colecaoName}</h2>
                 <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
                   {row.conteudos.map((conteudo, index) => (
-                    <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={setConteudoAberto} />
+                    <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={abrirConteudo} />
                   ))}
                 </div>
               </section>

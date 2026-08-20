@@ -270,6 +270,16 @@ Frontend: `StarRating.tsx` (5 estrelas clicáveis, estado local otimista + sincr
 
 **Testado no navegador**: avaliei o hero (AirPlay) com 4 estrelas → recarreguei a página → nota persistiu. Avaliei um card ("Climas") com 3 estrelas direto na grade (sem abrir o conteúdo) → abri o modal do mesmo item → mostrou as mesmas 3 estrelas preenchidas, confirmando que card e modal convergem.
 
+## Fileira "Mais assistidos" na Home (2026-08-19/20)
+
+Dos itens do Épico 3.6 ainda em aberto (US-053, progresso/"Continuar Assistindo"), o usuário preferiu priorizar "os mais assistidos" — uma versão do "Populares" do US-050 que é bem mais simples que progresso por usuário (não exige decidir o que conta como "progresso" pra PDF/Artigo, só contar aberturas).
+
+- **Schema**: `Conteudo.viewCount` (`Int @default(0)`) — migration `20260820012100_add_conteudo_view_count` (GIN index de `tags` reafirmado de novo, mesmo padrão de sempre).
+- **Backend**: `POST /home/view/:conteudoId` (`@Roles('PROFESSOR')`) incrementa `viewCount` a cada abertura (`{ increment: 1 }`, sem checagem de usuário único — é contagem total de aberturas, não "visualizado por N professores distintos"). `HomeService.getFeed` agora também devolve `populares: ConteudoSummary[]` — os até 10 conteúdos com `viewCount > 0`, ordenados por `viewCount` desc, calculados a partir da mesma lista já buscada pro feed (sem query extra). `viewCount` também virou campo novo em `ConteudoSummary` (sempre presente, útil pra debug ainda que não exibido na UI).
+- **Frontend**: `HomePage.tsx` — abrir qualquer conteúdo (`abrirConteudo`, substituindo o `setConteudoAberto` direto) dispara `useRegistrarView` (mutation fire-and-forget + invalida o feed). Fileira "🔥 Mais assistidos" aparece logo depois do hero, **antes** das fileiras por Eixo e **independente do pill ativo** — é um ranking global, não filtrado pela Eixo selecionada (só some da tela quando não há nenhum conteúdo com `viewCount > 0` ainda).
+
+**Testado no navegador**: abri "Climas" → fileira "Mais assistidos" apareceu imediatamente com esse item. Abri "Floresta" em seguida → apareceu como segundo item da fileira. Troquei de pill (Pedagógico → Tecnológico) → a fileira continuou mostrando os dois mesmos itens, confirmando que não é filtrada por Eixo.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

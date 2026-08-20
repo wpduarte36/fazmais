@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -74,6 +74,7 @@ export class HomeService {
       planoIds: conteudo.planos.map((p) => p.planoId),
       isFavorito: favoritoIds.has(conteudo.id),
       myRating: ratingByConteudoId.get(conteudo.id) ?? null,
+      viewCount: conteudo.viewCount,
       createdAt: conteudo.createdAt,
     });
 
@@ -95,9 +96,29 @@ export class HomeService {
 
     const featuredSource = conteudos.find((c) => c.isFeatured) ?? conteudos[0] ?? null;
 
+    const populares = [...conteudos]
+      .filter((c) => c.viewCount > 0)
+      .sort((a, b) => b.viewCount - a.viewCount)
+      .slice(0, 10)
+      .map(toSummary);
+
     return {
       featured: featuredSource ? toSummary(featuredSource) : null,
+      populares,
       rows: Array.from(rowsByColecao.values()),
     };
+  }
+
+  async registrarView(conteudoId: string): Promise<void> {
+    const conteudo = await this.prisma.conteudo.findUnique({
+      where: { id: conteudoId },
+    });
+    if (!conteudo) {
+      throw new NotFoundException('Conteúdo não encontrado');
+    }
+    await this.prisma.conteudo.update({
+      where: { id: conteudoId },
+      data: { viewCount: { increment: 1 } },
+    });
   }
 }

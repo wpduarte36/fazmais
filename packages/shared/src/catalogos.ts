@@ -60,6 +60,7 @@ export interface ConteudoSummary {
   planoIds: string[];
   isFavorito: boolean;
   myRating: number | null;
+  viewCount: number;
   createdAt: string;
 }
 

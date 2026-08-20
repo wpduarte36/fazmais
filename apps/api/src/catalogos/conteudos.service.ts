@@ -176,6 +176,7 @@ export class ConteudosService {
       planoIds: conteudo.planos.map((p) => p.planoId),
       isFavorito: false,
       myRating: null,
+      viewCount: conteudo.viewCount,
       createdAt: conteudo.createdAt,
     };
   }
