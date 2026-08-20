@@ -255,6 +255,8 @@ A pedido do usuário, mais um pedaço do catálogo legado foi migrado — desta 
 
 **Testado no navegador**: novo pill "Pedagógico" aparece na Home, os 6 PDFs abrem no viewer FlipHTML5 normalmente (testado "Floresta", 64 páginas, capa carregando certo).
 
+**Fotos reais aplicadas em seguida** (mesmo dia): os 6 itens tinham entrado com placeholder — trocados por fotos reais do Wikimedia Commons (mesma técnica da migração anterior, URL confirmada via API do Commons antes de usar): Floresta → foto de floresta, Animais de Estimação → cão e gato, Animais da Fazenda → foto de vacas em pasto, Café da Manhã → foto de prato de café da manhã inglês, Brinquedos e Jogos → foto de brinquedos infantis, Climas → ícone de sol com nuvens. Com isso, **todo o conteúdo real do catálogo está com foto de verdade** — só sobra o item de teste/demonstração (não é conteúdo do catálogo).
+
 ## US-055 — Avaliar conteúdos com estrelas (2026-08-19)
 
 Modelo `Rating` já existia no schema desde o Lote A (com o CHECK `score BETWEEN 1 AND 5` já aplicado na migration inicial) — só faltava endpoint e UI, mesma situação do `Favorite` antes do US-054.
