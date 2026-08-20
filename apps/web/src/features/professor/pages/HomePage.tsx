@@ -184,7 +184,29 @@ export function HomePage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-7 py-8">
+      <div className="flex">
+        {eixos.length > 0 && !isSearching && (
+          <aside className="w-52 shrink-0 border-r border-white/10 p-4 light:border-black/10">
+            <nav className="sticky top-4 flex flex-col gap-1">
+              {eixos.map((eixo) => (
+                <button
+                  key={eixo.id}
+                  type="button"
+                  onClick={() => setEixoAtivoId(eixo.id)}
+                  className={
+                    eixo.id === eixoAtivoId
+                      ? 'rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-left text-sm font-semibold text-neutral-950'
+                      : 'rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-neutral-400 transition hover:bg-white/[0.05] hover:text-neutral-100 light:text-neutral-500 light:hover:bg-black/[0.03]'
+                  }
+                >
+                  {eixo.name}
+                </button>
+              ))}
+            </nav>
+          </aside>
+        )}
+
+      <main className="min-w-0 flex-1 px-7 py-8">
         {isLoading && <p className="text-sm text-neutral-400">Carregando...</p>}
         {error && <p className="text-sm text-rose-300">Não foi possível carregar o catálogo.</p>}
 
@@ -209,25 +231,6 @@ export function HomePage() {
           </section>
         ) : (
           <>
-            {eixos.length > 0 && (
-              <div className="mb-7 flex gap-2 overflow-x-auto pb-1">
-                {eixos.map((eixo) => (
-                  <button
-                    key={eixo.id}
-                    type="button"
-                    onClick={() => setEixoAtivoId(eixo.id)}
-                    className={
-                      eixo.id === eixoAtivoId
-                        ? 'shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
-                        : 'shrink-0 rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
-                    }
-                  >
-                    {eixo.name}
-                  </button>
-                ))}
-              </div>
-            )}
-
             {feed?.featured && (
               <div
                 role={heroIsOpenable ? 'button' : undefined}
@@ -238,6 +241,7 @@ export function HomePage() {
               >
                 <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+
                 <FavoriteButton
                   conteudo={feed.featured}
                   className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white transition hover:text-rose-400 aria-pressed:text-rose-400"
@@ -283,6 +287,7 @@ export function HomePage() {
           </>
         )}
       </main>
+      </div>
 
       {conteudoAberto?.mediaType === 'ARTIGO' && (
         <ArtigoModal conteudo={conteudoAberto} onClose={() => setConteudoAberto(null)} />
