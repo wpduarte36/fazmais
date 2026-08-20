@@ -58,6 +58,7 @@ export interface ConteudoSummary {
   externalUrl: string | null;
   sourceName: string | null;
   planoIds: string[];
+  isFavorito: boolean;
   createdAt: string;
 }
 

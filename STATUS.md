@@ -230,6 +230,21 @@ Campo de busca no header (`HomePage.tsx`), filtra em tempo real, sem round-trip 
 
 **Testado no navegador**: busca cross-Eixo ("borboleta" achou itens de Mão na massa mesmo com o pill "Demonstração" ativo), multi-palavra ("sono adolescentes" só bate no título que tem as duas, em ordem diferente/separadas por outras palavras), estado vazio, botão limpar.
 
+## US-054 — Favoritar conteúdos (2026-08-19)
+
+Modelo `Favorite` já existia no schema desde o Lote A (não usado ainda) — só faltava o endpoint e a UI.
+
+Backend (`apps/api/src/favorites/`, novo módulo, `@Roles('PROFESSOR')`):
+- `POST /favorites/:conteudoId` — favorita (idempotente via `upsert`, mesmo padrão do `tenant-catalogos`).
+- `DELETE /favorites/:conteudoId` — desfavorita (idempotente via `deleteMany`).
+- `HomeService.getFeed` agora busca os favoritos do usuário logado e preenche `isFavorito` em cada `ConteudoSummary` do feed. `CatalogosService.getTree`/`ConteudosService` (visão do Master, sem usuário "consumindo") sempre devolvem `isFavorito: false` — campo novo em `ConteudoSummary` (`packages/shared`), não opcional, pra não precisar de checagem de undefined no frontend.
+
+Frontend (`apps/web/src/features/professor/`):
+- `FavoriteButton.tsx` — componente reutilizado no card (`ConteudoCard`), no hero, e no header dos 3 modais (Artigo/Vídeo/PDF). Estado local otimista (marca/desmarca instantaneamente no clique, sem esperar a resposta da API) + sincroniza com o valor de `isFavorito` vindo do feed quando ele muda — assim card e modal do mesmo conteúdo convergem mesmo sendo instâncias separadas do componente.
+- `useFavorites.ts` — mutations (`useMutation` + `invalidateQueries(['home','feed'])` no sucesso), mesmo padrão já usado em `useCatalogoBuilder.ts` no Master, sem introduzir um padrão novo.
+
+**Testado no navegador**: favoritei pelo coração do hero → recarreguei a página → continuou favoritado (persistiu de verdade, não só otimista). Favoritei pelo coração dentro do modal de vídeo → fechei o modal → o card na fileira já mostrava o coração preenchido (confirma que o toggle dentro do modal reflete no card fora dele). Desfiz os dois no final pra não deixar dado de teste.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

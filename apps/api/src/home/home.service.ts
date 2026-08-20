@@ -42,6 +42,12 @@ export class HomeService {
       orderBy: { createdAt: 'desc' },
     });
 
+    const favoritos = await this.prisma.favorite.findMany({
+      where: { userId },
+      select: { conteudoId: true },
+    });
+    const favoritoIds = new Set(favoritos.map((f) => f.conteudoId));
+
     const toSummary = (conteudo: (typeof conteudos)[number]) => ({
       id: conteudo.id,
       colecaoId: conteudo.colecaoId,
@@ -60,6 +66,7 @@ export class HomeService {
       externalUrl: conteudo.externalUrl,
       sourceName: conteudo.sourceName,
       planoIds: conteudo.planos.map((p) => p.planoId),
+      isFavorito: favoritoIds.has(conteudo.id),
       createdAt: conteudo.createdAt,
     });
 

@@ -7,6 +7,7 @@ import { useHomeFeed } from '../hooks/useHomeFeed';
 import { ArtigoModal } from '../components/ArtigoModal';
 import { VideoModal } from '../components/VideoModal';
 import { PdfModal } from '../components/PdfModal';
+import { FavoriteButton } from '../components/FavoriteButton';
 
 const MEDIA_BADGE: Record<string, string> = { VIDEO: '▶ Vídeo', PDF: '📄 PDF', ARTIGO: '📰 Artigo' };
 const OPENABLE_TYPES = new Set(['ARTIGO', 'VIDEO', 'PDF']);
@@ -50,6 +51,10 @@ function ConteudoCard({
             {OPEN_HINT[conteudo.mediaType]}
           </span>
         )}
+        <FavoriteButton
+          conteudo={conteudo}
+          className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white transition hover:text-rose-400 aria-pressed:text-rose-400"
+        />
       </div>
       <div className="p-2.5">
         <p className="line-clamp-2 text-xs font-semibold">{conteudo.title}</p>
@@ -225,6 +230,10 @@ export function HomePage() {
               >
                 <img src={feed.featured.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                <FavoriteButton
+                  conteudo={feed.featured}
+                  className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white transition hover:text-rose-400 aria-pressed:text-rose-400"
+                />
                 <span className="relative mb-2 w-fit rounded-full bg-black/40 px-2.5 py-0.5 text-[11px] font-bold text-white">
                   {MEDIA_BADGE[feed.featured.mediaType]} · destaque
                 </span>

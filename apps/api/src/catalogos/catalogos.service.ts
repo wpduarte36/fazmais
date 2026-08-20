@@ -127,6 +127,7 @@ export class CatalogosService {
             externalUrl: conteudo.externalUrl,
             sourceName: conteudo.sourceName,
             planoIds: conteudo.planos.map((p) => p.planoId),
+            isFavorito: false,
             createdAt: conteudo.createdAt,
           })),
         })),
