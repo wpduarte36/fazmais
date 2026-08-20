@@ -245,6 +245,16 @@ Frontend (`apps/web/src/features/professor/`):
 
 **Testado no navegador**: favoritei pelo coração do hero → recarreguei a página → continuou favoritado (persistiu de verdade, não só otimista). Favoritei pelo coração dentro do modal de vídeo → fechei o modal → o card na fileira já mostrava o coração preenchido (confirma que o toggle dentro do modal reflete no card fora dele). Desfiz os dois no final pra não deixar dado de teste.
 
+## Migração do legado — novo Eixo "Pedagógico" > Coleção "Inglês" (2026-08-19)
+
+A pedido do usuário, mais um pedaço do catálogo legado foi migrado — desta vez o módulo de Inglês, escolhido justamente por ser pequeno (ao contrário da tentativa anterior de migrar tudo de uma vez, que foi abandonada por custar caro demais).
+
+**Achado novo sobre a estrutura do admin legado**: o que documentamos antes como "Módulo → Categoria → Funcionalidade" (em `Config. Menu`) é só o **cadastro do menu de navegação** do admin — não tem nenhum campo de conteúdo (vídeo/PDF/link), é puramente `Nome da tela`/`Rota de acesso`/`Módulo`/`Categoria`. O conteúdo de verdade (o "Arquivo" que documentamos antes) mora numa tela **separada e não óbvia**: `Administração Faz Mais > Faz Mais > Cadastrar Arquivos` (rota `/fazMaisArquivos`) — só achamos usando a busca do próprio admin (`Mapa de navegação`) pela palavra "arquivo". Cada registro de Arquivo referencia uma Funcionalidade via dropdown (usada como tag), mas o **título do Arquivo não precisa bater com o nome da Funcionalidade** — descobrimos isso porque metade dos 6 itens de Inglês (Floresta, Café da Manhã, Brinquedos e Jogos) não apareciam na lista de Funcionalidades filtrada por Categoria=Inglês, mas existiam como Arquivo com uma Funcionalidade de mesmo nome (aparentemente criada especificamente pra aquele Arquivo, sem estar exposta como pill de menu pro usuário final).
+
+**Mapeamento**: `Eixo` novo "Pedagógico" (nome do Módulo do legado) → `Colecao` "Inglês" (nome da Categoria) → 6 `Conteudo` PDF (flashcards de vocabulário em inglês: Floresta, Animais de Estimação, Animais da Fazenda, Café da Manhã, Brinquedos e Jogos, Climas), cada um com a Funcionalidade associada como tag. Mesmo padrão de sempre: `mediaUrl` = link do FlipHTML5 (estável, sem assinatura), `imageUrl` = placeholder genérico (capa real é S3 assinado, mesmo bloqueio de sempre), `pageCount` migrado direto.
+
+**Testado no navegador**: novo pill "Pedagógico" aparece na Home, os 6 PDFs abrem no viewer FlipHTML5 normalmente (testado "Floresta", 64 páginas, capa carregando certo).
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.
