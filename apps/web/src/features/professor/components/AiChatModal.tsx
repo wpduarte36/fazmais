@@ -98,13 +98,16 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
                 {mensagem.sugestoes && mensagem.sugestoes.length > 0 && (
                   <div className="-mx-1 mt-3 flex gap-3 overflow-x-auto px-1 pb-1">
                     {mensagem.sugestoes.map((sugestao, sugestaoIndex) => (
-                      <div key={sugestao.conteudo.id} className="flex flex-col items-center gap-1.5">
+                      <div key={sugestao.conteudo.id} className="flex w-44 shrink-0 flex-col items-center gap-1.5">
                         <ConteudoCard conteudo={sugestao.conteudo} index={sugestaoIndex} onOpen={handleAbrirSugestao} />
                         {sugestao.relevancia > 0 && (
                           <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
                             {sugestao.relevancia}% relevante
                           </span>
                         )}
+                        <p className="text-center text-[10.5px] leading-snug text-neutral-400 light:text-neutral-500">
+                          {sugestao.comentario}
+                        </p>
                       </div>
                     ))}
                   </div>

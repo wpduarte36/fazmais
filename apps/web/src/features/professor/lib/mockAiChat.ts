@@ -1,9 +1,10 @@
 import type { ConteudoSummary, HomeFeed } from '@fazmais/shared';
-import { extrairTermos, matchScore } from '../../../lib/textSearch';
+import { extrairTermos, matchScore, normalize } from '../../../lib/textSearch';
 
 export interface SugestaoIa {
   conteudo: ConteudoSummary;
   relevancia: number;
+  comentario: string;
 }
 
 export interface RespostaIa {
@@ -24,6 +25,32 @@ const ABERTURAS_SEM_RESULTADO = [
 
 function escolher<T>(opcoes: T[]): T {
   return opcoes[Math.floor(Math.random() * opcoes.length)];
+}
+
+function truncar(texto: string, max: number): string {
+  const limpo = texto.trim();
+  if (limpo.length <= max) return limpo;
+  return `${limpo.slice(0, max).trimEnd()}...`;
+}
+
+// Comentário curto por sugestão: quando algum termo da pergunta bate numa
+// tag do conteúdo, puxa isso pra frente (parece que a IA "notou" o motivo);
+// senão cai só no resumo da descrição. Em conteúdo migrado do legado, a
+// descrição costuma repetir o nome do arquivo (que também vira tag) — nesse
+// caso o prefixo "Fala sobre X" ficaria redundante, então só usa o resumo.
+function construirComentario(conteudo: ConteudoSummary, termos: string[]): string {
+  const resumo = truncar(conteudo.description, 90);
+  const resumoNormalizado = normalize(resumo);
+  const tagsBatidas = conteudo.tags.filter((tag) => {
+    const tagNormalizada = normalize(tag);
+    const bateTermo = termos.some((termo) => tagNormalizada.includes(termo));
+    const redundante = resumoNormalizado.includes(tagNormalizada) || tagNormalizada.includes(resumoNormalizado);
+    return bateTermo && !redundante;
+  });
+  if (tagsBatidas.length > 0) {
+    return `Fala sobre ${tagsBatidas.slice(0, 2).join(' e ')}: ${resumo}`;
+  }
+  return resumo;
 }
 
 // IA simulada: sem chamada de backend nem modelo de verdade — só rankeia o
@@ -50,10 +77,15 @@ export function buildMockAiResponse(pergunta: string, feed: HomeFeed): RespostaI
     const sugestoes: SugestaoIa[] = top.map(({ conteudo, score }) => ({
       conteudo,
       relevancia: Math.round(60 + (score / termos.length) * 35),
+      comentario: construirComentario(conteudo, termos),
     }));
     return { texto: escolher(ABERTURAS_COM_RESULTADO), sugestoes };
   }
 
-  const populares = feed.populares.slice(0, 3).map((conteudo) => ({ conteudo, relevancia: 0 }));
+  const populares = feed.populares.slice(0, 3).map((conteudo) => ({
+    conteudo,
+    relevancia: 0,
+    comentario: truncar(conteudo.description, 90),
+  }));
   return { texto: escolher(ABERTURAS_SEM_RESULTADO)(pergunta.trim()), sugestoes: populares };
 }
