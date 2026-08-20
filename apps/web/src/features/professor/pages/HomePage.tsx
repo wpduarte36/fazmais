@@ -255,9 +255,17 @@ export function HomePage() {
             {feed && feed.populares.length > 0 && (
               <section className="mb-8">
                 <h2 className="mb-3 text-sm font-bold">🔥 Mais assistidos</h2>
-                <div className="-mx-2 flex gap-3 overflow-x-auto px-2 py-4">
-                  {feed.populares.map((conteudo, index) => (
-                    <ConteudoCard key={conteudo.id} conteudo={conteudo} index={index} onOpen={abrirConteudo} />
+                <div className="-mx-2 flex gap-1 overflow-x-auto px-2 py-4">
+                  {feed.populares.slice(0, 10).map((conteudo, index) => (
+                    <div key={conteudo.id} className="flex shrink-0 items-stretch">
+                      <span
+                        className="-mr-5 flex select-none items-center justify-center text-[110px] font-black leading-none text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.35)] light:[-webkit-text-stroke:2px_rgba(0,0,0,0.25)]"
+                        aria-hidden="true"
+                      >
+                        {index + 1}
+                      </span>
+                      <ConteudoCard conteudo={conteudo} index={index} onOpen={abrirConteudo} />
+                    </div>
                   ))}
                 </div>
               </section>
