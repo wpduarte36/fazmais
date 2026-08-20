@@ -367,6 +367,53 @@ projeto rodando na mesma porta) — provável desalinhamento de
 máquina/sandbox. Validado via `typecheck` limpo (api + web) e revisão de
 código; usuário optou por seguir sem teste visual e testar depois.
 
+### Bugs achados e corrigidos ao testar de verdade (2026-08-20, mesmo dia)
+
+Numa sessão seguinte, o browser certo foi pareado (via "trocar de
+navegador" na extensão) e o teste manual do vídeo revelou **três bugs reais**
+em `VideoModal.tsx`, todos corrigidos:
+
+1. **`player.destroy()` não remove o próprio wrapper**: o SDK do Vimeo
+   remove o iframe interno mas deixa o `<div style="padding:...;position:
+   relative">` que ele mesmo injeta. Abrir/fechar o modal de vídeo repetidas
+   vezes empilhava esses divs vazios, cada um do tamanho do vídeo, empurrando
+   o player de verdade pra fora da área visível do modal (parecia "vídeo
+   sumiu"). Fix: limpar `containerRef.current.innerHTML` explicitamente no
+   cleanup, sem depender do que `destroy()` faz por conta própria.
+2. **Evento `timeupdate` do player não é confiável**: mesmo com o vídeo
+   tocando visivelmente (trocando de cena), o listener `player.on('timeupdate',
+   ...)` nunca disparava — o timer interno do iframe parece ficar sujeito a
+   throttling independente da reprodução em si. Confirmado isolando o
+   problema: chamadas diretas a `player.getCurrentTime()`/`getDuration()`
+   (sob demanda, via postMessage request/response) funcionam perfeitamente e
+   refletem o tempo real. Fix: trocar de "escutar o evento" pra "perguntar
+   sob demanda" — o próprio `setInterval` de salvar progresso agora chama
+   `getCurrentTime()`/`getDuration()` diretamente a cada 10s, sem depender de
+   nenhum evento empurrado pelo iframe.
+3. **Race condition no cleanup causando remount em loop**: `parseVimeoUrl()`
+   cria um objeto novo a cada chamada, e o efeito que monta o player usa esse
+   valor (`vimeoRef`) como dependência — sem memoizar, *qualquer* re-render
+   do `VideoModal` recriava o player do zero. Como `useProgress()` (novo,
+   desta US) chama `useMutation()`, cada `salvarProgresso()` bem-sucedido
+   fazia o próprio `VideoModal` re-renderizar, disparando esse ciclo a cada
+   ~10s — o player era destruído e reconstruído em loop, o que (combinado
+   com o cleanup ter ficado assíncrono numa tentativa de correção do bug 1)
+   podia deixar o container vazio (um Player mais novo sendo apagado pelo
+   cleanup atrasado de um mount mais antigo). Fix duplo: `vimeoRef` agora é
+   `useMemo`'d por `conteudo.mediaUrl`, e o cleanup do player voltou a ser
+   100% síncrono (o progresso final ao fechar usa a última leitura já
+   cacheada em vez de esperar um novo round-trip assíncrono).
+
+Depois desses três fixes, o mecanismo de leitura de progresso foi validado
+diretamente (`getCurrentTime()` avançando de verdade, ex: 16.37s → 18.38s em
+~2s reais de espera) e o fluxo de PDF/Artigo (progresso 100% ao abrir) foi
+confirmado batendo no banco. A confirmação final de ponta a ponta (vídeo
+tocando + linha "Continuar assistindo" aparecendo) ficou bloqueada por um
+problema de rede/CDN do próprio Vimeo nesta sessão de testes (o vídeo de
+demonstração começou a travar em buffering, provavelmente por causa do
+volume de recarregamentos do player durante a depuração) — não chegou a ser
+confirmado visualmente, mas a lógica foi validada por partes.
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

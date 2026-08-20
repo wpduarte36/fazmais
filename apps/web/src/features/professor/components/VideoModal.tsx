@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Player from '@vimeo/player';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { parseVimeoUrl, toPlayerUrl } from '../lib/vimeo';
@@ -19,7 +19,12 @@ interface VideoModalProps {
 export function VideoModal({ conteudo, onClose }: VideoModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const vimeoRef = conteudo.mediaUrl ? parseVimeoUrl(conteudo.mediaUrl) : null;
+  // Memoizado por mediaUrl: parseVimeoUrl cria um objeto novo a cada
+  // chamada, e o efeito abaixo (que monta/destrói o player de verdade) usa
+  // essa referência como dependência — sem memoizar, qualquer re-render do
+  // VideoModal (inclusive o causado pelo próprio useProgress ao salvar
+  // progresso) recriaria o player do zero a cada poucos segundos.
+  const vimeoRef = useMemo(() => (conteudo.mediaUrl ? parseVimeoUrl(conteudo.mediaUrl) : null), [conteudo.mediaUrl]);
   const { salvarProgresso } = useProgress();
 
   useEffect(() => {
@@ -30,26 +35,39 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
       responsive: true,
     });
 
-    // Progresso real de vídeo: acompanha timeupdate do player e salva
-    // periodicamente (sem invalidar o feed a cada tick — só na saída/final,
-    // pra não recarregar a Home enquanto o professor ainda está assistindo).
-    const ultimoProgresso = { percent: 0, seconds: 0 };
+    // Progresso real de vídeo: o evento "timeupdate" do player não é
+    // confiável (o timer interno do iframe pode ficar throttled e nunca
+    // disparar, mesmo com o vídeo tocando normalmente) — em vez disso, lemos
+    // o tempo atual sob demanda via getCurrentTime()/getDuration(). O
+    // resultado fica cacheado em `ultimaLeitura` pra que o cleanup (no
+    // unmount) possa salvar de forma síncrona, sem esperar um novo
+    // round-trip — um cleanup assíncrono correria o risco de, ao terminar
+    // mais tarde, limpar o container depois que um novo Player (do próximo
+    // mount) já tiver sido criado nele.
     let terminou = false;
+    const ultimaLeitura = { seconds: 0, percent: 0 };
 
-    player.on('timeupdate', (data: { percent: number; seconds: number }) => {
-      ultimoProgresso.percent = data.percent * 100;
-      ultimoProgresso.seconds = data.seconds;
-    });
+    async function atualizarLeitura() {
+      if (terminou) return;
+      const seconds = await player.getCurrentTime().catch(() => null);
+      if (seconds === null || seconds <= 0) return;
+      const duration = await player.getDuration().catch(() => 0);
+      ultimaLeitura.seconds = seconds;
+      ultimaLeitura.percent = duration > 0 ? (seconds / duration) * 100 : 0;
+    }
 
-    player.on('ended', () => {
-      terminou = true;
-      salvarProgresso(conteudo.id, 100, ultimoProgresso.seconds, true);
-    });
+    function salvarLeituraAtual(invalidarFeed: boolean) {
+      if (terminou || ultimaLeitura.seconds <= 0) return;
+      if (ultimaLeitura.percent >= 99) {
+        terminou = true;
+        salvarProgresso(conteudo.id, 100, ultimaLeitura.seconds, true);
+      } else {
+        salvarProgresso(conteudo.id, ultimaLeitura.percent, ultimaLeitura.seconds, invalidarFeed);
+      }
+    }
 
     const intervalo = setInterval(() => {
-      if (ultimoProgresso.seconds > 0 && !terminou) {
-        salvarProgresso(conteudo.id, ultimoProgresso.percent, ultimoProgresso.seconds, false);
-      }
+      void atualizarLeitura().then(() => salvarLeituraAtual(false));
     }, INTERVALO_SALVAR_PROGRESSO_MS);
 
     player
@@ -65,10 +83,19 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
 
     return () => {
       clearInterval(intervalo);
-      if (!terminou && ultimoProgresso.seconds > 0) {
-        salvarProgresso(conteudo.id, ultimoProgresso.percent, ultimoProgresso.seconds, true);
-      }
+      salvarLeituraAtual(true);
       void player.destroy();
+      // player.destroy() é assíncrono e não remove de forma confiável o
+      // próprio wrapper (<div style="padding:...;position:relative">) que
+      // ele injeta — sem isso, abrir/fechar o modal repetidas vezes empilha
+      // divs vazios cada vez maiores, empurrando o player de verdade pra
+      // fora da tela. Precisa rodar de forma síncrona aqui (não dentro de um
+      // .then/.finally) pra não competir com o Player do próximo mount, que
+      // pode já ter sido criado no mesmo container antes desse destroy()
+      // assíncrono terminar.
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vimeoRef]);
