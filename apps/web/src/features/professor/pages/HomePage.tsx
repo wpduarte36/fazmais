@@ -63,7 +63,6 @@ function ConteudoCard({
         {conteudo.tags.length > 0 && (
           <p className="mt-1.5 truncate text-[10px] text-neutral-500">{conteudo.tags.join(', ')}</p>
         )}
-        <StarRating conteudo={conteudo} size={11} className="mt-1.5" />
       </div>
     </div>
   );
@@ -255,11 +254,11 @@ export function HomePage() {
             {feed && feed.populares.length > 0 && (
               <section className="mb-8">
                 <h2 className="mb-3 text-sm font-bold">🔥 Mais assistidos</h2>
-                <div className="-mx-2 flex gap-1 overflow-x-auto px-2 py-4">
+                <div className="-mx-2 flex gap-1 overflow-x-auto overflow-y-hidden px-2 py-4">
                   {feed.populares.slice(0, 10).map((conteudo, index) => (
                     <div key={conteudo.id} className="flex shrink-0 items-stretch">
                       <span
-                        className="-mr-5 flex select-none items-center justify-center text-[110px] font-black leading-none text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.35)] light:[-webkit-text-stroke:2px_rgba(0,0,0,0.25)]"
+                        className="-mr-6 flex select-none items-center justify-center text-[170px] font-black leading-none text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.35)] light:[-webkit-text-stroke:2px_rgba(0,0,0,0.25)]"
                         aria-hidden="true"
                       >
                         {index + 1}
