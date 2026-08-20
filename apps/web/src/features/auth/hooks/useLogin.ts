@@ -6,7 +6,7 @@ import { useAuthStore } from '../../../store/authStore';
 
 const HOME_ROUTE_BY_ROLE: Record<string, string> = {
   [Role.MASTER]: '/master',
-  [Role.ADMIN]: '/admin/acervo',
+  [Role.ADMIN]: '/admin',
   [Role.PROFESSOR]: '/',
 };
 

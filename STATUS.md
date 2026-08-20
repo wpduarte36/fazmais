@@ -435,6 +435,77 @@ Testado no navegador (login `master`/`fazmais123`) em dark e light: 1
 município, 1 admin, 1 professor, 90 conteúdos — bate com o que já existia
 no seed + migração do legado.
 
+## Painel Admin — aba Usuários (Épico 3.5, US-040 a US-046) (2026-08-20)
+
+Primeira tela real da persona Admin — até aqui `/admin/acervo` e
+`/admin/usuarios` eram dois `PlaceholderPage` soltos. Escopo combinado com o
+usuário: começar pela aba **Usuários** (CRUD de professores/admins do
+próprio município, stats, ativar/desativar, resetar senha, buscar/filtrar),
+deixando a aba **Acervo** como "Em construção" por enquanto (já coberta na
+prática pelo Construtor de Catálogo do Master). US-003 (aprovar/recusar
+solicitação pendente) e a Tela 02 (auto-cadastro) ficam de fora também — o
+backend de `register-pending` que alimentaria isso não existe no código
+ainda.
+
+**Refactor pequeno antes de começar**: extraídos `apps/api/src/common/{unique-constraint,password-token}.util.ts`
+de dentro de `TenantsService` (a lógica de traduzir P2002 do Prisma em 409 e
+de emitir token de 1º acesso) — evita rederivar a pegadinha do driver
+adapter do Prisma 7 (`error.meta.driverAdapterError.cause.constraint.fields`
+em vez de `error.meta.target`) numa segunda cópia. `TenantsService` passou a
+importar dali; comportamento preservado (`typecheck` limpo).
+
+Backend (`apps/api/src/users/`, novo módulo, `@Roles('ADMIN')`, escopado
+pelo `tenantId` do próprio JWT — nunca um `:id` de tenant na URL, ao
+contrário do CRUD de admins do Master):
+- `GET /users` — lista `ADMIN`+`PROFESSOR` do tenant.
+- `GET /users/stats` — total/ativos/pendentes (3 `count()` em paralelo).
+- `POST /users` — cria com `role` (`ADMIN` ou `PROFESSOR`, admin pode criar
+  os dois — texto literal do US-042 original), `status: ATIVO`,
+  `password: null` + token `FIRST_ACCESS` (7 dias, só logado no console,
+  mesmo padrão do `createAdmin`).
+- `PATCH /users/:id` — nome/e-mail/WhatsApp/status num único endpoint
+  (espelha `UpdateAdminDto`). **Trava de auto-bloqueio**: 403 se o próprio
+  admin tentar mudar o `status` da própria conta.
+- `POST /users/:id/reset-password` — emite token `RESET` (24h) e **devolve
+  o token na resposta** (única exceção ao padrão "só loga no console" —
+  como é uma ação pontual disparada pelo admin, sem isso o token não teria
+  como chegar no usuário, já que não existe envio de e-mail no projeto).
+- `DELETE /users/:id` — bloqueia auto-exclusão (403), senão remove.
+
+Tipos novos em `packages/shared/src/users.ts`: `UserSummary`, `UserStats`,
+`CreateUserRequest`, `UpdateUserRequest`, `ResetPasswordResponse`.
+
+Frontend (`apps/web/src/features/admin/`, mesma forma de `features/master/`):
+- `AdminShell.tsx` — cópia de `MasterShell.tsx` (badge "painel admin", label
+  "Admin").
+- `AdminPanelPage.tsx` — abas Acervo (placeholder inline)/Usuários, mesmo
+  padrão de `MasterPanelPage.tsx`. Rota trocou de duas (`/admin/acervo`,
+  `/admin/usuarios`) pra uma só (`/admin`), com abas internas — `useLogin.ts`
+  atualizado.
+- `UserStatsCards.tsx` — versão de 3 cards de `StatsCards.tsx` do Master.
+- `UsuariosTab.tsx` — segue o padrão do `AdminsPopup.tsx` do Master (form de
+  criação inline, edição inline na própria linha, sem modal separado),
+  acrescentando toolbar de busca (client-side, `useMemo`, mesmo padrão da
+  Home do Professor) + pills de filtro por papel, seletor de Papel na
+  criação, e ação de resetar senha. Excluir/ativar-desativar desabilitados
+  na própria linha do usuário logado (reforço de UX da trava do backend).
+- `ResetPasswordModal.tsx` — modal pontual mostrando o token + prazo de
+  expiração + botão copiar (chrome de `NameOnlyModal.tsx`).
+
+**Testado no navegador** (login `admin.demo`/`fazmais123`): cards de stats
+corretos (2/2/0 antes de criar); criei um professor de teste → apareceu na
+tabela, stats foram pra 3/3/0, token de 1º acesso confirmado no banco
+(`password_reset_tokens`, tipo `FIRST_ACCESS`, 7 dias); resetar senha do
+professor de teste → modal mostrou o token com prazo de 24h; tentativa de
+editar a própria conta (Admin Demo) → select de Status corretamente
+desabilitado com aviso; busca por "teste" filtrou certo. **Exclusão via
+clique na UI disparou `window.confirm()` nativo, que trava a automação do
+navegador** (comportamento conhecido/documentado — não é bug desta feature,
+o mesmo padrão já existe em `MunicipiosTab`) — fechei a aba e validei
+auto-exclusão (403) e exclusão de verdade (204) via `curl` direto contra a
+API em vez de clicar no navegador; usuário de teste removido, banco voltou
+ao estado original (`master`/`admin.demo`/`professor.demo`).
+
 ## Backlog adiado
 
 Adiado em 2026-08-07 pra depois da Tela 04. Ficam aqui pra não perder o levantamento já feito.

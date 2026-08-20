@@ -14,6 +14,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { ProgressModule } from './progress/progress.module';
 import { StatsModule } from './stats/stats.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { StatsModule } from './stats/stats.module';
     RatingsModule,
     ProgressModule,
     StatsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

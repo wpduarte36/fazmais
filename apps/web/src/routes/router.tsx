@@ -5,6 +5,7 @@ import { RequireRole } from './RequireRole'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { MasterPanelPage } from '../features/master/pages/MasterPanelPage'
 import { CatalogoBuilderPage } from '../features/master/pages/CatalogoBuilderPage'
+import { AdminPanelPage } from '../features/admin/pages/AdminPanelPage'
 import { HomePage } from '../features/professor/pages/HomePage'
 
 export const router = createBrowserRouter([
@@ -25,8 +26,14 @@ export const router = createBrowserRouter([
       </RequireRole>
     ),
   },
-  { path: '/admin/acervo', element: <PlaceholderPage title="Painel Admin — Acervo" /> },
-  { path: '/admin/usuarios', element: <PlaceholderPage title="Painel Admin — Usuários" /> },
+  {
+    path: '/admin',
+    element: (
+      <RequireRole role={Role.ADMIN}>
+        <AdminPanelPage />
+      </RequireRole>
+    ),
+  },
   { path: '/pesquisa-ia', element: <PlaceholderPage title="Resultado da busca IA" /> },
   {
     path: '/',
