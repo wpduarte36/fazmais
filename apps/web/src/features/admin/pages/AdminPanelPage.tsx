@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { AdminShell } from '../components/AdminShell';
 import { UserStatsCards } from '../components/UserStatsCards';
 import { UsuariosTab } from '../components/UsuariosTab';
+import { AcervoTab } from '../components/AcervoTab';
 
 type AdminTab = 'acervo' | 'usuarios';
 
@@ -45,14 +46,7 @@ export function AdminPanelPage() {
         </button>
       </div>
 
-      {tab === 'acervo' && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.035] px-6 py-14 text-center light:border-black/10 light:bg-white">
-          <p className="text-sm font-semibold text-neutral-300 light:text-neutral-600">Em construção</p>
-          <p className="mt-1 text-sm text-neutral-500">
-            Por enquanto, o acervo do seu município é montado pelo Painel Master.
-          </p>
-        </div>
-      )}
+      {tab === 'acervo' && <AcervoTab />}
 
       {tab === 'usuarios' && (
         <>

@@ -30,4 +30,9 @@ export class CreateUserDto {
 
   @IsIn(CREATABLE_ROLES)
   role: 'ADMIN' | 'PROFESSOR';
+
+  // só faz sentido pra PROFESSOR — ADMIN não consome conteúdo por plano.
+  @IsOptional()
+  @IsString()
+  planoId?: string;
 }

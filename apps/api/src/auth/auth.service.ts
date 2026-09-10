@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { ConfigService } from '@nestjs/config';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import type { User } from '@prisma/client';
 
@@ -56,17 +56,51 @@ export class AuthService {
     const accessToken = this.signAccessToken(user);
     const refreshToken = await this.issueRefreshToken(user.id);
 
+    return { accessToken, refreshToken, user: this.toUserSummary(user) };
+  }
+
+  // Troca um refresh token válido por um novo par de tokens — chamado pelo
+  // frontend quando o access token expira (15min), pra evitar derrubar a
+  // sessão do usuário sem precisar logar de novo a cada refresh de página.
+  // Rotaciona o refresh token a cada troca (revoga o antigo, emite um novo):
+  // se um refresh token revogado for reapresentado, é sinal de que ele
+  // vazou — mitiga replay em caso de roubo do cookie.
+  async refresh(token: string) {
+    let payload: { sub: string };
+    try {
+      payload = await this.jwtService.verifyAsync<{ sub: string }>(token, {
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Sessão expirada, faça login novamente');
+    }
+
+    const tokenHash = this.hashToken(token);
+    const stored = await this.prisma.refreshToken.findUnique({ where: { tokenHash } });
+    if (!stored || stored.revokedAt || stored.expiresAt.getTime() < Date.now() || stored.userId !== payload.sub) {
+      throw new UnauthorizedException('Sessão expirada, faça login novamente');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user || user.status !== 'ATIVO') {
+      throw new UnauthorizedException('Sessão inválida ou expirada');
+    }
+
+    await this.revokeRefreshToken(token);
+    const accessToken = this.signAccessToken(user);
+    const refreshToken = await this.issueRefreshToken(user.id);
+
+    return { accessToken, refreshToken, user: this.toUserSummary(user) };
+  }
+
+  private toUserSummary(user: User) {
     return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        login: user.login,
-        role: user.role,
-        tenantId: user.tenantId,
-        planoId: user.planoId,
-      },
+      id: user.id,
+      name: user.name,
+      login: user.login,
+      role: user.role,
+      tenantId: user.tenantId,
+      planoId: user.planoId,
     };
   }
 
@@ -85,8 +119,12 @@ export class AuthService {
 
   private async issueRefreshToken(userId: string): Promise<string> {
     const refreshExpires = this.configService.get<string>('JWT_REFRESH_EXPIRES', '7d');
+    // `jti` aleatório evita que dois refresh tokens emitidos pro mesmo
+    // usuário no mesmo segundo saiam byte-a-byte idênticos (payload só com
+    // `sub` + `iat` de resolução de 1s) — sem isso, o segundo `create()`
+    // abaixo colide no `UNIQUE(token_hash)` e derruba a troca com 500.
     const token = this.jwtService.sign(
-      { sub: userId },
+      { sub: userId, jti: randomBytes(16).toString('hex') },
       {
         secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
         expiresIn: refreshExpires as JwtSignOptions['expiresIn'],

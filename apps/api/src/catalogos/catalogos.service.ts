@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -6,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCatalogoDto } from './dto/create-catalogo.dto';
 import { UpdateCatalogoDto } from './dto/update-catalogo.dto';
+import { ReorderEixosDto } from './dto/reorder-eixos.dto';
 
 @Injectable()
 export class CatalogosService {
@@ -79,14 +81,13 @@ export class CatalogosService {
       where: { id, tenantId: null },
       include: {
         eixos: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: [{ ordem: 'asc' }, { createdAt: 'asc' }],
           include: {
             colecoes: {
-              orderBy: { createdAt: 'asc' },
+              orderBy: [{ ordem: 'asc' }, { createdAt: 'asc' }],
               include: {
                 conteudos: {
-                  orderBy: { createdAt: 'asc' },
-                  include: { planos: { select: { planoId: true } } },
+                  orderBy: [{ ordem: 'asc' }, { createdAt: 'asc' }],
                 },
               },
             },
@@ -118,6 +119,7 @@ export class CatalogosService {
             mediaUrl: conteudo.mediaUrl,
             htmlContent: conteudo.htmlContent,
             imageUrl: conteudo.imageUrl,
+            bannerImageUrl: conteudo.bannerImageUrl,
             isFeatured: conteudo.isFeatured,
             tags: conteudo.tags,
             aiSummary: conteudo.aiSummary,
@@ -126,7 +128,7 @@ export class CatalogosService {
             downloadUrl: conteudo.downloadUrl,
             externalUrl: conteudo.externalUrl,
             sourceName: conteudo.sourceName,
-            planoIds: conteudo.planos.map((p) => p.planoId),
+            planoMinimoId: conteudo.planoMinimoId,
             isFavorito: false,
             myRating: null,
             viewCount: conteudo.viewCount,
@@ -135,6 +137,35 @@ export class CatalogosService {
         })),
       })),
     };
+  }
+
+  // Mesmo racional de EixosService.reorderColecoes: recebe a lista de ids de
+  // eixo na ordem final desejada (Home não é um Eixo real, então nunca entra
+  // nessa lista — o frontend sempre a mantém fixa antes de tudo) e confere
+  // que todo id pertence mesmo a esse catálogo antes de gravar.
+  async reorderEixos(catalogoId: string, dto: ReorderEixosDto) {
+    await this.findOrThrow(catalogoId);
+    const eixos = await this.prisma.eixo.findMany({
+      where: { catalogoId },
+      select: { id: true },
+    });
+    const idsValidos = new Set(eixos.map((e) => e.id));
+    const idsRecebidos = new Set(dto.eixoIds);
+    if (
+      dto.eixoIds.length !== idsValidos.size ||
+      dto.eixoIds.some((id) => !idsValidos.has(id)) ||
+      idsValidos.size !== idsRecebidos.size
+    ) {
+      throw new BadRequestException(
+        'A lista precisa conter exatamente os eixos desse catálogo, sem repetir nem faltar nenhum.',
+      );
+    }
+
+    await this.prisma.$transaction(
+      dto.eixoIds.map((id, index) =>
+        this.prisma.eixo.update({ where: { id }, data: { ordem: index } }),
+      ),
+    );
   }
 
   async findOrThrow(id: string) {

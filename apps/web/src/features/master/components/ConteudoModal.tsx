@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ConteudoSummary, CreateConteudoRequest, MediaType, UpdateConteudoRequest } from '@fazmais/shared';
 import { usePlanos } from '../hooks/usePlanos';
-import { useAiSuggest } from '../hooks/useCatalogoBuilder';
+import { useAiSuggest, useUploadImage, useUploadPdf } from '../hooks/useCatalogoBuilder';
 
 interface ConteudoModalProps {
   mode: 'create' | 'edit';
@@ -23,6 +23,11 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
   const isEdit = mode === 'edit';
   const { data: planos } = usePlanos();
   const aiSuggest = useAiSuggest();
+  const uploadImage = useUploadImage();
+  const uploadPdf = useUploadPdf();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerFileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState(conteudo?.title ?? '');
   const [description, setDescription] = useState(conteudo?.description ?? '');
@@ -30,16 +35,13 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
   const [mediaUrl, setMediaUrl] = useState(conteudo?.mediaUrl ?? '');
   const [htmlContent, setHtmlContent] = useState(conteudo?.htmlContent ?? '');
   const [imageUrl, setImageUrl] = useState(conteudo?.imageUrl ?? '');
+  const [bannerImageUrl, setBannerImageUrl] = useState(conteudo?.bannerImageUrl ?? '');
   const [isFeatured, setIsFeatured] = useState(conteudo?.isFeatured ?? false);
-  const [planoIds, setPlanoIds] = useState<string[]>(conteudo?.planoIds ?? []);
+  const [planoMinimoId, setPlanoMinimoId] = useState<string | null>(conteudo?.planoMinimoId ?? null);
   const [tags, setTags] = useState<string[]>(conteudo?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
   const [aiSummary, setAiSummary] = useState(conteudo?.aiSummary ?? '');
   const [formError, setFormError] = useState<string | null>(null);
-
-  function togglePlano(id: string) {
-    setPlanoIds((current) => (current.includes(id) ? current.filter((p) => p !== id) : [...current, id]));
-  }
 
   function addTag() {
     const value = tagInput.trim();
@@ -51,6 +53,39 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
 
   function removeTag(tag: string) {
     setTags((current) => current.filter((t) => t !== tag));
+  }
+
+  function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // permite selecionar o mesmo arquivo de novo depois
+    if (!file) return;
+    setFormError(null);
+    uploadImage.mutate(file, {
+      onSuccess: (result) => setImageUrl(result.url),
+      onError: (error) => setFormError(error instanceof Error ? error.message : 'Não foi possível enviar a imagem'),
+    });
+  }
+
+  function handleBannerFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setFormError(null);
+    uploadImage.mutate(file, {
+      onSuccess: (result) => setBannerImageUrl(result.url),
+      onError: (error) => setFormError(error instanceof Error ? error.message : 'Não foi possível enviar a imagem'),
+    });
+  }
+
+  function handlePdfSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setFormError(null);
+    uploadPdf.mutate(file, {
+      onSuccess: (result) => setMediaUrl(result.url),
+      onError: (error) => setFormError(error instanceof Error ? error.message : 'Não foi possível enviar o PDF'),
+    });
   }
 
   function runAiSuggest() {
@@ -96,9 +131,10 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
       mediaUrl: mediaType === 'ARTIGO' ? undefined : mediaUrl,
       htmlContent: mediaType === 'ARTIGO' ? htmlContent : undefined,
       imageUrl,
+      bannerImageUrl: bannerImageUrl.trim() || undefined,
       isFeatured,
       tags,
-      planoIds,
+      planoMinimoId,
       aiSummary: aiSummary || undefined,
     };
 
@@ -184,8 +220,35 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
               />
             </Field>
+          ) : mediaType === 'PDF' ? (
+            <Field label="Arquivo PDF">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => pdfInputRef.current?.click()}
+                    disabled={uploadPdf.isPending}
+                    className="rounded-lg border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm font-semibold text-neutral-100 transition hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60 light:border-black/15 light:bg-black/[0.02] light:text-neutral-900"
+                  >
+                    {uploadPdf.isPending ? 'Enviando...' : 'Selecionar PDF'}
+                  </button>
+                  <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={handlePdfSelected} className="hidden" />
+                  {mediaUrl && (
+                    <span className="truncate text-xs text-neutral-400 light:text-neutral-500" title={mediaUrl}>
+                      📄 {mediaUrl.split('/').pop()}
+                    </span>
+                  )}
+                </div>
+                <input
+                  value={mediaUrl}
+                  onChange={(event) => setMediaUrl(event.target.value)}
+                  placeholder="ou cole uma URL: https://..."
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 text-xs text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+                />
+              </div>
+            </Field>
           ) : (
-            <Field label="URL da mídia">
+            <Field label="URL da mídia (Vimeo)">
               <input
                 value={mediaUrl}
                 onChange={(event) => setMediaUrl(event.target.value)}
@@ -195,13 +258,88 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
             </Field>
           )}
 
-          <Field label="Imagem de capa (URL)">
-            <input
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="https://... (upload de arquivo ainda não existe, é só URL colada)"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
-            />
+          <Field label="Imagem de capa">
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5 light:border-black/10 light:bg-black/[0.03]">
+                {imageUrl ? (
+                  <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-neutral-500">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <circle cx="8.5" cy="10" r="1.5" />
+                    <path d="m3 16 5-4 4 3 3-2 6 5" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadImage.isPending}
+                    className="rounded-lg border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm font-semibold text-neutral-100 transition hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60 light:border-black/15 light:bg-black/[0.02] light:text-neutral-900"
+                  >
+                    {uploadImage.isPending ? 'Enviando...' : 'Selecionar foto'}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileSelected}
+                    className="hidden"
+                  />
+                  <span className="text-xs text-neutral-500">JPEG, PNG ou WebP, até 10 MB</span>
+                </div>
+                <input
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  placeholder="ou cole uma URL: https://..."
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 text-xs text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+                />
+              </div>
+            </div>
+          </Field>
+
+          <Field label="Imagem para banner (opcional)">
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5 light:border-black/10 light:bg-black/[0.03]">
+                {bannerImageUrl ? (
+                  <img src={bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-neutral-500">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <circle cx="8.5" cy="10" r="1.5" />
+                    <path d="m3 16 5-4 4 3 3-2 6 5" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => bannerFileInputRef.current?.click()}
+                    disabled={uploadImage.isPending}
+                    className="rounded-lg border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm font-semibold text-neutral-100 transition hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60 light:border-black/15 light:bg-black/[0.02] light:text-neutral-900"
+                  >
+                    {uploadImage.isPending ? 'Enviando...' : 'Selecionar foto'}
+                  </button>
+                  <input
+                    ref={bannerFileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleBannerFileSelected}
+                    className="hidden"
+                  />
+                  <span className="text-xs text-neutral-500">Formato mais largo, usado no hero de destaque</span>
+                </div>
+                <input
+                  value={bannerImageUrl}
+                  onChange={(event) => setBannerImageUrl(event.target.value)}
+                  placeholder="ou cole uma URL: https://... — vazio usa a imagem de capa"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 text-xs text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+                />
+              </div>
+            </div>
           </Field>
 
           <div className="flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 light:border-black/10 light:bg-black/[0.02]">
@@ -222,15 +360,26 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
             </button>
           </div>
 
-          <Field label="Planos habilitados">
+          <Field label="Plano mínimo">
             <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setPlanoMinimoId(null)}
+                className={
+                  planoMinimoId === null
+                    ? 'rounded-full border border-amber-400/50 bg-amber-400/15 px-3.5 py-1.5 text-sm font-semibold text-amber-300 light:text-amber-700'
+                    : 'rounded-full border border-white/15 bg-white/[0.03] px-3.5 py-1.5 text-sm font-semibold text-neutral-400 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
+                }
+              >
+                Sem plano (rascunho)
+              </button>
               {planos?.map((plano) => (
                 <button
                   key={plano.id}
                   type="button"
-                  onClick={() => togglePlano(plano.id)}
+                  onClick={() => setPlanoMinimoId(plano.id)}
                   className={
-                    planoIds.includes(plano.id)
+                    planoMinimoId === plano.id
                       ? 'rounded-full border border-amber-400/50 bg-amber-400/15 px-3.5 py-1.5 text-sm font-semibold text-amber-300 light:text-amber-700'
                       : 'rounded-full border border-white/15 bg-white/[0.03] px-3.5 py-1.5 text-sm font-semibold text-neutral-400 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
                   }
@@ -239,7 +388,10 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
                 </button>
               ))}
             </div>
-            <p className="mt-1 text-xs text-neutral-500">Sem plano marcado, ninguém vê esse conteúdo mesmo com acesso ao catálogo.</p>
+            <p className="mt-1 text-xs text-neutral-500">
+              Visível pra quem tem esse plano ou um superior (ex.: marcar "Prata" também libera pra quem é Ouro). "Sem plano" deixa como
+              rascunho, invisível pra qualquer professor.
+            </p>
           </Field>
 
           <div className="rounded-xl border border-violet-400/30 bg-violet-400/10 p-4 light:border-violet-600/25 light:bg-violet-600/5">

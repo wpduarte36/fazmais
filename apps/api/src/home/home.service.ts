@@ -1,42 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  assertConteudoVisivel,
+  conteudoVisivelWhere,
+} from '../common/conteudo-visibility.util';
 
 @Injectable()
 export class HomeService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getFeed(userId: string, tenantId: string) {
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: { planoId: true },
-    });
-
-    const access = await this.prisma.tenantCatalogoAccess.findMany({
-      where: { tenantId },
-      select: { catalogoId: true },
-    });
-    const catalogosAtivados = access.map((a) => a.catalogoId);
-
+    // Filtro do que esse professor pode enxergar (tenant + catálogos
+    // ativados + nível de plano, rascunho de fora) — mesma regra que
+    // assertConteudoVisivel aplica nas rotas de escrita.
     const conteudos = await this.prisma.conteudo.findMany({
-      where: {
-        OR: [
-          { tenantId },
-          {
-            tenantId: null,
-            colecao: { eixo: { catalogoId: { in: catalogosAtivados } } },
-          },
-        ],
-        ...(user.planoId
-          ? {
-              OR: [
-                { planos: { none: {} } },
-                { planos: { some: { planoId: user.planoId } } },
-              ],
-            }
-          : {}),
-      },
+      where: await conteudoVisivelWhere(this.prisma, userId, tenantId),
       include: {
-        planos: { select: { planoId: true } },
         colecao: { include: { eixo: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -52,13 +31,22 @@ export class HomeService {
       where: { userId },
       select: { conteudoId: true, score: true },
     });
-    const ratingByConteudoId = new Map(ratings.map((r) => [r.conteudoId, r.score]));
+    const ratingByConteudoId = new Map(
+      ratings.map((r) => [r.conteudoId, r.score]),
+    );
 
     const progressos = await this.prisma.progress.findMany({
       where: { userId },
-      select: { conteudoId: true, progressPercent: true, lastPosition: true, updatedAt: true },
+      select: {
+        conteudoId: true,
+        progressPercent: true,
+        lastPosition: true,
+        updatedAt: true,
+      },
     });
-    const progressByConteudoId = new Map(progressos.map((p) => [p.conteudoId, p]));
+    const progressByConteudoId = new Map(
+      progressos.map((p) => [p.conteudoId, p]),
+    );
 
     const toSummary = (conteudo: (typeof conteudos)[number]) => ({
       id: conteudo.id,
@@ -69,6 +57,7 @@ export class HomeService {
       mediaUrl: conteudo.mediaUrl,
       htmlContent: conteudo.htmlContent,
       imageUrl: conteudo.imageUrl,
+      bannerImageUrl: conteudo.bannerImageUrl,
       isFeatured: conteudo.isFeatured,
       tags: conteudo.tags,
       aiSummary: conteudo.aiSummary,
@@ -77,32 +66,56 @@ export class HomeService {
       downloadUrl: conteudo.downloadUrl,
       externalUrl: conteudo.externalUrl,
       sourceName: conteudo.sourceName,
-      planoIds: conteudo.planos.map((p) => p.planoId),
+      planoMinimoId: conteudo.planoMinimoId,
       isFavorito: favoritoIds.has(conteudo.id),
       myRating: ratingByConteudoId.get(conteudo.id) ?? null,
       viewCount: conteudo.viewCount,
-      progressPercent: progressByConteudoId.get(conteudo.id)?.progressPercent ?? 0,
+      progressPercent:
+        progressByConteudoId.get(conteudo.id)?.progressPercent ?? 0,
       lastPosition: progressByConteudoId.get(conteudo.id)?.lastPosition ?? 0,
       createdAt: conteudo.createdAt,
     });
 
     const rowsByColecao = new Map<
       string,
-      { eixoId: string; eixoName: string; colecaoId: string; colecaoName: string; conteudos: ReturnType<typeof toSummary>[] }
+      {
+        eixoId: string;
+        eixoName: string;
+        eixoOrdem: number;
+        colecaoId: string;
+        colecaoName: string;
+        colecaoOrdem: number;
+        conteudos: ReturnType<typeof toSummary>[];
+      }
     >();
     for (const conteudo of conteudos) {
       const row = rowsByColecao.get(conteudo.colecaoId) ?? {
         eixoId: conteudo.colecao.eixo.id,
         eixoName: conteudo.colecao.eixo.name,
+        eixoOrdem: conteudo.colecao.eixo.ordem,
         colecaoId: conteudo.colecaoId,
         colecaoName: conteudo.colecao.name,
+        colecaoOrdem: conteudo.colecao.ordem,
         conteudos: [],
       };
       row.conteudos.push(toSummary(conteudo));
       rowsByColecao.set(conteudo.colecaoId, row);
     }
+    const ordemByConteudoId = new Map(conteudos.map((c) => [c.id, c.ordem]));
+    for (const row of rowsByColecao.values()) {
+      row.conteudos.sort(
+        (a, b) =>
+          (ordemByConteudoId.get(a.id) ?? 0) -
+          (ordemByConteudoId.get(b.id) ?? 0),
+      );
+    }
+    const rows = Array.from(rowsByColecao.values()).sort(
+      (a, b) => a.eixoOrdem - b.eixoOrdem || a.colecaoOrdem - b.colecaoOrdem,
+    );
 
-    const featuredSource = conteudos.find((c) => c.isFeatured) ?? conteudos[0] ?? null;
+    const featuredMarcados = conteudos.filter((c) => c.isFeatured);
+    const featuredSource =
+      featuredMarcados.length > 0 ? featuredMarcados : conteudos.slice(0, 1);
 
     const populares = [...conteudos]
       .filter((c) => c.viewCount > 0)
@@ -110,10 +123,22 @@ export class HomeService {
       .slice(0, 10)
       .map(toSummary);
 
+    // `conteudos` já vem ordenado por createdAt desc (orderBy da query
+    // principal), então os primeiros já são os mais recentes. APP fica de
+    // fora — é só um atalho pra loja, sem "conteúdo" pra destacar aqui.
+    const recentes = conteudos
+      .filter((c) => c.mediaType !== 'APP')
+      .slice(0, 10)
+      .map(toSummary);
+
     const continuarAssistindo = [...conteudos]
       .filter((c) => {
         const progresso = progressByConteudoId.get(c.id);
-        return progresso && progresso.progressPercent > 0 && progresso.progressPercent < 100;
+        return (
+          progresso &&
+          progresso.progressPercent > 0 &&
+          progresso.progressPercent < 100
+        );
       })
       .sort((a, b) => {
         const atualizadoA = progressByConteudoId.get(a.id)!.updatedAt.getTime();
@@ -123,11 +148,60 @@ export class HomeService {
       .slice(0, 10)
       .map(toSummary);
 
+    // Sem motor de recomendação de verdade: usa como sinal de interesse os
+    // Eixos onde o professor já se engajou (favoritou, avaliou bem, ou tem
+    // progresso), recomendando o resto desses Eixos que ele ainda não tocou.
+    // Sem nenhum sinal (cold start), cai pra conteúdo novo ainda não visto.
+    const eixoIdsDeInteresse = new Set<string>();
+    for (const c of conteudos) {
+      const favoritado = favoritoIds.has(c.id);
+      const bemAvaliado = (ratingByConteudoId.get(c.id) ?? 0) >= 4;
+      const progresso = progressByConteudoId.get(c.id);
+      const engajado =
+        favoritado ||
+        bemAvaliado ||
+        (progresso && progresso.progressPercent > 0);
+      if (engajado) {
+        eixoIdsDeInteresse.add(c.colecao.eixo.id);
+      }
+    }
+
+    const jaEngajado = new Set([
+      ...favoritoIds,
+      ...ratingByConteudoId.keys(),
+      ...progressByConteudoId.keys(),
+    ]);
+
+    // App é só um atalho pra loja, sem "conteúdo" pra recomendar — mesma
+    // regra de exclusão usada em `recentes`.
+    let recomendadosSource = conteudos.filter(
+      (c) =>
+        c.mediaType !== 'APP' &&
+        eixoIdsDeInteresse.has(c.colecao.eixo.id) &&
+        !jaEngajado.has(c.id),
+    );
+    if (recomendadosSource.length === 0) {
+      recomendadosSource = conteudos.filter(
+        (c) => c.mediaType !== 'APP' && !jaEngajado.has(c.id),
+      );
+    }
+
+    const recomendados = recomendadosSource
+      .sort(
+        (a, b) =>
+          b.viewCount - a.viewCount ||
+          b.createdAt.getTime() - a.createdAt.getTime(),
+      )
+      .slice(0, 10)
+      .map(toSummary);
+
     return {
-      featured: featuredSource ? toSummary(featuredSource) : null,
+      featured: featuredSource.slice(0, 5).map(toSummary),
       populares,
+      recentes,
       continuarAssistindo,
-      rows: Array.from(rowsByColecao.values()),
+      recomendados,
+      rows,
     };
   }
 
@@ -135,13 +209,16 @@ export class HomeService {
   // iframe sem contagem de página; Artigo muitas vezes é só um link externo)
   // — decisão do usuário foi tratar "abrir = concluído" pra esses dois tipos,
   // só o vídeo reporta progresso real via ProgressController (player do Vimeo).
-  async registrarView(conteudoId: string, userId: string, tenantId: string): Promise<void> {
-    const conteudo = await this.prisma.conteudo.findUnique({
+  async registrarView(
+    conteudoId: string,
+    userId: string,
+    tenantId: string,
+  ): Promise<void> {
+    await assertConteudoVisivel(this.prisma, userId, tenantId, conteudoId);
+    const conteudo = await this.prisma.conteudo.findUniqueOrThrow({
       where: { id: conteudoId },
+      select: { mediaType: true },
     });
-    if (!conteudo) {
-      throw new NotFoundException('Conteúdo não encontrado');
-    }
     await this.prisma.conteudo.update({
       where: { id: conteudoId },
       data: { viewCount: { increment: 1 } },
@@ -151,7 +228,13 @@ export class HomeService {
       await this.prisma.progress.upsert({
         where: { userId_conteudoId: { userId, conteudoId } },
         update: { progressPercent: 100, lastPosition: 0 },
-        create: { userId, conteudoId, tenantId, progressPercent: 100, lastPosition: 0 },
+        create: {
+          userId,
+          conteudoId,
+          tenantId,
+          progressPercent: 100,
+          lastPosition: 0,
+        },
       });
     }
   }

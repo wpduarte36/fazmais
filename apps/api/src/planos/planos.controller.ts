@@ -6,7 +6,7 @@ import { PlanosService } from './planos.service';
 
 @Controller('planos')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('MASTER')
+@Roles('MASTER', 'ADMIN')
 export class PlanosController {
   constructor(private readonly planosService: PlanosService) {}
 

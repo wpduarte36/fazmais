@@ -1,17 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { assertConteudoVisivel } from '../common/conteudo-visibility.util';
 
 @Injectable()
 export class RatingsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async avaliar(userId: string, tenantId: string, conteudoId: string, score: number): Promise<void> {
-    const conteudo = await this.prisma.conteudo.findUnique({
-      where: { id: conteudoId },
-    });
-    if (!conteudo) {
-      throw new NotFoundException('Conteúdo não encontrado');
-    }
+  async avaliar(
+    userId: string,
+    tenantId: string,
+    conteudoId: string,
+    score: number,
+  ): Promise<void> {
+    await assertConteudoVisivel(this.prisma, userId, tenantId, conteudoId);
     await this.prisma.rating.upsert({
       where: { userId_conteudoId: { userId, conteudoId } },
       update: { score },

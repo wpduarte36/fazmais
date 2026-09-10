@@ -33,6 +33,7 @@ enum MediaType {
   VIDEO
   PDF
   ARTIGO
+  APP
 }
 
 enum PasswordTokenType {
@@ -62,12 +63,13 @@ model Tenant {
 model Plano {
   id          String   @id @default(uuid())
   name        String   @unique
+  level       Int      @unique // hierarquia: quem tem um plano de level N enxerga todo conteúdo com planoMinimo.level <= N (0 = Padrão, o mais básico)
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   users     User[]
-  conteudos ConteudoPlano[]
+  conteudos Conteudo[]
 
   @@map("planos")
 }
@@ -132,6 +134,7 @@ model Eixo {
   tenantId    String?  @map("tenant_id") // espelha o tenantId do Catalogo pai
   name        String
   description String?
+  ordem       Int      @default(0) // posição de exibição no menu — menor primeiro (Home não é um Eixo, sempre fica antes de tudo no frontend)
   createdAt   DateTime @default(now()) @map("created_at")
 
   catalogo Catalogo  @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
@@ -149,6 +152,7 @@ model Colecao {
   eixoId    String   @map("eixo_id")
   tenantId  String?  @map("tenant_id") // espelha o tenantId do Eixo pai
   name      String
+  ordem     Int      @default(0) // posição de exibição dentro do Eixo — menor primeiro
   createdAt DateTime @default(now()) @map("created_at")
 
   eixo      Eixo       @relation(fields: [eixoId], references: [id], onDelete: Cascade)
@@ -173,6 +177,7 @@ model Conteudo {
   mediaUrl    String?   @map("media_url") // obrigatório para VIDEO/PDF, nulo para ARTIGO
   htmlContent String?   @map("html_content") // obrigatório para ARTIGO, nulo para VIDEO/PDF
   imageUrl    String    @map("image_url")
+  bannerImageUrl String? @map("banner_image_url") // opcional: arte específica pro hero de destaques (proporção larga), sem cortar a imageUrl quando existe
   isFeatured  Boolean   @default(false) @map("is_featured")
   tags        String[]  @default([]) // SQL MANUAL: índice GIN para busca por tag (ver rodapé)
   aiSummary   String?   @map("ai_summary")
@@ -181,36 +186,26 @@ model Conteudo {
   downloadUrl     String? @map("download_url") // opcional, sem uso confirmado no produto ainda
   externalUrl     String? @map("external_url") // ARTIGO de fonte externa (ex: notícia sindicada): link pra matéria completa no site de origem
   sourceName      String? @map("source_name") // nome da fonte externa exibido junto do externalUrl (ex: "Canguru News")
+  appStoreUrl     String? @map("app_store_url") // só p/ APP
+  playStoreUrl    String? @map("play_store_url") // só p/ APP
   viewCount       Int     @default(0) @map("view_count") // incrementado toda vez que um professor abre o conteúdo — alimenta a fileira "Mais assistidos"
+  ordem       Int       @default(0) // posição de exibição dentro da Coleção — menor primeiro
+  planoMinimoId String? @map("plano_minimo_id") // nulo = rascunho, não aparece pra ninguém; senão, visível pra quem tem plano com level >= o desse plano
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  colecao   Colecao         @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
-  tenant    Tenant?         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  favorites Favorite[]
-  ratings   Rating[]
-  progress  Progress[]
-  planos    ConteudoPlano[]
+  colecao     Colecao    @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
+  tenant      Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planoMinimo Plano?     @relation(fields: [planoMinimoId], references: [id], onDelete: Restrict)
+  favorites   Favorite[]
+  ratings     Rating[]
+  progress    Progress[]
 
   @@index([tenantId])
   @@index([colecaoId])
   @@index([tenantId, isFeatured])
+  @@index([planoMinimoId])
   @@map("conteudos")
-}
-
-// Quais planos podem ver um determinado conteúdo (N:N).
-model ConteudoPlano {
-  id         String   @id @default(uuid())
-  conteudoId String   @map("conteudo_id")
-  planoId    String   @map("plano_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  conteudo Conteudo @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
-  plano    Plano    @relation(fields: [planoId], references: [id], onDelete: Cascade)
-
-  @@unique([conteudoId, planoId])
-  @@index([planoId])
-  @@map("conteudo_planos")
 }
 
 // Registra quais tenants ativaram (opt-in) quais catálogos compartilhados pelo

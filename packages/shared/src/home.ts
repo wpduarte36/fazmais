@@ -3,14 +3,17 @@ import type { ConteudoSummary } from './catalogos';
 export interface HomeRow {
   eixoId: string;
   eixoName: string;
+  eixoOrdem: number;
   colecaoId: string;
   colecaoName: string;
   conteudos: ConteudoSummary[];
 }
 
 export interface HomeFeed {
-  featured: ConteudoSummary | null;
+  featured: ConteudoSummary[];
   populares: ConteudoSummary[];
+  recentes: ConteudoSummary[];
   continuarAssistindo: ConteudoSummary[];
+  recomendados: ConteudoSummary[];
   rows: HomeRow[];
 }

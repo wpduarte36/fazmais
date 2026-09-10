@@ -7,8 +7,8 @@ export class PlanosService {
 
   list() {
     return this.prisma.plano.findMany({
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true, description: true },
+      orderBy: { level: 'asc' },
+      select: { id: true, name: true, level: true, description: true },
     });
   }
 }

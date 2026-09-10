@@ -11,9 +11,10 @@ const dateTimeFormatter = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short',
 
 export function ResetPasswordModal({ userName, token, expiresAt, onClose }: ResetPasswordModalProps) {
   const [copied, setCopied] = useState(false);
+  const link = `${window.location.origin}/definir-senha?token=${token}`;
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(token);
+    await navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -45,12 +46,12 @@ export function ResetPasswordModal({ userName, token, expiresAt, onClose }: Rese
         </div>
 
         <p className="mb-4 text-sm leading-relaxed text-neutral-400 light:text-neutral-500">
-          Como ainda não enviamos e-mail automaticamente, copie o token abaixo e repasse pro usuário (WhatsApp, por
-          exemplo) — ele vai usar isso pra definir uma senha nova.
+          Como ainda não enviamos e-mail automaticamente, copie o link abaixo e repasse pro usuário (WhatsApp, por
+          exemplo) — ele vai abrir e definir uma senha nova.
         </p>
 
         <div className="rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 light:border-black/10 light:bg-black/[0.03]">
-          <code className="block break-all text-xs text-amber-300 light:text-amber-700">{token}</code>
+          <code className="block break-all text-xs text-amber-300 light:text-amber-700">{link}</code>
         </div>
 
         <p className="mt-2 text-xs text-neutral-500">Expira em {dateTimeFormatter.format(new Date(expiresAt))}.</p>
@@ -68,7 +69,7 @@ export function ResetPasswordModal({ userName, token, expiresAt, onClose }: Rese
             onClick={handleCopy}
             className="flex-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
           >
-            {copied ? 'Copiado!' : 'Copiar token'}
+            {copied ? 'Copiado!' : 'Copiar link'}
           </button>
         </div>
       </div>

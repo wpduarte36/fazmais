@@ -49,6 +49,7 @@ export interface ConteudoSummary {
   mediaUrl: string | null;
   htmlContent: string | null;
   imageUrl: string;
+  bannerImageUrl: string | null;
   isFeatured: boolean;
   tags: string[];
   aiSummary: string | null;
@@ -57,7 +58,9 @@ export interface ConteudoSummary {
   downloadUrl: string | null;
   externalUrl: string | null;
   sourceName: string | null;
-  planoIds: string[];
+  appStoreUrl: string | null;
+  playStoreUrl: string | null;
+  planoMinimoId: string | null;
   isFavorito: boolean;
   myRating: number | null;
   viewCount: number;
@@ -94,21 +97,36 @@ export interface CreateConteudoRequest {
   mediaUrl?: string;
   htmlContent?: string;
   imageUrl: string;
+  bannerImageUrl?: string;
   isFeatured?: boolean;
   tags?: string[];
-  planoIds?: string[];
+  planoMinimoId?: string | null;
   aiSummary?: string;
   durationSeconds?: number;
   pageCount?: number;
   downloadUrl?: string;
   externalUrl?: string;
   sourceName?: string;
+  appStoreUrl?: string;
+  playStoreUrl?: string;
 }
 
 export type UpdateConteudoRequest = Partial<CreateConteudoRequest>;
 
 export interface MoveConteudoRequest {
   colecaoId: string;
+}
+
+export interface ReorderColecoesRequest {
+  colecaoIds: string[];
+}
+
+export interface ReorderEixosRequest {
+  eixoIds: string[];
+}
+
+export interface ReorderConteudosRequest {
+  conteudoIds: string[];
 }
 
 export interface AiSuggestRequest {

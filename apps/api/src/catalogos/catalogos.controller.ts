@@ -19,6 +19,7 @@ import { EixosService } from './eixos.service';
 import { CreateCatalogoDto } from './dto/create-catalogo.dto';
 import { UpdateCatalogoDto } from './dto/update-catalogo.dto';
 import { EixoDto } from './dto/eixo.dto';
+import { ReorderEixosDto } from './dto/reorder-eixos.dto';
 
 @Controller('catalogos')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -58,5 +59,10 @@ export class CatalogosController {
   @Post(':id/eixos')
   createEixo(@Param('id', ParseUUIDPipe) catalogoId: string, @Body() dto: EixoDto) {
     return this.eixosService.create(catalogoId, dto);
+  }
+
+  @Patch(':id/eixos/reorder')
+  reorderEixos(@Param('id', ParseUUIDPipe) catalogoId: string, @Body() dto: ReorderEixosDto) {
+    return this.catalogosService.reorderEixos(catalogoId, dto);
   }
 }

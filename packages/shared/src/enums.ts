@@ -16,5 +16,6 @@ export const MediaType = {
   VIDEO: 'VIDEO',
   PDF: 'PDF',
   ARTIGO: 'ARTIGO',
+  APP: 'APP',
 } as const;
 export type MediaType = (typeof MediaType)[keyof typeof MediaType];

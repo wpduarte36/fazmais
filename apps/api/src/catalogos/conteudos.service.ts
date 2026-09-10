@@ -17,36 +17,35 @@ export class ConteudosService {
       throw new NotFoundException('Coleção não encontrada');
     }
 
+    const ordem = await this.prisma.conteudo.count({ where: { colecaoId } });
     const conteudo = await this.prisma.conteudo.create({
       data: {
         colecaoId,
         tenantId: colecao.tenantId,
+        ordem,
         title: dto.title,
         description: dto.description,
         mediaType: dto.mediaType,
-        mediaUrl: dto.mediaType === 'ARTIGO' ? null : dto.mediaUrl,
+        mediaUrl:
+          dto.mediaType === 'ARTIGO' || dto.mediaType === 'APP'
+            ? null
+            : dto.mediaUrl,
         htmlContent: dto.mediaType === 'ARTIGO' ? dto.htmlContent : null,
         imageUrl: dto.imageUrl,
+        bannerImageUrl: dto.bannerImageUrl,
         isFeatured: dto.isFeatured ?? false,
         tags: dto.tags ?? [],
+        planoMinimoId: dto.planoMinimoId ?? null,
         aiSummary: dto.aiSummary,
         durationSeconds: dto.durationSeconds,
         pageCount: dto.pageCount,
         downloadUrl: dto.downloadUrl,
         externalUrl: dto.externalUrl,
         sourceName: dto.sourceName,
+        appStoreUrl: dto.appStoreUrl,
+        playStoreUrl: dto.playStoreUrl,
       },
     });
-
-    if (dto.planoIds?.length) {
-      await this.prisma.conteudoPlano.createMany({
-        data: dto.planoIds.map((planoId) => ({
-          conteudoId: conteudo.id,
-          planoId,
-        })),
-        skipDuplicates: true,
-      });
-    }
 
     return this.findOrThrow(conteudo.id);
   }
@@ -61,30 +60,27 @@ export class ConteudosService {
         title: dto.title,
         description: dto.description,
         mediaType: dto.mediaType,
-        mediaUrl: mediaType === 'ARTIGO' ? null : (dto.mediaUrl ?? undefined),
+        mediaUrl:
+          mediaType === 'ARTIGO' || mediaType === 'APP'
+            ? null
+            : (dto.mediaUrl ?? undefined),
         htmlContent:
           mediaType === 'ARTIGO' ? (dto.htmlContent ?? undefined) : null,
         imageUrl: dto.imageUrl,
+        bannerImageUrl: dto.bannerImageUrl,
         isFeatured: dto.isFeatured,
         tags: dto.tags,
+        planoMinimoId: dto.planoMinimoId,
         aiSummary: dto.aiSummary,
         durationSeconds: dto.durationSeconds,
         pageCount: dto.pageCount,
         downloadUrl: dto.downloadUrl,
         externalUrl: dto.externalUrl,
         sourceName: dto.sourceName,
+        appStoreUrl: dto.appStoreUrl,
+        playStoreUrl: dto.playStoreUrl,
       },
     });
-
-    if (dto.planoIds) {
-      await this.prisma.$transaction([
-        this.prisma.conteudoPlano.deleteMany({ where: { conteudoId: id } }),
-        this.prisma.conteudoPlano.createMany({
-          data: dto.planoIds.map((planoId) => ({ conteudoId: id, planoId })),
-          skipDuplicates: true,
-        }),
-      ]);
-    }
 
     return this.findOrThrow(id);
   }
@@ -151,7 +147,6 @@ export class ConteudosService {
   private async findOrThrow(id: string) {
     const conteudo = await this.prisma.conteudo.findFirst({
       where: { id, tenantId: null },
-      include: { planos: { select: { planoId: true } } },
     });
     if (!conteudo) {
       throw new NotFoundException('Conteúdo não encontrado');
@@ -165,6 +160,7 @@ export class ConteudosService {
       mediaUrl: conteudo.mediaUrl,
       htmlContent: conteudo.htmlContent,
       imageUrl: conteudo.imageUrl,
+      bannerImageUrl: conteudo.bannerImageUrl,
       isFeatured: conteudo.isFeatured,
       tags: conteudo.tags,
       aiSummary: conteudo.aiSummary,
@@ -173,7 +169,9 @@ export class ConteudosService {
       downloadUrl: conteudo.downloadUrl,
       externalUrl: conteudo.externalUrl,
       sourceName: conteudo.sourceName,
-      planoIds: conteudo.planos.map((p) => p.planoId),
+      appStoreUrl: conteudo.appStoreUrl,
+      playStoreUrl: conteudo.playStoreUrl,
+      planoMinimoId: conteudo.planoMinimoId,
       isFavorito: false,
       myRating: null,
       viewCount: conteudo.viewCount,

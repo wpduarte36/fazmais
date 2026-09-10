@@ -18,3 +18,8 @@ export interface LoginResponse {
   accessToken: string;
   user: AuthenticatedUser;
 }
+
+export interface SetPasswordRequest {
+  token: string;
+  password: string;
+}

@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import type { MediaType } from '@prisma/client';
 
-const MEDIA_TYPES: MediaType[] = ['VIDEO', 'PDF', 'ARTIGO'];
+const MEDIA_TYPES: MediaType[] = ['VIDEO', 'PDF', 'ARTIGO', 'APP'];
 
 export class CreateConteudoDto {
   @IsString()
@@ -30,7 +30,10 @@ export class CreateConteudoDto {
   @IsIn(MEDIA_TYPES)
   mediaType: MediaType;
 
-  @ValidateIf((dto: CreateConteudoDto) => dto.mediaType !== 'ARTIGO')
+  @ValidateIf(
+    (dto: CreateConteudoDto) =>
+      dto.mediaType !== 'ARTIGO' && dto.mediaType !== 'APP',
+  )
   @IsUrl(
     { require_tld: false },
     { message: 'mediaUrl deve ser uma URL válida' },
@@ -49,6 +52,13 @@ export class CreateConteudoDto {
   imageUrl: string;
 
   @IsOptional()
+  @IsUrl(
+    { require_tld: false },
+    { message: 'bannerImageUrl deve ser uma URL válida' },
+  )
+  bannerImageUrl?: string;
+
+  @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
 
@@ -58,10 +68,10 @@ export class CreateConteudoDto {
   @IsString({ each: true })
   tags?: string[];
 
+  // nulo/ausente = rascunho, não visível pra ninguém ainda.
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  planoIds?: string[];
+  @IsString()
+  planoMinimoId?: string | null;
 
   @IsOptional()
   @IsString()
@@ -96,4 +106,18 @@ export class CreateConteudoDto {
   @IsString()
   @MaxLength(120)
   sourceName?: string;
+
+  @IsOptional()
+  @IsUrl(
+    { require_tld: false },
+    { message: 'appStoreUrl deve ser uma URL válida' },
+  )
+  appStoreUrl?: string;
+
+  @IsOptional()
+  @IsUrl(
+    { require_tld: false },
+    { message: 'playStoreUrl deve ser uma URL válida' },
+  )
+  playStoreUrl?: string;
 }

@@ -1,9 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import type { ManagedUserRole, UserSummary, UserStatus } from '@fazmais/shared';
+import type { ManagedUserRole, UpdateUserRequest, UserSummary, UserStatus } from '@fazmais/shared';
 import { ApiError } from '../../../lib/apiClient';
 import { useAuthStore } from '../../../store/authStore';
 import { useCreateUser, useDeleteUser, useResetPassword, useUpdateUser, useUsers } from '../hooks/useUsers';
+import { usePlanos } from '../hooks/usePlanos';
 import { ResetPasswordModal } from './ResetPasswordModal';
+import { EditUserModal } from './EditUserModal';
 
 const STATUS_LABEL: Record<UserStatus, string> = {
   ATIVO: 'Ativo',
@@ -35,6 +37,7 @@ function normalize(text: string): string {
 export function UsuariosTab() {
   const currentUserId = useAuthStore((state) => state.user?.id);
   const { data: users, isLoading } = useUsers();
+  const { data: planos } = usePlanos();
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
@@ -44,11 +47,17 @@ export function UsuariosTab() {
   const [roleFilter, setRoleFilter] = useState<ManagedUserRole | 'TODOS'>('TODOS');
 
   const [creating, setCreating] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: '', login: '', email: '', whatsapp: '', role: 'PROFESSOR' as ManagedUserRole });
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    login: '',
+    email: '',
+    whatsapp: '',
+    role: 'PROFESSOR' as ManagedUserRole,
+    planoId: '',
+  });
   const [createError, setCreateError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', email: '', whatsapp: '', status: 'ATIVO' as UserStatus });
   const [editError, setEditError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -64,9 +73,10 @@ export function UsuariosTab() {
     });
   }, [users, searchQuery, roleFilter]);
 
+  const editingUser = users?.find((u) => u.id === editingId) ?? null;
+
   function startEdit(user: UserSummary) {
     setEditingId(user.id);
-    setEditForm({ name: user.name, email: user.email, whatsapp: user.whatsapp ?? '', status: user.status });
     setEditError(null);
   }
 
@@ -80,23 +90,28 @@ export function UsuariosTab() {
         email: createForm.email,
         whatsapp: createForm.whatsapp || undefined,
         role: createForm.role,
+        planoId: createForm.role === 'PROFESSOR' && createForm.planoId ? createForm.planoId : undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setCreating(false);
-          setCreateForm({ name: '', login: '', email: '', whatsapp: '', role: 'PROFESSOR' });
+          setCreateForm({ name: '', login: '', email: '', whatsapp: '', role: 'PROFESSOR', planoId: '' });
+          setResetResult({
+            userName: data.name,
+            token: data.firstAccessToken,
+            expiresAt: data.firstAccessExpiresAt,
+          });
         },
         onError: (err) => setCreateError(err instanceof ApiError ? err.message : 'Não foi possível criar o usuário.'),
       },
     );
   }
 
-  function handleUpdate(event: FormEvent) {
-    event.preventDefault();
+  function handleUpdate(dto: UpdateUserRequest) {
     if (!editingId) return;
     setEditError(null);
     updateUser.mutate(
-      { id: editingId, dto: editForm },
+      { id: editingId, dto },
       {
         onSuccess: () => setEditingId(null),
         onError: (err) => setEditError(err instanceof ApiError ? err.message : 'Não foi possível salvar as alterações.'),
@@ -201,6 +216,23 @@ export function UsuariosTab() {
                 <option value="ADMIN">Admin</option>
               </select>
             </div>
+            {createForm.role === 'PROFESSOR' && (
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-neutral-400 light:text-neutral-500">Plano</label>
+                <select
+                  value={createForm.planoId}
+                  onChange={(event) => setCreateForm((f) => ({ ...f, planoId: event.target.value }))}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+                >
+                  <option value="">Sem plano</option>
+                  {planos?.map((plano) => (
+                    <option key={plano.id} value={plano.id}>
+                      {plano.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <p className="mb-3 text-xs text-neutral-500">O usuário define a própria senha no primeiro acesso.</p>
           {createError && <p className="mb-3 text-sm text-rose-300 light:text-rose-700">{createError}</p>}
@@ -228,7 +260,7 @@ export function UsuariosTab() {
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr>
-                {['Nome', 'Login', 'E-mail', 'WhatsApp', 'Papel', 'Status', 'Ações'].map((label) => (
+                {['Nome', 'Login', 'E-mail', 'WhatsApp', 'Papel', 'Plano', 'Status', 'Ações'].map((label) => (
                   <th
                     key={label}
                     className="border-b border-white/10 bg-white/[0.02] px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500 light:border-black/10 light:bg-black/[0.02]"
@@ -241,65 +273,21 @@ export function UsuariosTab() {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-5 text-center text-neutral-500">
+                  <td colSpan={8} className="px-4 py-5 text-center text-neutral-500">
                     Carregando...
                   </td>
                 </tr>
               )}
               {!isLoading && filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-5 text-center text-neutral-500">
+                  <td colSpan={8} className="px-4 py-5 text-center text-neutral-500">
                     {users?.length === 0 ? 'Nenhum usuário cadastrado ainda.' : 'Nenhum usuário encontrado.'}
                   </td>
                 </tr>
               )}
               {filteredUsers.map((user) => {
                 const isSelf = user.id === currentUserId;
-                return editingId === user.id ? (
-                  <tr key={user.id} className="border-b border-white/10 last:border-b-0 light:border-black/10">
-                    <td colSpan={7} className="px-4 py-3">
-                      <form onSubmit={handleUpdate} className="flex flex-col gap-2.5">
-                        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                          <FormField label="Nome" value={editForm.name} onChange={(v) => setEditForm((f) => ({ ...f, name: v }))} required />
-                          <FormField label="E-mail" type="email" value={editForm.email} onChange={(v) => setEditForm((f) => ({ ...f, email: v }))} required />
-                          <FormField label="WhatsApp" value={editForm.whatsapp} onChange={(v) => setEditForm((f) => ({ ...f, whatsapp: v }))} />
-                          <div className="flex flex-col gap-1">
-                            <label className="text-[11px] font-semibold text-neutral-400 light:text-neutral-500">Status</label>
-                            <select
-                              value={editForm.status}
-                              onChange={(event) => setEditForm((f) => ({ ...f, status: event.target.value as UserStatus }))}
-                              disabled={isSelf}
-                              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none disabled:opacity-50 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
-                            >
-                              <option value="ATIVO">Ativo</option>
-                              <option value="INATIVO">Inativo</option>
-                            </select>
-                          </div>
-                        </div>
-                        {isSelf && (
-                          <p className="text-xs text-neutral-500">Você não pode alterar o status da sua própria conta.</p>
-                        )}
-                        {editError && <p className="text-sm text-rose-300 light:text-rose-700">{editError}</p>}
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setEditingId(null)}
-                            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900"
-                          >
-                            Cancelar
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={updateUser.isPending}
-                            className="rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
-                          >
-                            {updateUser.isPending ? 'Salvando...' : 'Salvar'}
-                          </button>
-                        </div>
-                      </form>
-                    </td>
-                  </tr>
-                ) : (
+                return (
                   <tr key={user.id} className="border-b border-white/10 last:border-b-0 hover:bg-white/[0.02] light:border-black/10 light:hover:bg-black/[0.02]">
                     <td className="px-4 py-2.5">
                       {user.name}
@@ -309,6 +297,7 @@ export function UsuariosTab() {
                     <td className="px-4 py-2.5 text-neutral-400">{user.email}</td>
                     <td className="px-4 py-2.5 text-neutral-400">{user.whatsapp ?? '—'}</td>
                     <td className="px-4 py-2.5 text-neutral-400">{ROLE_LABEL[user.role]}</td>
+                    <td className="px-4 py-2.5 text-neutral-400">{user.role === 'PROFESSOR' ? (user.planoName ?? 'Sem plano') : '—'}</td>
                     <td className="px-4 py-2.5">
                       <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold ${STATUS_CLASSES[user.status]}`}>
                         {STATUS_LABEL[user.status]}
@@ -368,6 +357,18 @@ export function UsuariosTab() {
           token={resetResult.token}
           expiresAt={resetResult.expiresAt}
           onClose={() => setResetResult(null)}
+        />
+      )}
+
+      {editingUser && (
+        <EditUserModal
+          user={editingUser}
+          planos={planos}
+          isSelf={editingUser.id === currentUserId}
+          pending={updateUser.isPending}
+          error={editError}
+          onSave={handleUpdate}
+          onClose={() => setEditingId(null)}
         />
       )}
     </div>

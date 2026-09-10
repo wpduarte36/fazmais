@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { assertConteudoVisivel } from '../common/conteudo-visibility.util';
 
 @Injectable()
 export class ProgressService {
@@ -12,12 +13,7 @@ export class ProgressService {
     progressPercent: number,
     lastPosition: number,
   ): Promise<void> {
-    const conteudo = await this.prisma.conteudo.findUnique({
-      where: { id: conteudoId },
-    });
-    if (!conteudo) {
-      throw new NotFoundException('Conteúdo não encontrado');
-    }
+    await assertConteudoVisivel(this.prisma, userId, tenantId, conteudoId);
     await this.prisma.progress.upsert({
       where: { userId_conteudoId: { userId, conteudoId } },
       update: { progressPercent, lastPosition },

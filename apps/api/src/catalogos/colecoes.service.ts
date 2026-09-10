@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NameOnlyDto } from './dto/name-only.dto';
+import { ReorderConteudosDto } from './dto/reorder-conteudos.dto';
 
 @Injectable()
 export class ColecoesService {
@@ -13,8 +14,9 @@ export class ColecoesService {
     if (!eixo) {
       throw new NotFoundException('Eixo não encontrado');
     }
+    const ordem = await this.prisma.colecao.count({ where: { eixoId } });
     return this.prisma.colecao.create({
-      data: { eixoId, tenantId: eixo.tenantId, name: dto.name },
+      data: { eixoId, tenantId: eixo.tenantId, name: dto.name, ordem },
     });
   }
 
@@ -29,6 +31,35 @@ export class ColecoesService {
   async remove(id: string): Promise<void> {
     await this.findOrThrow(id);
     await this.prisma.colecao.delete({ where: { id } });
+  }
+
+  // Mesmo racional de EixosService.reorderColecoes: recebe a lista de ids de
+  // conteúdo na ordem final desejada e persiste o índice de cada um como
+  // `ordem`. Confere que todo id pertence mesmo a essa coleção antes de
+  // gravar.
+  async reorderConteudos(colecaoId: string, dto: ReorderConteudosDto) {
+    await this.findOrThrow(colecaoId);
+    const conteudos = await this.prisma.conteudo.findMany({
+      where: { colecaoId },
+      select: { id: true },
+    });
+    const idsValidos = new Set(conteudos.map((c) => c.id));
+    const idsRecebidos = new Set(dto.conteudoIds);
+    if (
+      dto.conteudoIds.length !== idsValidos.size ||
+      dto.conteudoIds.some((id) => !idsValidos.has(id)) ||
+      idsValidos.size !== idsRecebidos.size
+    ) {
+      throw new BadRequestException(
+        'A lista precisa conter exatamente os conteúdos dessa coleção, sem repetir nem faltar nenhum.',
+      );
+    }
+
+    await this.prisma.$transaction(
+      dto.conteudoIds.map((id, index) =>
+        this.prisma.conteudo.update({ where: { id }, data: { ordem: index } }),
+      ),
+    );
   }
 
   // tenantId: null restringe a catálogos globais — hoje o único tipo

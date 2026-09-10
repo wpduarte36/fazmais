@@ -6,11 +6,15 @@
 
 Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para municípios, com três perfis (Master, Admin, Professor) e consumo estilo Netflix. PRD original em `FazMais_PRD.docx`/`PRD_extracted.txt`.
 
-## Status atual (2026-08-19)
+## Status atual (2026-08-28)
 
-**Feito e commitado em git** (até `c800f1f`): bootstrap do monorepo + schema Prisma (Lote A) + Tela 01 (Login) + Painel Master (Municípios, Catálogos, Construtor de Catálogo/Tela 05, tema claro/escuro real) + opt-in de catálogo compartilhado (backend) + campos novos em Conteudo/Eixo pro import do legado + **migração real de dados do FazMais legado (Faz+)** + **Home do Professor completa nos 3 tipos de mídia** (hero, menu horizontal de Eixos, fileiras por Coleção, leitura de Artigo com HTML rico, player de Vídeo, viewer de PDF em formato de livro). Ver seções "Migração do legado (Faz+)" e "Home do Professor" abaixo pros detalhes.
+**Feito e commitado em git** (até `f5e54eb`, 2026-08-20): bootstrap do monorepo + schema Prisma (Lote A) + Tela 01 (Login) + Painel Master (Municípios, Catálogos, Construtor de Catálogo/Tela 05, tema claro/escuro real) + opt-in de catálogo compartilhado (backend) + campos novos em Conteudo/Eixo pro import do legado + **migração real de dados do FazMais legado (Faz+)** + **Home do Professor completa nos 3 tipos de mídia originais** (hero, menu horizontal de Eixos, fileiras por Coleção, busca, favoritar, avaliar, progresso/"Continuar assistindo", "Mais assistidos", chat de IA simulado) + **Painel Admin, aba Usuários** (US-040 a US-046) + dashboard de stats do Master (US-010). Ver seções abaixo pros detalhes de cada rodada.
 
-**Ainda não commitado**: o `PdfModal` (viewer de PDF) e o ajuste de conteúdo dos 2 artigos originais pra HTML rico em vez de texto puro — ver seção "Home do Professor" e a nota de HTML rico logo abaixo dela. Também nesta rodada: fotos reais nos 15 artigos de terceiro (Canguru News) + correção de um bug real (`ConteudoCard`/hero nunca renderizavam `imageUrl`) — ver seção "Fotos reais nos artigos migrados" logo abaixo de "Home do Professor".
+**Bloco grande NÃO commitado e sem nenhum teste de navegador registrado** (reconstruído por leitura de diff nesta sessão de 2026-08-28, não por acompanhar quem implementou — migrations datadas até 2026-08-26, ~1 semana de trabalho sem commit): reordenação drag & drop persistida (Eixo/Coleção/Conteúdo), tipo de mídia novo `APP`, hierarquia de Planos por nível (substitui o N:N antigo), upload real de arquivo (imagem/PDF), sessão com refresh token automático (não desloga mais no F5), aba Acervo do Painel Admin (fecha o gap do M5.5), redesign da Home do Professor (hero virou carrossel, fileiras novas, chat de IA virou botão flutuante, modal "Acervo em números"), rebranding da Tela 01/nova Tela de definir senha, fotos do acervo migrado passaram a ser servidas localmente. Ver as seções novas mais abaixo (todas marcadas "não commitado, 2026-08-2x") — **cada uma tem uma nota final sobre o que falta validar antes de commitar**.
+
+**Corrigido nesta revisão (2026-08-28)**: o índice GIN de `conteudos.tags` tinha sumido de novo (a migration do tipo `APP`, `20260825165100_add_conteudo_app_media_type`, derrubou o índice e não recriou — confirmado direto no banco local antes da correção, `conteudos_tags_gin_idx` não existia mais). Reincidência do problema já documentado na seção "Migração do legado" abaixo. Corrigido com uma migration nova (`20260828120907_fix_conteudo_tags_gin_index`, `CREATE INDEX IF NOT EXISTS`) aplicada via `prisma migrate deploy` — confirmado no banco local que o índice voltou a existir. Essa migration em si já está no working tree, não commitada, junto com o resto.
+
+**Ainda não commitado (rodada anterior, 2026-08-19/20)**: o `PdfModal` (viewer de PDF) e o ajuste de conteúdo dos 2 artigos originais pra HTML rico em vez de texto puro — ver seção "Home do Professor" e a nota de HTML rico logo abaixo dela. Também nesta rodada: fotos reais nos 15 artigos de terceiro (Canguru News) + correção de um bug real (`ConteudoCard`/hero nunca renderizavam `imageUrl`) — ver seção "Fotos reais nos artigos migrados" logo abaixo de "Home do Professor".
 
 **Mudança de ordem no roadmap**: as Telas 02 ("Ainda não tenho acesso") e 03 ("Esqueceu sua senha?") foram **adiadas** — ver seção "Backlog adiado" no final deste arquivo. Decidiu-se ir direto para a Tela 04 (Painel Master), que cresceu de escopo em cima do PRD original.
 
@@ -27,6 +31,19 @@ Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para m
 3. `pnpm install` na raiz, depois `pnpm turbo run dev` (web em `:5173`, api em `:3000`).
 4. Se o banco for recriado do zero: `pnpm exec prisma migrate dev` (aplica a migration já commitada em `prisma/migrations/`) e depois `pnpm db:seed`.
 5. Logins de teste (seed, senha `fazmais123` para todos): `master` (MASTER), `admin.demo` (ADMIN), `professor.demo` (PROFESSOR).
+
+## Deploy web (preparado 2026-09-10, ainda não publicado)
+
+Arquitetura: **Web → Vercel**, **API → Railway** (container, `apps/api/Dockerfile` + `railway.toml`), **Banco → Supabase** (só Postgres). Passo a passo completo em **`DEPLOY.md`**.
+
+Mudanças de código feitas pra viabilizar o split web/API (todas com default local, o `pnpm dev` não muda):
+- `main.ts`: `trust proxy`, CORS aceita lista, `UPLOADS_DIR` configurável (`apps/api/src/uploads/uploads-dir.ts`).
+- `auth.controller.ts`: cookie de refresh vira `sameSite:'none'`+`secure` quando `NODE_ENV=production`.
+- `app.controller.ts`: `GET /health` pro healthcheck.
+- `prisma.config.ts`: `loadEnvFile` só se `.env` existir; `datasource.url = DIRECT_URL ?? DATABASE_URL`.
+- Bug pré-existente corrigido: `CatalogoBuilderPage.tsx:171` (`tree` possibly undefined) quebrava `tsc -b` / o build da Vercel.
+
+Não testado: build do Docker (sem Docker nesta máquina) e o deploy real.
 
 ## Pegadinhas de ambiente já resolvidas
 
@@ -505,6 +522,82 @@ o mesmo padrão já existe em `MunicipiosTab`) — fechei a aba e validei
 auto-exclusão (403) e exclusão de verdade (204) via `curl` direto contra a
 API em vez de clicar no navegador; usuário de teste removido, banco voltou
 ao estado original (`master`/`admin.demo`/`professor.demo`).
+
+## Trabalho não commitado desde `f5e54eb` (2026-08-20 → 2026-08-26) — reconstruído por diff em 2026-08-28
+
+As seções abaixo documentam um bloco grande de mudanças que já está no working tree (`git status` mostra ~51 arquivos modificados + vários novos) mas **nunca foi commitado nem tem nenhuma nota de teste manual** — ao contrário do resto deste arquivo, que sempre registra o que foi testado no navegador. As datas das migrations (até `20260826105219_add_plano_hierarchy`) indicam pelo menos uma semana de trabalho depois do último commit. Reconstruído lendo `git diff`/arquivos novos direto, então a intenção de produto por trás de cada decisão é inferida do código, não de uma conversa registrada — vale confirmar com quem implementou antes de assumir como decisão final.
+
+### Reordenação (drag & drop) persistida de Eixo/Coleção/Conteúdo
+
+Antes a ordem de exibição era só `createdAt asc` (implícita, não reordenável). Agora:
+
+- **Schema**: `ordem: Int @default(0)` em `Eixo`, `Colecao` e `Conteudo` (migrations `add_eixo_ordem`, `add_colecao_ordem`, `add_conteudo_ordem`, todas 2026-08-25). `create()` de cada um já grava `ordem = count(irmãos existentes)` (entra sempre no fim).
+- **Backend**: `PATCH /catalogos/:id/eixos/reorder`, `PATCH /eixos/:id/colecoes/reorder`, `PATCH /colecoes/:id/conteudos/reorder` — cada um recebe a lista completa de ids na ordem final e valida que é exatamente o conjunto de filhos daquele pai (nem falta nem sobra id) antes de gravar via `$transaction`. `CatalogosService.getTree`/`HomeService.getFeed` agora ordenam por `[ordem asc, createdAt asc]` em vez de só `createdAt asc`.
+- **Frontend** (`CatalogoBuilderPage.tsx`): arrastar um pill de Eixo em cima de outro reordena eixos; arrastar o cabeçalho (alça `⋮⋮`) de uma Coleção em cima de outra reordena coleções dentro do eixo; arrastar um card de Conteúdo em cima de outro **na mesma coleção** reordena (em vez de mover — mover entre coleções continua sendo soltar em cima da grade/pill de destino, gesto antigo preservado). Toolbar da tela reorganizada: botões de criar/editar/excluir Eixo/Coleção viraram ícones fixos ao lado do eixo ativo, em vez de ficarem dentro do pill/duplo-clique.
+- **Não validado**: nenhum teste de navegador registrado. `reorderColecoes`/`reorderEixos`/`reorderConteudos` (back) não têm teste via `curl` documentado como as rotas anteriores tiveram.
+
+### Tipo de mídia `APP` (atalho pra loja de aplicativos)
+
+- **Schema**: `MediaType` ganhou o valor `APP`; `Conteudo` ganhou `appStoreUrl`/`playStoreUrl` (ambos opcionais). CHECK de consistência (`conteudos_media_type_content_check`) atualizado pra exigir que `APP` não preencha nem `mediaUrl` nem `htmlContent` (migrations `add_conteudo_app_media_type` + `fix_conteudo_media_type_check_app`, 2026-08-25).
+- **Backend**: DTOs de criar/editar conteúdo aceitam `APP` como `mediaType` e os dois campos de URL de loja; `HomeService` exclui `APP` das fileiras "recentes"/"recomendados" (não é "conteúdo" pra recomendar, é um atalho).
+- **Frontend**: `AppModal.tsx` (novo) — modal simples com favoritar/avaliar/descrição + botões "App Store"/"Play Store" (some se nenhuma das duas URLs existir). `HomePage.tsx`/`ConteudoCard.tsx` reconhecem `APP` nos badges (`📱 App`) e no conjunto de tipos abríveis.
+- **Gap real**: o `ConteudoModal.tsx` do Construtor de Catálogo (Master) **não tem `APP` na lista de tipos de mídia nem campos pra `appStoreUrl`/`playStoreUrl`** — não dá pra criar ou editar um conteúdo `APP` pela UI hoje, só via API/script direto. Existe um Eixo "Biblioteca de Apps" > Coleção "Recomendados" com 5 itens de teste (Babbel, GarageBand, Keynote, YouTube Kids, Duolingo) criados assim no banco local — todos com `appStoreUrl`/`playStoreUrl` nulos (o `AppModal` cai no fallback "Disponível na App Store e na Play Store." sem link clicável).
+
+### Hierarquia de Planos por nível (substitui o N:N antigo)
+
+Mudança de arquitetura, não só feature nova — decisão que merece confirmação explícita antes de ir pra produção.
+
+- **Antes**: `ConteudoPlano` (N:N) — cada conteúdo listava explicitamente quais planos podiam vê-lo.
+- **Agora**: `Plano.level: Int @unique` (0 = Padrão, o mais básico) + `Conteudo.planoMinimoId` (um só, opcional). Regra: professor com plano de level N enxerga todo conteúdo cujo `planoMinimo.level <= N` (Ouro vê tudo; Prata vê Prata+Bronze+Padrão; etc.). **`planoMinimoId` nulo agora significa "rascunho", invisível pra qualquer professor** — mudou o comportamento default (antes, conteúdo sem plano nenhum vinculado era visível a todos).
+- **Migration `add_plano_hierarchy`** (2026-08-26) faz backfill: todo conteúdo existente recebe o plano "Padrão" (preserva a visibilidade que tinham antes da virada, em vez de virar rascunho oculto de uma hora pra outra).
+- **Seed**: além de "Padrão" (level 0), agora cria "Bronze" (1), "Prata" (2), "Ouro" (3).
+- **`PlanosController`**: role liberada de `MASTER` só pra `MASTER, ADMIN` — Admin passou a poder ler a lista de planos (necessário pra atribuir plano a um Professor que ele cria/edita).
+- **Frontend**: `ConteudoModal.tsx` (Master) trocou o multi-select "Planos habilitados" por um single-select "Plano mínimo" (com opção "Sem plano (rascunho)"). `UsuariosTab.tsx`/`EditUserModal.tsx` (Admin, novo) ganharam campo de Plano ao criar/editar Professor (só aparece pra role `PROFESSOR`; Admin não tem plano).
+- **Não validado**: nenhum teste registrado da regra de visibilidade por nível, nem do backfill em dado real (só os 90→96 conteúdos do banco local, que já rodaram a migration sem erro).
+
+### Upload de arquivo real (imagem de capa e PDF)
+
+Antes só dava pra colar uma URL manualmente.
+
+- **Backend** (`apps/api/src/uploads/`, novo módulo, `@Roles('MASTER')`): `POST /uploads/image` (multer + `diskStorage`, JPEG/PNG/WebP até 10MB) e `POST /uploads/pdf` (até 30MB, mesmo limite do legado) — salvam em `apps/api/uploads/` com nome `uuid.ext` e devolvem a URL pública. `main.ts` passou a servir essa pasta como estático (`/uploads/...`, via `NestExpressApplication` + `useStaticAssets`).
+- **Frontend** (`ConteudoModal.tsx`): campo "Imagem de capa" ganhou preview + botão "Selecionar foto" (upload real) ao lado do campo de URL manual (mantido como alternativa). Campo de mídia, quando `mediaType === 'PDF'`, ganhou o mesmo padrão: botão "Selecionar PDF" + URL manual como alternativa.
+- **PDF real vs. FlipHTML5**: com upload de PDF nativo, não precisa mais depender de um visualizador de terceiro (a ideia original documentada na seção "Home do Professor" abaixo) — um PDF de verdade abre direto num `<iframe>` no `PdfModal`, que o navegador já sabe renderizar. **Nenhum dos 48 PDFs migrados do legado foi trocado** — todos continuam apontando pro FlipHTML5 (confirmado consultando o banco local), upload é só uma capacidade nova pra conteúdo criado daqui pra frente.
+- **Terminologia mudou na Home**: PDF passou a ser rotulado "📄 eBook" (era "📄 PDF") em `ConteudoCard`/`PdfModal`; `ConteudoCard` ganhou um botão de download (ícone ↓) que só aparece se `conteudo.downloadUrl` estiver preenchido — hoje nenhum conteúdo migrado tem esse campo preenchido, então o botão nunca aparece em dado real ainda.
+- **Não versionado**: `apps/api/uploads/` (pasta de destino do disco) está no working tree como diretório novo — confirmar que está no `.gitignore` antes de commitar (evitar versionar upload de teste).
+
+### Sessão com refresh token automático (não desloga mais no F5)
+
+- **Backend**: `POST /auth/refresh` (novo) — troca o refresh token do cookie httpOnly por um par de tokens novo, rotacionando o refresh token a cada troca (revoga o antigo, emite um novo com `jti` aleatório — sem isso, dois refresh tokens emitidos no mesmo segundo colidiam no `UNIQUE(token_hash)` e derrubavam a troca com 500, bug real corrigido nesta mesma rodada). `POST /auth/login` não muda de contrato.
+- **Frontend**: `apiClient.ts` — qualquer 401 (exceto nos próprios endpoints de auth) dispara `refreshAccessToken()` uma vez e reexecuta a chamada original; chamadas simultâneas compartilham a mesma promise de refresh (não disparam `/auth/refresh` em paralelo). `App.tsx` agora faz um "bootstrap": antes de renderizar qualquer rota, tenta trocar o cookie por um access token novo silenciosamente (o access token só vive em memória via `tokenStore.ts`, nunca em `localStorage` — um F5 sempre zerava isso antes). `useLogout()` (novo, compartilhado entre os 3 shells) chama `POST /auth/logout` pra revogar o refresh token no backend antes de limpar a sessão local — sem isso o cookie de 7 dias continuava válido e o bootstrap acima logaria o usuário de volta sozinho depois de um "logout".
+- **Não validado**: fluxo de refresh (expiração do access token de 15min, rotação do refresh token, comportamento após `/auth/logout`) não tem teste manual registrado.
+
+### Painel Admin — aba Acervo (fecha o gap do M5.5)
+
+A seção "M5.5 — Opt-in de Catálogo Compartilhado" documentava 3 endpoints prontos (`GET/POST/DELETE /tenant-catalogos`) sem nenhuma UI porque o Painel Admin ainda não existia. Agora existe:
+
+- **`AcervoTab.tsx`** (novo): grade de cards, um por catálogo global disponível (ícone, nome, contagens de eixos/coleções/conteúdos), com um toggle switch pra ativar/desativar o catálogo pro próprio município — consome os 3 endpoints que já existiam sem mudança nenhuma no backend.
+- **`AdminPanelPage.tsx`**: aba "Acervo" trocou de placeholder "Em construção" pra renderizar `<AcervoTab />` de verdade.
+- **Não validado**: sem teste de navegador registrado (o padrão anterior, quando os endpoints foram feitos em 2026-08-19, tinha um teste via `curl` completo — esta rodada de UI não repetiu isso nem testou visualmente).
+
+### Redesign da Home do Professor e da Tela de Login
+
+- **Login (`LoginPage.tsx`)**: layout mudou de card centralizado único pra duas colunas (texto de boas-vindas institucional + card de login), com um novo componente `AbstractGradientBg.tsx` (glows radiais, variante light/dark) substituindo os glows fixos antigos, e a logo real (`FazMaisLegacyLogo`, componente já existente no projeto) no lugar do "F" em gradiente.
+- **Nova Tela `/definir-senha`** (`DefinirSenhaPage.tsx` + `useSetPassword.ts`): consome o `POST /auth/set-password` que já existia desde 2026-08-19 sem UI própria — lê `?token=` da URL, formulário de nova senha + confirmação, estados de link inválido/sucesso. `ResetPasswordModal.tsx` (Admin) passou a copiar o link completo (`/definir-senha?token=...`) em vez de só o token cru.
+- **Home (`HomePage.tsx`)**: mudança de estrutura, não só visual:
+  - Sidebar vertical de Eixos virou pills horizontais no header (sticky no topo ao rolar); ganhou uma pill fixa "Home" antes de todos os eixos reais.
+  - Hero único virou `HeroCarousel.tsx` (novo) — até 5 destaques (`isFeatured`) em rotação automática a cada 7s, com setas/dots, pausa no hover.
+  - Fileiras novas, visíveis só na pill "Home" (não mais repetidas em cada Eixo): "🆕 Adicionados recentemente" (10 mais novos, exclui `APP`) e "✨ Recomendados para você" (heurística simples: Eixos onde o professor já favoritou/avaliou bem/tem progresso, recomenda o resto desses Eixos ainda não visto; sem nenhum sinal, cai pra conteúdo ainda não visto ordenado por popularidade — não é um motor de recomendação de verdade). "Mais assistidos" foi renomeado pra "🔥 Top 10 mais acessados".
+  - Campo "Consulte a IA" ao lado da busca virou um botão flutuante (FAB) no canto inferior direito — abre o mesmo `AiChatModal.tsx` de antes, que ganhou uma mensagem de saudação + 4 perguntas sugeridas clicáveis na primeira abertura.
+  - `AcervoStatsModal.tsx` (novo): botão "Acervo em números" no header abre um resumo (horas de vídeo, total de eBooks/Apps/Artigos) calculado no cliente a partir do feed já carregado.
+- **Não validado**: nenhuma das mudanças de Home/Login tem teste de navegador registrado nesta rodada.
+
+### Fotos do acervo migrado agora servidas localmente
+
+`apps/web/public/legado/` (novo, 72 arquivos `.jpg`) — parece substituir as URLs externas (Wikimedia Commons/Pexels) usadas nas rodadas de "fotos reais" documentadas mais abaixo por cópias locais servidas pelo próprio Vite. Confirmado no banco local: **77 dos 96 conteúdos** têm `imageUrl` apontando pra `/legado/...` (só 1 continua com placeholder — o item de demonstração de sempre). Reduz dependência de hotlink externo (evita quebrar se a fonte original mudar/sair do ar), mas não há nenhuma nota registrada de quando/como esse download em lote foi feito nem se as 72 imagens foram commitadas — **`git status` mostra a pasta inteira como não rastreada**, então hoje elas só existem localmente na máquina onde foram baixadas.
+
+---
+
+**Antes de commitar qualquer coisa deste bloco**: nenhuma das seções acima tem teste manual registrado (diferente do resto deste arquivo). Recomendado passar por elas no navegador — pelo menos o fluxo de login/refresh/logout (é o que mais quebra silenciosamente) e a regra de visibilidade por plano — antes de dar como pronto. O índice GIN de `conteudos.tags` já foi corrigido (ver nota no topo deste arquivo); falta decidir se `apps/api/uploads/` e `apps/web/public/legado/` devem entrar no `.gitignore` ou ser commitados de propósito.
 
 ## Backlog adiado
 

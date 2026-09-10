@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
+import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
+import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
 
 interface AdminShellProps {
   children: ReactNode;
@@ -10,21 +11,13 @@ interface AdminShellProps {
 
 export function AdminShell({ children, maxWidthClassName = 'max-w-5xl' }: AdminShellProps) {
   const user = useAuthStore((state) => state.user);
-  const clearSession = useAuthStore((state) => state.clearSession);
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    clearSession();
-    navigate('/login', { replace: true });
-  }
+  const handleLogout = useLogout();
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
       <header className="flex items-center justify-between border-b border-white/10 px-7 py-3.5 light:border-black/10">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-sm font-black text-neutral-950">
-            F
-          </span>
+          <FazMaisLegacyLogo className="h-9 w-auto" />
           <span className="text-base font-bold tracking-tight">
             Faz<span className="text-amber-400">Mais</span>
           </span>
