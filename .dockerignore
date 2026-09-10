@@ -1,0 +1,36 @@
+# Build da imagem da API (contexto = raiz do repo)
+**/node_modules
+**/dist
+**/build
+**/.turbo
+.git
+.github
+*.log
+.dev-run.log
+apps/*/*.log
+
+# Arquivos grandes / irrelevantes pra API
+*.docx
+*.png
+FazMais_PRD.docx
+PRD_extracted.txt
+Gemini_Generated_Image_*.png
+
+# Uploads locais — em produção é volume persistente
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+
+# Env locais nunca entram na imagem
+.env
+.env.*
+apps/*/.env
+apps/*/.env.*
+
+# Frontend não é buildado nesta imagem
+apps/web/src
+apps/web/public
+apps/web/index.html
+
+# Scratch / scripts descartáveis
+scratch_*.mjs
+scripts/import-legado.progress.json
