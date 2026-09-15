@@ -66,7 +66,10 @@ export function buildMockAiResponse(pergunta: string, feed: HomeFeed): RespostaI
     ? todosConteudos
         .map((conteudo) => ({
           conteudo,
-          score: matchScore(`${conteudo.title} ${conteudo.description} ${conteudo.tags.join(' ')}`, termos),
+          score: matchScore(
+            `${conteudo.title} ${conteudo.description} ${conteudo.tags.join(' ')} ${conteudo.aiSummary ?? ''}`,
+            termos,
+          ),
         }))
         .filter((item) => item.score > 0)
         .sort((a, b) => b.score - a.score)

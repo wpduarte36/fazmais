@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   AiSuggestRequest,
   CreateConteudoRequest,
+  EixoRequest,
   MoveConteudoRequest,
   NameOnlyRequest,
   ReorderColecoesRequest,
@@ -44,11 +45,11 @@ export function useCatalogoBuilder(catalogoId: string) {
   }
 
   const createEixoMutation = useMutation({
-    mutationFn: (dto: NameOnlyRequest) => createEixo(catalogoId, dto),
+    mutationFn: (dto: EixoRequest) => createEixo(catalogoId, dto),
     onSuccess: invalidate,
   });
   const updateEixoMutation = useMutation({
-    mutationFn: ({ id, dto }: { id: string; dto: NameOnlyRequest }) => updateEixo(id, dto),
+    mutationFn: ({ id, dto }: { id: string; dto: EixoRequest }) => updateEixo(id, dto),
     onSuccess: invalidate,
   });
   const deleteEixoMutation = useMutation({

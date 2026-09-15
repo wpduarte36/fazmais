@@ -1,20 +1,10 @@
-import DOMPurify from 'dompurify';
 import type { ConteudoSummary } from '@fazmais/shared';
+import { sanitizeHtml } from '../../../lib/sanitizeHtml';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
-
-// Reforça rel="noopener noreferrer" em qualquer link com target="_blank" que
-// sobreviver à sanitização — evita reverse tabnabbing mesmo se o HTML de
-// origem esquecer o rel (import-legado.mjs já inclui, mas não dá pra confiar
-// nisso pra todo htmlContent futuro).
-DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-  if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
-    node.setAttribute('rel', 'noopener noreferrer');
-  }
-});
 
 interface ArtigoModalProps {
   conteudo: ConteudoSummary;
@@ -23,10 +13,7 @@ interface ArtigoModalProps {
 
 export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
   const isExternal = Boolean(conteudo.externalUrl);
-  // htmlContent é autoral (hoje só MASTER cria conteúdo), mas sanitizamos
-  // mesmo assim: defesa em profundidade contra um MASTER comprometido e
-  // contra o dia em que Admins também puderem publicar conteúdo.
-  const sanitizedHtml = DOMPurify.sanitize(conteudo.htmlContent ?? '');
+  const sanitizedHtml = sanitizeHtml(conteudo.htmlContent);
 
   return (
     <div
@@ -73,7 +60,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
           </div>
 
           <div
-            className="max-h-[65vh] overflow-y-auto text-[15px] leading-relaxed text-neutral-300 [&_a]:text-amber-400 [&_a]:underline [&_em]:text-neutral-500 [&_p]:mb-4 [&_p:last-child]:mb-0 light:text-neutral-700"
+            className="max-h-[65vh] overflow-y-auto text-[15px] leading-relaxed text-neutral-300 [&_a]:text-amber-400 [&_a]:underline [&_em]:text-neutral-500 [&_p]:mb-4 [&_p:last-child]:mb-0 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-700 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
             dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
           />
 

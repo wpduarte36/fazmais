@@ -3,6 +3,7 @@ import type { ConteudoSummary } from './catalogos';
 export interface HomeRow {
   eixoId: string;
   eixoName: string;
+  eixoDescription: string | null;
   eixoOrdem: number;
   colecaoId: string;
   colecaoName: string;

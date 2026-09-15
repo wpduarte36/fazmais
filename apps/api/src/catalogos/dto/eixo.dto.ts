@@ -6,8 +6,9 @@ export class EixoDto {
   @MaxLength(120)
   name: string;
 
+  // HTML autoral (mesmo padrão do `htmlContent` de Artigo — sanitizado com
+  // DOMPurify no frontend antes de renderizar), sem limite de tamanho.
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
   description?: string;
 }

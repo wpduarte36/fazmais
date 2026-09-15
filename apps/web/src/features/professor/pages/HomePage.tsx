@@ -5,6 +5,7 @@ import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
 import { extrairTermos, matchScore } from '../../../lib/textSearch';
+import { sanitizeHtml } from '../../../lib/sanitizeHtml';
 import { useHomeFeed } from '../hooks/useHomeFeed';
 import { useRegistrarView } from '../hooks/useRegistrarView';
 import { ArtigoModal } from '../components/ArtigoModal';
@@ -38,15 +39,21 @@ export function HomePage() {
     // `feed.rows` já vem do backend ordenado por eixo.ordem (ver
     // home.service.ts) — então só precisa pegar a primeira ocorrência de
     // cada eixo, na ordem em que aparecem, sem reordenar de novo aqui.
-    const vistos = new Map<string, string>();
+    const vistos = new Map<string, { name: string; description: string | null }>();
     for (const row of feed?.rows ?? []) {
-      if (!vistos.has(row.eixoId)) vistos.set(row.eixoId, row.eixoName);
+      if (!vistos.has(row.eixoId)) {
+        vistos.set(row.eixoId, { name: row.eixoName, description: row.eixoDescription });
+      }
     }
-    return [{ id: HOME_ID, name: 'Home' }, ...Array.from(vistos, ([id, name]) => ({ id, name }))];
+    return [
+      { id: HOME_ID, name: 'Home', description: null },
+      ...Array.from(vistos, ([id, { name, description }]) => ({ id, name, description })),
+    ];
   }, [feed]);
 
   const isHome = eixoAtivoId === HOME_ID;
   const rowsDoEixo = feed?.rows.filter((row) => row.eixoId === eixoAtivoId) ?? [];
+  const eixoAtivoDescription = eixos.find((eixo) => eixo.id === eixoAtivoId)?.description ?? null;
 
   const isSearching = searchQuery.trim().length > 0;
   const searchResults = useMemo(() => {
@@ -226,6 +233,13 @@ export function HomePage() {
                   ))}
                 </div>
               </section>
+            )}
+
+            {!isHome && eixoAtivoDescription && (
+              <div
+                className="mb-8 max-w-5xl text-sm leading-relaxed text-neutral-400 [&_a]:text-amber-400 [&_a]:underline [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:text-neutral-200 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-600 light:[&_strong]:text-neutral-800 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(eixoAtivoDescription) }}
+              />
             )}
 
             {rowsDoEixo.map((row) => (

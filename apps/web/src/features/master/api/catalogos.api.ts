@@ -8,6 +8,7 @@ import type {
   CreateCatalogoRequest,
   CreateConteudoRequest,
   EixoNode,
+  EixoRequest,
   MoveConteudoRequest,
   NameOnlyRequest,
   ReorderColecoesRequest,
@@ -38,11 +39,11 @@ export function getCatalogoTree(id: string): Promise<CatalogoTree> {
   return apiRequest<CatalogoTree>(`/catalogos/${id}`);
 }
 
-export function createEixo(catalogoId: string, dto: NameOnlyRequest): Promise<EixoNode> {
+export function createEixo(catalogoId: string, dto: EixoRequest): Promise<EixoNode> {
   return apiRequest<EixoNode>(`/catalogos/${catalogoId}/eixos`, { method: 'POST', body: dto });
 }
 
-export function updateEixo(id: string, dto: NameOnlyRequest): Promise<EixoNode> {
+export function updateEixo(id: string, dto: EixoRequest): Promise<EixoNode> {
   return apiRequest<EixoNode>(`/eixos/${id}`, { method: 'PATCH', body: dto });
 }
 

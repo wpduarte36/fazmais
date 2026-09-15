@@ -67,6 +67,17 @@ async function main() {
     console.log(`planos mapeados: ${planoMap.size}/${localPlanos.length}`);
     if (!prodPadrao) throw new Error('Plano "Padrão" não existe em produção — rode o seed antes.');
 
+    // 2) mapa de tenants: id local -> id de produção, casando por `name`
+    // (os UUIDs podem divergir quando o tenant foi criado em separado nos dois lados).
+    const localTenants = await local.$queryRawUnsafe('select id, name from tenants');
+    const prodTenants = await prod.$queryRawUnsafe('select id, name from tenants');
+    const tenantMap = new Map();
+    for (const lt of localTenants) {
+      const pt = prodTenants.find((x) => x.name === lt.name);
+      if (pt) tenantMap.set(lt.id, pt.id);
+    }
+    console.log(`tenants mapeados: ${tenantMap.size}/${localTenants.length}`);
+
     let total = 0;
     for (const table of TABLES) {
       const cols = await columnsOf(prod, table);
@@ -75,17 +86,29 @@ async function main() {
       for (const row of localRows) {
         const values = cols.map((col) => {
           let v = row[col];
-          if (table === 'conteudos') {
+          if (col === 'tenant_id' && v != null) {
+            const mapped = tenantMap.get(v);
+            if (!mapped) throw new Error(`Tenant local ${v} sem correspondente em produção (tabela ${table}) — crie o tenant lá antes.`);
+            v = mapped;
+          } else if (table === 'conteudos') {
             if (col === 'plano_minimo_id') v = v ? planoMap.get(v) ?? prodPadrao.id : null;
             else if (URL_COLS.has(col)) v = rewrite(v);
           }
           return v === undefined ? null : v;
         });
         const ph = cols.map((_, i) => `$${i + 1}`).join(', ');
-        const upd = cols.filter((c) => c !== 'id').map((c) => `"${c}" = excluded."${c}"`).join(', ');
+        // tenant_catalogo_access tem chave natural (tenant_id, catalogo_id) além do
+        // `id` surrogate — o `id` local pode não bater com um vínculo já existente
+        // em produção (ex: criado pelo seed). Conflito pela dupla; nada a atualizar
+        // além da existência do vínculo (id/created_at ficam com o valor de produção).
+        const isAccess = table === 'tenant_catalogo_access';
+        const conflictCols = isAccess ? 'tenant_id, catalogo_id' : 'id';
+        const upd = isAccess
+          ? ''
+          : cols.filter((c) => c !== 'id').map((c) => `"${c}" = excluded."${c}"`).join(', ');
         await prod.$executeRawUnsafe(
           `insert into "${table}" (${cols.map((c) => `"${c}"`).join(', ')})
-           values (${ph}) on conflict (id) do update set ${upd}`,
+           values (${ph}) on conflict (${conflictCols}) do ${upd ? `update set ${upd}` : 'nothing'}`,
           ...values,
         );
         total++;

@@ -81,6 +81,7 @@ export class HomeService {
       {
         eixoId: string;
         eixoName: string;
+        eixoDescription: string | null;
         eixoOrdem: number;
         colecaoId: string;
         colecaoName: string;
@@ -92,6 +93,7 @@ export class HomeService {
       const row = rowsByColecao.get(conteudo.colecaoId) ?? {
         eixoId: conteudo.colecao.eixo.id,
         eixoName: conteudo.colecao.eixo.name,
+        eixoDescription: conteudo.colecao.eixo.description,
         eixoOrdem: conteudo.colecao.eixo.ordem,
         colecaoId: conteudo.colecaoId,
         colecaoName: conteudo.colecao.name,

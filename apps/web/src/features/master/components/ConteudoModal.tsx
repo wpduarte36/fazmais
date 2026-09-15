@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ConteudoSummary, CreateConteudoRequest, MediaType, UpdateConteudoRequest } from '@fazmais/shared';
+import { RichTextEditor } from '../../../components/RichTextEditor';
 import { usePlanos } from '../hooks/usePlanos';
 import { useAiSuggest, useUploadImage, useUploadPdf } from '../hooks/useCatalogoBuilder';
 
@@ -212,13 +213,7 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
 
           {mediaType === 'ARTIGO' ? (
             <Field label="Conteúdo do artigo">
-              <textarea
-                value={htmlContent}
-                onChange={(event) => setHtmlContent(event.target.value)}
-                rows={5}
-                placeholder="Texto do artigo — editor de verdade fica pra depois, isso aqui é texto simples"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
-              />
+              <RichTextEditor value={htmlContent} onChange={setHtmlContent} placeholder="Texto do artigo" />
             </Field>
           ) : mediaType === 'PDF' ? (
             <Field label="Arquivo PDF">
@@ -396,18 +391,23 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
 
           <div className="rounded-xl border border-violet-400/30 bg-violet-400/10 p-4 light:border-violet-600/25 light:bg-violet-600/5">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="text-sm font-bold text-violet-300 light:text-violet-700">✨ Sugestões com IA</span>
+              <span className="text-sm font-bold text-violet-300 light:text-violet-700">✨ Informações para IA</span>
               <button
                 type="button"
                 onClick={runAiSuggest}
                 disabled={aiSuggest.isPending}
                 className="rounded-lg bg-gradient-to-r from-violet-400 to-violet-600 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-wait disabled:opacity-70"
               >
-                {aiSuggest.isPending ? 'Gerando...' : tags.length || aiSummary ? 'Gerar de novo' : 'Gerar sugestões'}
+                {aiSuggest.isPending ? 'Gerando...' : 'Gerar tags e texto'}
               </button>
             </div>
             <p className="mb-3 text-xs text-neutral-400 light:text-neutral-500">
-              Usa título + descrição pra sugerir tags e um resumo — os dois continuam editáveis.
+              Preencha as tags e o resumo abaixo você mesmo, do jeito que preferir. O botão "Gerar tags e texto" é só uma opção pra
+              começar mais rápido, a partir do título + descrição — nunca é obrigatório usar.
+            </p>
+            <p className="mb-3 text-xs text-neutral-400 light:text-neutral-500">
+              É por título, descrição, tags e resumo que o chat de IA do professor (Fabinho) encontra e entende esse conteúdo quando
+              alguém pergunta algo relacionado — quanto mais completos e relevantes, maior a chance de aparecer numa resposta.
             </p>
 
             <div className="mb-3 flex flex-wrap items-center gap-1.5">

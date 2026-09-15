@@ -564,18 +564,21 @@ export function CatalogoBuilderPage() {
           lede={`Agrupa coleções dentro do catálogo "${tree.name}".`}
           placeholder="Ex.: Oralidade"
           initialName={eixoModal.mode === 'edit' ? eixoModal.eixo.name : ''}
+          showDescription
+          initialDescription={(eixoModal.mode === 'edit' ? eixoModal.eixo.description : '') ?? ''}
+          descriptionPlaceholder="Texto de apresentação exibido pro professor ao abrir esse eixo (opcional)."
           pending={builder.createEixo.isPending || builder.updateEixo.isPending}
           onClose={() => setEixoModal(null)}
-          onSave={(name) => {
+          onSave={(name, description) => {
             const onError = (err: unknown) => handleMutationError(err, 'Não foi possível salvar o eixo.');
             if (eixoModal.mode === 'edit') {
               builder.updateEixo.mutate(
-                { id: eixoModal.eixo.id, dto: { name } },
+                { id: eixoModal.eixo.id, dto: { name, description } },
                 { onSuccess: () => setEixoModal(null), onError },
               );
             } else {
               builder.createEixo.mutate(
-                { name },
+                { name, description },
                 {
                   onSuccess: (created) => {
                     setActiveEixoId(created.id);
