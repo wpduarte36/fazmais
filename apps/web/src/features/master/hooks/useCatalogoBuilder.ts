@@ -2,8 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   AiSuggestRequest,
   CreateConteudoRequest,
+  EixoRequest,
   MoveConteudoRequest,
   NameOnlyRequest,
+  ReorderColecoesRequest,
+  ReorderConteudosRequest,
+  ReorderEixosRequest,
   UpdateConteudoRequest,
 } from '@fazmais/shared';
 import {
@@ -16,10 +20,14 @@ import {
   deleteEixo,
   getCatalogoTree,
   moveConteudo,
+  reorderColecoes,
+  reorderConteudos,
+  reorderEixos,
   updateColecao,
   updateConteudo,
   updateEixo,
 } from '../api/catalogos.api';
+import { uploadImage, uploadPdf } from '../api/uploads.api';
 
 const CATALOGOS_KEY = ['catalogos'];
 const treeKey = (catalogoId: string) => ['catalogo-tree', catalogoId];
@@ -37,11 +45,11 @@ export function useCatalogoBuilder(catalogoId: string) {
   }
 
   const createEixoMutation = useMutation({
-    mutationFn: (dto: NameOnlyRequest) => createEixo(catalogoId, dto),
+    mutationFn: (dto: EixoRequest) => createEixo(catalogoId, dto),
     onSuccess: invalidate,
   });
   const updateEixoMutation = useMutation({
-    mutationFn: ({ id, dto }: { id: string; dto: NameOnlyRequest }) => updateEixo(id, dto),
+    mutationFn: ({ id, dto }: { id: string; dto: EixoRequest }) => updateEixo(id, dto),
     onSuccess: invalidate,
   });
   const deleteEixoMutation = useMutation({
@@ -78,6 +86,18 @@ export function useCatalogoBuilder(catalogoId: string) {
     mutationFn: ({ id, dto }: { id: string; dto: MoveConteudoRequest }) => moveConteudo(id, dto),
     onSuccess: invalidate,
   });
+  const reorderColecoesMutation = useMutation({
+    mutationFn: ({ eixoId, dto }: { eixoId: string; dto: ReorderColecoesRequest }) => reorderColecoes(eixoId, dto),
+    onSuccess: invalidate,
+  });
+  const reorderEixosMutation = useMutation({
+    mutationFn: (dto: ReorderEixosRequest) => reorderEixos(catalogoId, dto),
+    onSuccess: invalidate,
+  });
+  const reorderConteudosMutation = useMutation({
+    mutationFn: ({ colecaoId, dto }: { colecaoId: string; dto: ReorderConteudosRequest }) => reorderConteudos(colecaoId, dto),
+    onSuccess: invalidate,
+  });
 
   return {
     createEixo: createEixoMutation,
@@ -90,9 +110,20 @@ export function useCatalogoBuilder(catalogoId: string) {
     updateConteudo: updateConteudoMutation,
     deleteConteudo: deleteConteudoMutation,
     moveConteudo: moveConteudoMutation,
+    reorderColecoes: reorderColecoesMutation,
+    reorderEixos: reorderEixosMutation,
+    reorderConteudos: reorderConteudosMutation,
   };
 }
 
 export function useAiSuggest() {
   return useMutation({ mutationFn: (dto: AiSuggestRequest) => aiSuggest(dto) });
+}
+
+export function useUploadImage() {
+  return useMutation({ mutationFn: (file: File) => uploadImage(file) });
+}
+
+export function useUploadPdf() {
+  return useMutation({ mutationFn: (file: File) => uploadPdf(file) });
 }

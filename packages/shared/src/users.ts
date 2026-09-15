@@ -10,6 +10,8 @@ export interface UserSummary {
   whatsapp: string | null;
   role: ManagedUserRole;
   status: UserStatus;
+  planoId: string | null;
+  planoName: string | null;
   createdAt: string;
 }
 
@@ -25,6 +27,7 @@ export interface CreateUserRequest {
   email: string;
   whatsapp?: string;
   role: ManagedUserRole;
+  planoId?: string;
 }
 
 export interface UpdateUserRequest {
@@ -32,9 +35,15 @@ export interface UpdateUserRequest {
   email?: string;
   whatsapp?: string;
   status?: UserStatus;
+  planoId?: string | null;
 }
 
 export interface ResetPasswordResponse {
   token: string;
   expiresAt: string;
+}
+
+export interface CreateUserResponse extends UserSummary {
+  firstAccessToken: string;
+  firstAccessExpiresAt: string;
 }

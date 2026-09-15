@@ -13,17 +13,17 @@ export function CatalogosTab() {
   const { data: catalogos, isLoading, error } = useCatalogos();
   const deleteCatalogo = useDeleteCatalogo();
   const [modal, setModal] = useState<ModalState>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   function handleDelete(catalogo: CatalogoSummary) {
-    setDeleteError(null);
+    setActionError(null);
     if (!window.confirm(`Excluir o catálogo "${catalogo.name}"? Essa ação não pode ser desfeita.`)) {
       return;
     }
     deleteCatalogo.mutate(catalogo.id, {
       onError: (err) => {
-        setDeleteError(err instanceof ApiError ? err.message : 'Não foi possível excluir o catálogo.');
+        setActionError(err instanceof ApiError ? err.message : 'Não foi possível excluir o catálogo.');
       },
     });
   }
@@ -52,9 +52,9 @@ export function CatalogosTab() {
         </button>
       </div>
 
-      {deleteError && (
+      {actionError && (
         <div className="mb-3 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-300 light:text-rose-700">
-          {deleteError}
+          {actionError}
         </div>
       )}
 
@@ -98,7 +98,8 @@ export function CatalogosTab() {
               {catalogos?.map((catalogo) => (
                 <tr
                   key={catalogo.id}
-                  onClick={() => navigate(`/master/catalogos/${catalogo.id}`)}
+                  onDoubleClick={() => navigate(`/master/catalogos/${catalogo.id}`)}
+                  title="Duplo clique pra abrir o construtor de acervo"
                   className="cursor-pointer border-b border-white/10 last:border-b-0 hover:bg-white/[0.02] light:border-black/10 light:hover:bg-black/[0.02]"
                 >
                   <td className="flex items-center gap-2.5 px-4 py-3 font-semibold">
@@ -116,9 +117,9 @@ export function CatalogosTab() {
                     <div className="flex items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
                       <button
                         type="button"
-                        onClick={() => navigate(`/master/catalogos/${catalogo.id}`)}
+                        onClick={() => setModal({ mode: 'edit', catalogo })}
                         aria-label="Editar"
-                        title="Abrir construtor de acervo"
+                        title="Editar nome/ícone"
                         className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-neutral-400 transition hover:bg-white/[0.05] hover:text-neutral-100 light:border-black/10 light:hover:bg-black/[0.05] light:hover:text-neutral-900"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -147,7 +148,7 @@ export function CatalogosTab() {
         </div>
       </div>
       <p className="mt-2.5 text-xs leading-relaxed text-neutral-500">
-        Excluir fica bloqueado se algum município já ativou o catálogo. Clique numa linha (ou no lápis) pra abrir o construtor de acervo.
+        Excluir fica bloqueado se algum município já ativou o catálogo. Dê duplo clique numa linha pra abrir o construtor de acervo (eixos, coleções e conteúdos).
       </p>
 
       {modal && <CatalogoModal state={modal} onClose={() => setModal(null)} />}

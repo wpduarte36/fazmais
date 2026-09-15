@@ -27,4 +27,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsIn(EDITABLE_STATUSES)
   status?: UserStatus;
+
+  // nulo = remove o plano (raro; normalmente só pra ADMIN, que não consome
+  // conteúdo por plano mesmo). undefined = não mexe.
+  @IsOptional()
+  @IsString()
+  planoId?: string | null;
 }

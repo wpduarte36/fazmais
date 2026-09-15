@@ -22,8 +22,26 @@ async function main() {
 
   const planoPadrao = await prisma.plano.upsert({
     where: { name: 'Padrão' },
-    update: {},
-    create: { name: 'Padrão', description: 'Plano padrão de acesso ao acervo educacional' },
+    update: { level: 0 },
+    create: { name: 'Padrão', level: 0, description: 'Plano padrão de acesso ao acervo educacional' },
+  });
+
+  // Hierarquia: quem tem um plano de level N enxerga todo conteúdo com
+  // planoMinimo.level <= N — Ouro vê tudo, Prata vê Prata+Bronze+Padrão, etc.
+  await prisma.plano.upsert({
+    where: { name: 'Bronze' },
+    update: { level: 1 },
+    create: { name: 'Bronze', level: 1, description: 'Acesso ao acervo Padrão + conteúdos Bronze' },
+  });
+  await prisma.plano.upsert({
+    where: { name: 'Prata' },
+    update: { level: 2 },
+    create: { name: 'Prata', level: 2, description: 'Acesso ao acervo Padrão + Bronze + conteúdos Prata' },
+  });
+  await prisma.plano.upsert({
+    where: { name: 'Ouro' },
+    update: { level: 3 },
+    create: { name: 'Ouro', level: 3, description: 'Acesso a todo o acervo, incluindo conteúdos exclusivos Ouro' },
   });
 
   const passwordHash = await bcrypt.hash('fazmais123', 10);

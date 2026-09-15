@@ -8,8 +8,12 @@ import type {
   CreateCatalogoRequest,
   CreateConteudoRequest,
   EixoNode,
+  EixoRequest,
   MoveConteudoRequest,
   NameOnlyRequest,
+  ReorderColecoesRequest,
+  ReorderConteudosRequest,
+  ReorderEixosRequest,
   UpdateCatalogoRequest,
   UpdateConteudoRequest,
 } from '@fazmais/shared';
@@ -35,11 +39,11 @@ export function getCatalogoTree(id: string): Promise<CatalogoTree> {
   return apiRequest<CatalogoTree>(`/catalogos/${id}`);
 }
 
-export function createEixo(catalogoId: string, dto: NameOnlyRequest): Promise<EixoNode> {
+export function createEixo(catalogoId: string, dto: EixoRequest): Promise<EixoNode> {
   return apiRequest<EixoNode>(`/catalogos/${catalogoId}/eixos`, { method: 'POST', body: dto });
 }
 
-export function updateEixo(id: string, dto: NameOnlyRequest): Promise<EixoNode> {
+export function updateEixo(id: string, dto: EixoRequest): Promise<EixoNode> {
   return apiRequest<EixoNode>(`/eixos/${id}`, { method: 'PATCH', body: dto });
 }
 
@@ -73,6 +77,18 @@ export function deleteConteudo(id: string): Promise<void> {
 
 export function moveConteudo(id: string, dto: MoveConteudoRequest): Promise<ConteudoSummary> {
   return apiRequest<ConteudoSummary>(`/conteudos/${id}/move`, { method: 'PATCH', body: dto });
+}
+
+export function reorderColecoes(eixoId: string, dto: ReorderColecoesRequest): Promise<void> {
+  return apiRequest<void>(`/eixos/${eixoId}/colecoes/reorder`, { method: 'PATCH', body: dto });
+}
+
+export function reorderEixos(catalogoId: string, dto: ReorderEixosRequest): Promise<void> {
+  return apiRequest<void>(`/catalogos/${catalogoId}/eixos/reorder`, { method: 'PATCH', body: dto });
+}
+
+export function reorderConteudos(colecaoId: string, dto: ReorderConteudosRequest): Promise<void> {
+  return apiRequest<void>(`/colecoes/${colecaoId}/conteudos/reorder`, { method: 'PATCH', body: dto });
 }
 
 export function aiSuggest(dto: AiSuggestRequest): Promise<AiSuggestResponse> {

@@ -1,0 +1,16 @@
+# Configuração do serviço da API (@fazmais/api) na Railway.
+# Na Railway: crie um serviço a partir deste repo, mantenha o Root Directory
+# na raiz ("/") e as variáveis de ambiente listadas em DEPLOY.md.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/api/Dockerfile"
+
+[deploy]
+# migrate deploy + start já estão no CMD do Dockerfile; o startCommand aqui
+# é redundância explícita (a Railway mostra na UI o que vai rodar).
+startCommand = "sh -c 'pnpm exec prisma migrate deploy && node apps/api/dist/main.js'"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

@@ -139,7 +139,7 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
             {error}
           </p>
         )}
-        {vimeoRef && <div ref={containerRef} className="aspect-video w-full overflow-hidden rounded-xl" />}
+        {vimeoRef && <div ref={containerRef} className="w-full overflow-hidden rounded-xl" />}
 
         {conteudo.description && (
           <p className="mt-4 text-sm text-neutral-400 light:text-neutral-600">{conteudo.description}</p>

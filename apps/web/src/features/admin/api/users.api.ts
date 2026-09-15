@@ -1,5 +1,6 @@
 import type {
   CreateUserRequest,
+  CreateUserResponse,
   ResetPasswordResponse,
   UpdateUserRequest,
   UserStats,
@@ -15,8 +16,8 @@ export function getUserStats(): Promise<UserStats> {
   return apiRequest<UserStats>('/users/stats');
 }
 
-export function createUser(dto: CreateUserRequest): Promise<UserSummary> {
-  return apiRequest<UserSummary>('/users', { method: 'POST', body: dto });
+export function createUser(dto: CreateUserRequest): Promise<CreateUserResponse> {
+  return apiRequest<CreateUserResponse>('/users', { method: 'POST', body: dto });
 }
 
 export function updateUser(id: string, dto: UpdateUserRequest): Promise<UserSummary> {

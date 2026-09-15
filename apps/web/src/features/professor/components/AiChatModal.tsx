@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { ConteudoSummary, HomeFeed } from '@fazmais/shared';
 import { buildMockAiResponse, type SugestaoIa } from '../lib/mockAiChat';
 import { ConteudoCard } from './ConteudoCard';
+import fabinhoFigura from '../../../assets/fabinho.webp';
+import fabinhoAvatar from '../../../assets/fabinho-avatar.webp';
 
 interface Mensagem {
   autor: 'usuario' | 'ia';
@@ -17,6 +19,15 @@ interface AiChatModalProps {
 }
 
 const DELAY_RESPOSTA_MS = 700;
+
+const SAUDACAO = 'Oi! Eu sou o Fabinho, assistente do Faz+. Me conta o que você está planejando ensinar e eu busco os melhores materiais do acervo pra sua aula. Pode perguntar com suas palavras, tipo:';
+
+const PERGUNTAS_SUGERIDAS = [
+  'Quero uma atividade sobre o ciclo da borboleta',
+  'Tem algo sobre fotossíntese pros alunos?',
+  'Preciso de conteúdo sobre o sistema solar',
+  'Como uso o iPad em sala de aula?',
+];
 
 export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }: AiChatModalProps) {
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
@@ -67,10 +78,12 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
       >
         <div className="mb-3 flex shrink-0 items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-sm">
-              🤖
-            </span>
-            <h1 className="text-base font-bold">Consultar a IA</h1>
+            <img
+              src={fabinhoAvatar}
+              alt=""
+              className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
+            />
+            <h1 className="text-base font-bold">Fabinho</h1>
           </div>
           <button
             type="button"
@@ -85,8 +98,42 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+          {mensagens.length === 0 && !isThinking && (
+            <div className="space-y-3">
+              <img
+                src={fabinhoFigura}
+                alt="Fabinho, a IA do Faz+"
+                className="mx-auto h-36 w-auto drop-shadow-xl"
+              />
+              <div className="flex justify-start">
+                <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-white/[0.06] px-3.5 py-2.5 text-sm text-neutral-200 light:bg-black/[0.04] light:text-neutral-800">
+                  <p>{SAUDACAO}</p>
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {PERGUNTAS_SUGERIDAS.map((pergunta) => (
+                      <button
+                        key={pergunta}
+                        type="button"
+                        onClick={() => enviarPergunta(pergunta)}
+                        className="rounded-full border border-amber-400/30 bg-amber-400/5 px-3 py-1 text-xs font-medium text-amber-300 transition hover:bg-amber-400/15 light:text-amber-700"
+                      >
+                        {pergunta}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {mensagens.map((mensagem, index) => (
-            <div key={index} className={mensagem.autor === 'usuario' ? 'flex justify-end' : 'flex justify-start'}>
+            <div key={index} className={mensagem.autor === 'usuario' ? 'flex justify-end' : 'flex justify-start gap-2'}>
+              {mensagem.autor === 'ia' && (
+                <img
+                  src={fabinhoAvatar}
+                  alt=""
+                  className="mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
+                />
+              )}
               <div
                 className={
                   mensagem.autor === 'usuario'
@@ -117,7 +164,12 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
           ))}
 
           {isThinking && (
-            <div className="flex justify-start">
+            <div className="flex justify-start gap-2">
+              <img
+                src={fabinhoAvatar}
+                alt=""
+                className="mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
+              />
               <div className="rounded-2xl rounded-bl-sm bg-white/[0.06] px-3.5 py-2.5 text-sm text-neutral-400 light:bg-black/[0.04]">
                 <span className="inline-flex gap-1">
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -136,7 +188,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
             type="text"
             value={novaPergunta}
             onChange={(event) => setNovaPergunta(event.target.value)}
-            placeholder="Pergunte mais alguma coisa..."
+            placeholder="Pergunte ao Fabinho..."
             className="w-full flex-1 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
           />
           <button

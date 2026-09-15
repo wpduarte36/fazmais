@@ -17,6 +17,7 @@ import { EixosService } from './eixos.service';
 import { ColecoesService } from './colecoes.service';
 import { EixoDto } from './dto/eixo.dto';
 import { NameOnlyDto } from './dto/name-only.dto';
+import { ReorderColecoesDto } from './dto/reorder-colecoes.dto';
 
 @Controller('eixos')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -41,5 +42,10 @@ export class EixosController {
   @Post(':id/colecoes')
   createColecao(@Param('id', ParseUUIDPipe) eixoId: string, @Body() dto: NameOnlyDto) {
     return this.colecoesService.create(eixoId, dto);
+  }
+
+  @Patch(':id/colecoes/reorder')
+  reorderColecoes(@Param('id', ParseUUIDPipe) eixoId: string, @Body() dto: ReorderColecoesDto) {
+    return this.eixosService.reorderColecoes(eixoId, dto);
   }
 }

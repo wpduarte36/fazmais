@@ -42,10 +42,15 @@ export function PdfModal({ conteudo, onClose }: PdfModalProps) {
             className="min-h-0 w-full flex-1 rounded-xl border border-white/10 light:border-black/10"
             allow="fullscreen"
             allowFullScreen
+            // Sem allow-same-origin: se o mediaUrl apontar pra algo hospedado
+            // na própria origem da API (PDF em /uploads), o conteúdo roda num
+            // origin opaco e não alcança o cookie de refresh. allow-scripts +
+            // popups/forms mantêm visualizadores de PDF em JS funcionando.
+            sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-downloads"
           />
         ) : (
           <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-300 light:text-rose-700">
-            Link do PDF inválido.
+            Link do eBook inválido.
           </p>
         )}
       </div>

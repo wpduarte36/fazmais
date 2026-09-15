@@ -32,7 +32,13 @@ const USER_SELECT = {
   role: true,
   status: true,
   createdAt: true,
+  plano: { select: { id: true, name: true } },
 } as const;
+
+function toSummary(user: { plano: { id: string; name: string } | null } & Record<string, unknown>) {
+  const { plano, ...rest } = user;
+  return { ...rest, planoId: plano?.id ?? null, planoName: plano?.name ?? null };
+}
 
 @Injectable()
 export class UsersService {
@@ -40,12 +46,13 @@ export class UsersService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  list(tenantId: string) {
-    return this.prisma.user.findMany({
+  async list(tenantId: string) {
+    const users = await this.prisma.user.findMany({
       where: { tenantId, role: { in: MANAGED_ROLES } },
       orderBy: { name: 'asc' },
       select: USER_SELECT,
     });
+    return users.map(toSummary);
   }
 
   async stats(tenantId: string) {
@@ -71,18 +78,20 @@ export class UsersService {
             role: dto.role,
             status: 'ATIVO',
             password: null,
+            planoId: dto.planoId,
           },
           select: USER_SELECT,
         }),
       USER_CONFLICT_MESSAGES,
     );
 
+    const expiresAt = new Date(Date.now() + FIRST_ACCESS_TOKEN_TTL_MS);
     const token = await issuePasswordToken(this.prisma, created.id, 'FIRST_ACCESS', FIRST_ACCESS_TOKEN_TTL_MS);
     this.logger.log(
       `[dev only, sem envio de e-mail] token de 1º acesso para ${created.login}: ${token}`,
     );
 
-    return created;
+    return { ...toSummary(created), firstAccessToken: token, firstAccessExpiresAt: expiresAt };
   }
 
   async update(tenantId: string, currentUserId: string, userId: string, dto: UpdateUserDto) {
@@ -90,7 +99,7 @@ export class UsersService {
       throw new ForbiddenException('Você não pode alterar o status da sua própria conta');
     }
     await this.findUserOrThrow(tenantId, userId);
-    return runUniqueCheckedWrite(
+    const updated = await runUniqueCheckedWrite(
       () =>
         this.prisma.user.update({
           where: { id: userId },
@@ -99,11 +108,13 @@ export class UsersService {
             email: dto.email,
             whatsapp: dto.whatsapp,
             status: dto.status,
+            planoId: dto.planoId,
           },
           select: USER_SELECT,
         }),
       USER_CONFLICT_MESSAGES,
     );
+    return toSummary(updated);
   }
 
   async resetPassword(tenantId: string, userId: string) {

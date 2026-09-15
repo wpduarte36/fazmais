@@ -17,6 +17,7 @@ import { ColecoesService } from './colecoes.service';
 import { ConteudosService } from './conteudos.service';
 import { NameOnlyDto } from './dto/name-only.dto';
 import { CreateConteudoDto } from './dto/create-conteudo.dto';
+import { ReorderConteudosDto } from './dto/reorder-conteudos.dto';
 
 @Controller('colecoes')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,5 +45,13 @@ export class ColecoesController {
     @Body() dto: CreateConteudoDto,
   ) {
     return this.conteudosService.create(colecaoId, dto);
+  }
+
+  @Patch(':id/conteudos/reorder')
+  reorderConteudos(
+    @Param('id', ParseUUIDPipe) colecaoId: string,
+    @Body() dto: ReorderConteudosDto,
+  ) {
+    return this.colecoesService.reorderConteudos(colecaoId, dto);
   }
 }
