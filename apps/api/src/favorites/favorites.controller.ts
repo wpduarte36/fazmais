@@ -30,6 +30,6 @@ export class FavoritesController {
   @Delete(':conteudoId')
   @HttpCode(HttpStatus.NO_CONTENT)
   desfavoritar(@CurrentUser() user: JwtPayload, @Param('conteudoId', ParseUUIDPipe) conteudoId: string) {
-    return this.favoritesService.desfavoritar(user.sub, conteudoId);
+    return this.favoritesService.desfavoritar(user.sub, user.tenantId as string, conteudoId);
   }
 }
