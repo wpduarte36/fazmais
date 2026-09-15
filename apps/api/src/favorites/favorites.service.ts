@@ -19,7 +19,8 @@ export class FavoritesService {
     });
   }
 
-  async desfavoritar(userId: string, conteudoId: string): Promise<void> {
+  async desfavoritar(userId: string, tenantId: string, conteudoId: string): Promise<void> {
+    await assertConteudoVisivel(this.prisma, userId, tenantId, conteudoId);
     await this.prisma.favorite.deleteMany({ where: { userId, conteudoId } });
   }
 }

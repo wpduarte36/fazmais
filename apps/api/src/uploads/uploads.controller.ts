@@ -20,6 +20,17 @@ import { UPLOADS_DIR } from './uploads-dir';
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_PDF_SIZE_BYTES = 30 * 1024 * 1024; // 30 MB — mesmo limite do legado
 
+// Preferimos PUBLIC_API_URL (fixo, configurado no deploy) a montar a URL a
+// partir do header Host da requisição: esse header é enviado pelo cliente e
+// não é validado pelo `trust proxy` (que só afeta protocol/ip), então sem
+// isso um MASTER podia forjar `Host` e gravar no conteúdo uma URL de imagem
+// apontando pra um domínio arbitrário. Sem a env var (dev local), cai de
+// volta no host da requisição, que é sempre localhost mesmo.
+function buildUploadUrl(req: Request, filename: string): string {
+  const baseUrl = process.env.PUBLIC_API_URL ?? `${req.protocol}://${req.get('host')}`;
+  return `${baseUrl}/uploads/${filename}`;
+}
+
 // A extensão do arquivo salvo é decidida AQUI, a partir do mimetype já
 // validado — nunca copiada de file.originalname (que o cliente controla).
 // Sem isso, um MASTER podia enviar "x.html" com Content-Type: image/png,
@@ -99,8 +110,7 @@ export class UploadsController {
       MAGIC[file.mimetype as keyof typeof MAGIC],
       'O arquivo enviado não é uma imagem JPEG, PNG ou WebP válida.',
     );
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    return { url: `${baseUrl}/uploads/${file.filename}` };
+    return { url: buildUploadUrl(req, file.filename) };
   }
 
   // PDF fica hospedado aqui mesmo e é aberto direto num <iframe> no
@@ -134,7 +144,6 @@ export class UploadsController {
       MAGIC['application/pdf'],
       'O arquivo enviado não é um PDF válido.',
     );
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    return { url: `${baseUrl}/uploads/${file.filename}` };
+    return { url: buildUploadUrl(req, file.filename) };
   }
 }

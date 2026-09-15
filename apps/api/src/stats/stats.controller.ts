@@ -6,11 +6,11 @@ import { StatsService } from './stats.service';
 
 @Controller('stats')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('MASTER')
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 
   @Get('master')
-  @Roles('MASTER')
   getMasterStats() {
     return this.statsService.getMasterStats();
   }
