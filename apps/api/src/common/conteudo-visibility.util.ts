@@ -6,8 +6,9 @@ import { PrismaService } from '../prisma/prisma.service';
 // - conteúdo do próprio tenant, OU conteúdo global de um catálogo que o
 //   tenant ativou (TenantCatalogoAccess);
 // - publicado — planoMinimoId nulo = rascunho, não aparece pra ninguém;
-// - com planoMinimo.level <= o level do plano do professor (professor sem
-//   plano não filtra por nível, mesmo comportamento histórico do feed).
+// - com planoMinimo.level <= o level do plano do professor. Professor sem
+//   plano atribuído é tratado como Padrão (level 0) — só enxerga o acervo
+//   básico, nunca conteúdo Bronze/Prata/Ouro sem um plano pago de verdade.
 // É a MESMA regra usada em HomeService.getFeed pra montar a lista visível —
 // as duas precisam andar juntas, por isso a lógica mora aqui.
 export async function conteudoVisivelWhere(
@@ -19,7 +20,7 @@ export async function conteudoVisivelWhere(
     where: { id: userId },
     select: { plano: { select: { level: true } } },
   });
-  const userPlanoLevel = user.plano?.level ?? null;
+  const userPlanoLevel = user.plano?.level ?? 0;
 
   const access = await prisma.tenantCatalogoAccess.findMany({
     where: { tenantId },
@@ -36,9 +37,7 @@ export async function conteudoVisivelWhere(
       },
     ],
     planoMinimoId: { not: null },
-    ...(userPlanoLevel !== null
-      ? { planoMinimo: { level: { lte: userPlanoLevel } } }
-      : {}),
+    planoMinimo: { level: { lte: userPlanoLevel } },
   };
 }
 
