@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { bulkSetOrdem } from '../common/bulk-ordem.util';
 import { CreateCatalogoDto } from './dto/create-catalogo.dto';
 import { UpdateCatalogoDto } from './dto/update-catalogo.dto';
 import { ReorderEixosDto } from './dto/reorder-eixos.dto';
@@ -161,11 +162,7 @@ export class CatalogosService {
       );
     }
 
-    await this.prisma.$transaction(
-      dto.eixoIds.map((id, index) =>
-        this.prisma.eixo.update({ where: { id }, data: { ordem: index } }),
-      ),
-    );
+    await bulkSetOrdem(this.prisma, 'eixos', dto.eixoIds);
   }
 
   async findOrThrow(id: string) {

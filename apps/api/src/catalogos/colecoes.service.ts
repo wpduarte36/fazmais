@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { bulkSetOrdem } from '../common/bulk-ordem.util';
 import { NameOnlyDto } from './dto/name-only.dto';
 import { ReorderConteudosDto } from './dto/reorder-conteudos.dto';
 
@@ -55,11 +56,7 @@ export class ColecoesService {
       );
     }
 
-    await this.prisma.$transaction(
-      dto.conteudoIds.map((id, index) =>
-        this.prisma.conteudo.update({ where: { id }, data: { ordem: index } }),
-      ),
-    );
+    await bulkSetOrdem(this.prisma, 'conteudos', dto.conteudoIds);
   }
 
   // tenantId: null restringe a catálogos globais — hoje o único tipo
