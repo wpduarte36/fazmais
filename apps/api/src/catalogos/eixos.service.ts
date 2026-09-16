@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { bulkSetOrdem } from '../common/bulk-ordem.util';
 import { EixoDto } from './dto/eixo.dto';
 import { ReorderColecoesDto } from './dto/reorder-colecoes.dto';
 
@@ -61,11 +62,7 @@ export class EixosService {
       );
     }
 
-    await this.prisma.$transaction(
-      dto.colecaoIds.map((id, index) =>
-        this.prisma.colecao.update({ where: { id }, data: { ordem: index } }),
-      ),
-    );
+    await bulkSetOrdem(this.prisma, 'colecoes', dto.colecaoIds);
   }
 
   // Mesmo racional de ColecoesService.findOrThrow: restringe a catálogos
