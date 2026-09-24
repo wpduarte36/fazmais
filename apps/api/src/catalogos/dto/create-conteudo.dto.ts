@@ -1,5 +1,6 @@
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsIn,
@@ -12,9 +13,10 @@ import {
   MaxLength,
   ValidateIf,
 } from 'class-validator';
-import type { MediaType } from '@prisma/client';
+import type { AppPlatform, MediaType } from '@prisma/client';
 
 const MEDIA_TYPES: MediaType[] = ['VIDEO', 'PDF', 'ARTIGO', 'APP'];
+const APP_PLATFORMS: AppPlatform[] = ['APP_STORE', 'PLAY_STORE', 'WEB'];
 
 export class CreateConteudoDto {
   @IsString()
@@ -100,24 +102,41 @@ export class CreateConteudoDto {
     { require_tld: false },
     { message: 'externalUrl deve ser uma URL válida' },
   )
-  externalUrl?: string;
+  externalUrl?: string | null;
 
   @IsOptional()
   @IsString()
   @MaxLength(120)
-  sourceName?: string;
+  sourceName?: string | null;
 
   @IsOptional()
   @IsUrl(
     { require_tld: false },
     { message: 'appStoreUrl deve ser uma URL válida' },
   )
-  appStoreUrl?: string;
+  appStoreUrl?: string | null;
 
   @IsOptional()
   @IsUrl(
     { require_tld: false },
     { message: 'playStoreUrl deve ser uma URL válida' },
   )
-  playStoreUrl?: string;
+  playStoreUrl?: string | null;
+
+  @IsOptional()
+  @IsUrl({ require_tld: false }, { message: 'webUrl deve ser uma URL válida' })
+  webUrl?: string | null;
+
+  // Onde o APP está disponível — pelo menos uma plataforma quando o tipo é
+  // APP (sem isso a janela do professor não teria o que mostrar).
+  @ValidateIf(
+    (dto: CreateConteudoDto) =>
+      dto.mediaType === 'APP' || dto.appPlatforms !== undefined,
+  )
+  @IsArray()
+  @ArrayMinSize(1, {
+    message: 'Marque pelo menos uma plataforma onde o app está disponível',
+  })
+  @IsIn(APP_PLATFORMS, { each: true })
+  appPlatforms?: AppPlatform[];
 }

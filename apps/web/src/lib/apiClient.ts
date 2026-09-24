@@ -78,10 +78,15 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}, 
   const data: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // ValidationPipe do Nest devolve `message` como lista (um item por regra
+    // violada) — sem juntar, qualquer 400 de validação virava a mensagem genérica.
+    const rawMessage = data && typeof data === 'object' && 'message' in data ? data.message : null;
     const message =
-      data && typeof data === 'object' && 'message' in data && typeof data.message === 'string'
-        ? data.message
-        : 'Ocorreu um erro inesperado';
+      typeof rawMessage === 'string'
+        ? rawMessage
+        : Array.isArray(rawMessage) && rawMessage.length > 0
+          ? rawMessage.join(' · ')
+          : 'Ocorreu um erro inesperado';
     throw new ApiError(message, response.status);
   }
 

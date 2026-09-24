@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { ConteudoSummary, CreateConteudoRequest, MediaType, UpdateConteudoRequest } from '@fazmais/shared';
+import type { AppPlatform, ConteudoSummary, CreateConteudoRequest, MediaType, UpdateConteudoRequest } from '@fazmais/shared';
 import { RichTextEditor } from '../../../components/RichTextEditor';
 import { usePlanos } from '../hooks/usePlanos';
 import { useAiSuggest, useUploadImage, useUploadPdf } from '../hooks/useCatalogoBuilder';
@@ -14,10 +14,22 @@ interface ConteudoModalProps {
   onUpdate: (dto: UpdateConteudoRequest) => void;
 }
 
-const MEDIA_OPTIONS: { value: MediaType; label: string }[] = [
+// Mesmo limite do CreateConteudoDto/UpdateConteudoDto na API.
+const DESCRIPTION_MAX = 600;
+
+const MEDIA_OPTIONS:{ value: MediaType; label: string }[] = [
   { value: 'VIDEO', label: 'Vídeo' },
   { value: 'PDF', label: 'PDF' },
   { value: 'ARTIGO', label: 'Artigo' },
+  { value: 'APP', label: 'App' },
+];
+
+// Cada plataforma é uma caixa de marcar + um link opcional: marcada sem link,
+// o professor vê só "Disponível na App Store"; com link, vira botão.
+const APP_PLATFORM_OPTIONS: { value: AppPlatform; label: string; placeholder: string }[] = [
+  { value: 'APP_STORE', label: 'App Store', placeholder: 'https://apps.apple.com/...' },
+  { value: 'PLAY_STORE', label: 'Play Store', placeholder: 'https://play.google.com/...' },
+  { value: 'WEB', label: 'Web (navegador)', placeholder: 'https://...' },
 ];
 
 export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onCreate, onUpdate }: ConteudoModalProps) {
@@ -42,6 +54,25 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
   const [tags, setTags] = useState<string[]>(conteudo?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
   const [aiSummary, setAiSummary] = useState(conteudo?.aiSummary ?? '');
+  const [externalUrl, setExternalUrl] = useState(conteudo?.externalUrl ?? '');
+  const [sourceName, setSourceName] = useState(conteudo?.sourceName ?? '');
+  const [appPlatforms, setAppPlatforms] = useState<AppPlatform[]>(conteudo?.appPlatforms ?? []);
+  const [appLinks, setAppLinks] = useState<Record<AppPlatform, string>>({
+    APP_STORE: conteudo?.appStoreUrl ?? '',
+    PLAY_STORE: conteudo?.playStoreUrl ?? '',
+    WEB: conteudo?.webUrl ?? '',
+  });
+
+  function toggleAppPlatform(platform: AppPlatform) {
+    setAppPlatforms((current) =>
+      current.includes(platform) ? current.filter((p) => p !== platform) : [...current, platform],
+    );
+  }
+
+  // Link só vale pra plataforma marcada — desmarcar descarta o link junto.
+  function appLinkPayload(platform: AppPlatform): string | null {
+    return appPlatforms.includes(platform) ? appLinks[platform].trim() || null : null;
+  }
   const [formError, setFormError] = useState<string | null>(null);
 
   function addTag() {
@@ -112,6 +143,10 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
       setFormError('Título e descrição são obrigatórios.');
       return;
     }
+    if (description.length > DESCRIPTION_MAX) {
+      setFormError(`A descrição tem ${description.length} caracteres; o máximo é ${DESCRIPTION_MAX}.`);
+      return;
+    }
     if (!imageUrl.trim()) {
       setFormError('Informe a URL da imagem de capa.');
       return;
@@ -120,8 +155,12 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
       setFormError('Informe o conteúdo do artigo.');
       return;
     }
-    if (mediaType !== 'ARTIGO' && !mediaUrl.trim()) {
+    if ((mediaType === 'VIDEO' || mediaType === 'PDF') && !mediaUrl.trim()) {
       setFormError('Informe a URL da mídia.');
+      return;
+    }
+    if (mediaType === 'APP' && appPlatforms.length === 0) {
+      setFormError('Marque pelo menos uma plataforma onde o app está disponível.');
       return;
     }
 
@@ -129,8 +168,18 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
       title,
       description,
       mediaType,
-      mediaUrl: mediaType === 'ARTIGO' ? undefined : mediaUrl,
+      mediaUrl: mediaType === 'VIDEO' || mediaType === 'PDF' ? mediaUrl : undefined,
       htmlContent: mediaType === 'ARTIGO' ? htmlContent : undefined,
+      ...(mediaType === 'ARTIGO' && {
+        externalUrl: externalUrl.trim() || null,
+        sourceName: sourceName.trim() || null,
+      }),
+      ...(mediaType === 'APP' && {
+        appPlatforms,
+        appStoreUrl: appLinkPayload('APP_STORE'),
+        playStoreUrl: appLinkPayload('PLAY_STORE'),
+        webUrl: appLinkPayload('WEB'),
+      }),
       imageUrl,
       bannerImageUrl: bannerImageUrl.trim() || undefined,
       isFeatured,
@@ -190,6 +239,9 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
               placeholder="1-2 frases sobre o conteúdo"
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
             />
+            <p className={`text-right text-xs ${description.length > DESCRIPTION_MAX ? 'text-rose-400' : 'text-neutral-500'}`}>
+              {description.length}/{DESCRIPTION_MAX}
+            </p>
           </Field>
 
           <Field label="Tipo de mídia">
@@ -212,8 +264,68 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
           </Field>
 
           {mediaType === 'ARTIGO' ? (
-            <Field label="Conteúdo do artigo">
-              <RichTextEditor value={htmlContent} onChange={setHtmlContent} placeholder="Texto do artigo" />
+            <>
+              <div className="grid grid-cols-[2fr_1fr] gap-3">
+                <Field label="Link da matéria original (opcional)">
+                  <input
+                    value={externalUrl}
+                    onChange={(event) => setExternalUrl(event.target.value)}
+                    placeholder="https://... — só pra notícia de outro site"
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Fonte (opcional)">
+                  <input
+                    value={sourceName}
+                    onChange={(event) => setSourceName(event.target.value)}
+                    placeholder="Ex.: Canguru News"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <Field label={externalUrl.trim() ? 'Resumo da matéria' : 'Conteúdo do artigo'}>
+                <RichTextEditor
+                  value={htmlContent}
+                  onChange={setHtmlContent}
+                  placeholder={externalUrl.trim() ? 'Resumo curto — o professor lê a matéria inteira no site de origem' : 'Texto do artigo'}
+                />
+                {externalUrl.trim() && (
+                  <p className="mt-1 text-xs text-neutral-500">
+                    O professor vê este resumo e o botão "Ler matéria inteira", que abre o link acima.
+                  </p>
+                )}
+              </Field>
+            </>
+          ) : mediaType === 'APP' ? (
+            <Field label="Onde está disponível">
+              <div className="flex flex-col gap-2">
+                {APP_PLATFORM_OPTIONS.map((option) => {
+                  const checked = appPlatforms.includes(option.value);
+                  return (
+                    <div key={option.value} className="flex items-center gap-3">
+                      <label className="flex w-40 shrink-0 cursor-pointer items-center gap-2 text-sm text-neutral-200 light:text-neutral-800">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleAppPlatform(option.value)}
+                          className="h-4 w-4 accent-amber-400"
+                        />
+                        {option.label}
+                      </label>
+                      <input
+                        value={appLinks[option.value]}
+                        onChange={(event) => setAppLinks((links) => ({ ...links, [option.value]: event.target.value }))}
+                        disabled={!checked}
+                        placeholder={checked ? `Link (opcional): ${option.placeholder}` : 'Marque a plataforma para informar o link'}
+                        className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-40`}
+                      />
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-neutral-500">
+                  Com link, vira um botão na janela do professor. Sem link, aparece só "Disponível na ...".
+                </p>
+              </div>
             </Field>
           ) : mediaType === 'PDF' ? (
             <Field label="Arquivo PDF">
@@ -474,6 +586,9 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
     </div>
   );
 }
+
+const inputClass =
+  'w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

@@ -36,6 +36,14 @@ enum MediaType {
   APP
 }
 
+// Onde um conteúdo APP está disponível — mostrado ao professor na janela do
+// App. Independe de ter link: o link de cada plataforma é opcional.
+enum AppPlatform {
+  APP_STORE
+  PLAY_STORE
+  WEB
+}
+
 enum PasswordTokenType {
   FIRST_ACCESS
   RESET
@@ -188,6 +196,8 @@ model Conteudo {
   sourceName      String? @map("source_name") // nome da fonte externa exibido junto do externalUrl (ex: "Canguru News")
   appStoreUrl     String? @map("app_store_url") // só p/ APP
   playStoreUrl    String? @map("play_store_url") // só p/ APP
+  webUrl          String? @map("web_url") // só p/ APP: versão que abre no navegador
+  appPlatforms    AppPlatform[] @default([]) @map("app_platforms") // só p/ APP
   viewCount       Int     @default(0) @map("view_count") // incrementado toda vez que um professor abre o conteúdo — alimenta a fileira "Mais assistidos"
   ordem       Int       @default(0) // posição de exibição dentro da Coleção — menor primeiro
   planoMinimoId String? @map("plano_minimo_id") // nulo = rascunho, não aparece pra ninguém; senão, visível pra quem tem plano com level >= o desse plano

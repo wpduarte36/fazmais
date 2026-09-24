@@ -1,4 +1,4 @@
-import type { MediaType } from './enums';
+import type { AppPlatform, MediaType } from './enums';
 
 export interface CatalogoSummary {
   id: string;
@@ -60,6 +60,8 @@ export interface ConteudoSummary {
   sourceName: string | null;
   appStoreUrl: string | null;
   playStoreUrl: string | null;
+  webUrl: string | null;
+  appPlatforms: AppPlatform[];
   planoMinimoId: string | null;
   isFavorito: boolean;
   myRating: number | null;
@@ -105,10 +107,13 @@ export interface CreateConteudoRequest {
   durationSeconds?: number;
   pageCount?: number;
   downloadUrl?: string;
-  externalUrl?: string;
-  sourceName?: string;
-  appStoreUrl?: string;
-  playStoreUrl?: string;
+  // null limpa o campo na edição (undefined = não mexe).
+  externalUrl?: string | null;
+  sourceName?: string | null;
+  appStoreUrl?: string | null;
+  playStoreUrl?: string | null;
+  webUrl?: string | null;
+  appPlatforms?: AppPlatform[];
 }
 
 export type UpdateConteudoRequest = Partial<CreateConteudoRequest>;

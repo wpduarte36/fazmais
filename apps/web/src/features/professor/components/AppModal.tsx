@@ -1,9 +1,35 @@
-import type { ConteudoSummary } from '@fazmais/shared';
+import type { AppPlatform, ConteudoSummary } from '@fazmais/shared';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
+
+const PLATFORM_ORDER: AppPlatform[] = ['APP_STORE', 'PLAY_STORE', 'WEB'];
+
+const PLATFORM_ACTION: Record<AppPlatform, string> = {
+  APP_STORE: 'Baixar na App Store',
+  PLAY_STORE: 'Baixar na Play Store',
+  WEB: 'Abrir no navegador',
+};
+
+const PLATFORM_ONDE: Record<AppPlatform, string> = {
+  APP_STORE: 'na App Store',
+  PLAY_STORE: 'na Play Store',
+  WEB: 'na versão web',
+};
+
+function linkDa(conteudo: ConteudoSummary, platform: AppPlatform): string | null {
+  if (platform === 'APP_STORE') return conteudo.appStoreUrl;
+  if (platform === 'PLAY_STORE') return conteudo.playStoreUrl;
+  return conteudo.webUrl;
+}
+
+// ["na App Store", "na Play Store"] -> "na App Store e na Play Store"
+function juntar(partes: string[]): string {
+  if (partes.length <= 1) return partes.join('');
+  return `${partes.slice(0, -1).join(', ')} e ${partes[partes.length - 1]}`;
+}
 
 interface AppModalProps {
   conteudo: ConteudoSummary;
@@ -11,7 +37,14 @@ interface AppModalProps {
 }
 
 export function AppModal({ conteudo, onClose }: AppModalProps) {
-  const hasStoreLink = Boolean(conteudo.appStoreUrl || conteudo.playStoreUrl);
+  // Mostra só as plataformas marcadas no cadastro — com link vira botão, sem
+  // link vira texto. Nenhuma marcada (ex.: App migrado ainda não revisado) =
+  // não afirma nada sobre onde está disponível.
+  const disponibilidade = PLATFORM_ORDER.filter((platform) => conteudo.appPlatforms.includes(platform)).map(
+    (platform) => ({ platform, url: linkDa(conteudo, platform) }),
+  );
+  const comLink = disponibilidade.filter((item) => item.url);
+  const semLink = disponibilidade.filter((item) => !item.url);
 
   return (
     <div
@@ -57,33 +90,33 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
             {conteudo.description}
           </p>
 
-          {hasStoreLink ? (
-            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
-              {conteudo.appStoreUrl && (
-                <a
-                  href={conteudo.appStoreUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-300"
-                >
-                  App Store
-                </a>
+          {disponibilidade.length > 0 && (
+            <div className="mt-5 flex flex-col gap-2.5">
+              {comLink.length > 0 && (
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  {comLink.map(({ platform, url }, index) => (
+                    <a
+                      key={platform}
+                      href={url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={
+                        index === 0
+                          ? 'flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-300'
+                          : 'flex flex-1 items-center justify-center gap-2 rounded-xl border border-amber-400/40 px-4 py-2.5 text-sm font-bold text-amber-300 transition hover:bg-amber-400/10 light:text-amber-700'
+                      }
+                    >
+                      {PLATFORM_ACTION[platform]}
+                    </a>
+                  ))}
+                </div>
               )}
-              {conteudo.playStoreUrl && (
-                <a
-                  href={conteudo.playStoreUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-amber-400/40 px-4 py-2.5 text-sm font-bold text-amber-300 transition hover:bg-amber-400/10"
-                >
-                  Play Store
-                </a>
+              {semLink.length > 0 && (
+                <p className="text-xs text-neutral-500">
+                  Disponível {juntar(semLink.map(({ platform }) => PLATFORM_ONDE[platform]))}.
+                </p>
               )}
             </div>
-          ) : (
-            <p className="mt-5 text-xs text-neutral-500">
-              Disponível na App Store e na Play Store.
-            </p>
           )}
         </div>
       </div>

@@ -1,9 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { MediaType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateConteudoDto } from './dto/create-conteudo.dto';
 import { UpdateConteudoDto } from './dto/update-conteudo.dto';
 import { MoveConteudoDto } from './dto/move-conteudo.dto';
 import { AiSuggestDto } from './dto/ai-suggest.dto';
+
+// Campos que só fazem sentido pra um tipo de mídia: link/fonte da matéria
+// original (ARTIGO) e plataformas/links de loja (APP). Pro tipo certo, repassa
+// o que veio no DTO (undefined = não mexe, null = limpa); pra qualquer outro
+// tipo, zera — assim trocar o tipo de um conteúdo não deixa sobra do anterior.
+function camposPorTipo(mediaType: MediaType, dto: UpdateConteudoDto) {
+  const isArtigo = mediaType === 'ARTIGO';
+  const isApp = mediaType === 'APP';
+  return {
+    externalUrl: isArtigo ? dto.externalUrl : null,
+    sourceName: isArtigo ? dto.sourceName : null,
+    appStoreUrl: isApp ? dto.appStoreUrl : null,
+    playStoreUrl: isApp ? dto.playStoreUrl : null,
+    webUrl: isApp ? dto.webUrl : null,
+    appPlatforms: isApp ? dto.appPlatforms : [],
+  };
+}
 
 @Injectable()
 export class ConteudosService {
@@ -40,10 +58,7 @@ export class ConteudosService {
         durationSeconds: dto.durationSeconds,
         pageCount: dto.pageCount,
         downloadUrl: dto.downloadUrl,
-        externalUrl: dto.externalUrl,
-        sourceName: dto.sourceName,
-        appStoreUrl: dto.appStoreUrl,
-        playStoreUrl: dto.playStoreUrl,
+        ...camposPorTipo(dto.mediaType, dto),
       },
     });
 
@@ -75,10 +90,7 @@ export class ConteudosService {
         durationSeconds: dto.durationSeconds,
         pageCount: dto.pageCount,
         downloadUrl: dto.downloadUrl,
-        externalUrl: dto.externalUrl,
-        sourceName: dto.sourceName,
-        appStoreUrl: dto.appStoreUrl,
-        playStoreUrl: dto.playStoreUrl,
+        ...camposPorTipo(mediaType, dto),
       },
     });
 
@@ -171,6 +183,8 @@ export class ConteudosService {
       sourceName: conteudo.sourceName,
       appStoreUrl: conteudo.appStoreUrl,
       playStoreUrl: conteudo.playStoreUrl,
+      webUrl: conteudo.webUrl,
+      appPlatforms: conteudo.appPlatforms,
       planoMinimoId: conteudo.planoMinimoId,
       isFavorito: false,
       myRating: null,
