@@ -5,6 +5,8 @@ import { usePlanos } from '../hooks/usePlanos';
 
 interface VerComoEducadorModalProps {
   onClose: () => void;
+  // Já vem escolhido quando aberto de dentro do "Acessar como admin".
+  tenantIdInicial?: string;
 }
 
 const selectClassName =
@@ -12,11 +14,11 @@ const selectClassName =
 
 // Master não tem município nem plano: pra ver a plataforma como educador ele
 // escolhe os dois aqui, e a Home abre com ?tenant=&plano= (ver HomePage).
-export function VerComoEducadorModal({ onClose }: VerComoEducadorModalProps) {
+export function VerComoEducadorModal({ onClose, tenantIdInicial }: VerComoEducadorModalProps) {
   const navigate = useNavigate();
   const { data: tenants, isLoading: loadingTenants } = useTenants();
   const { data: planos, isLoading: loadingPlanos } = usePlanos();
-  const [tenantId, setTenantId] = useState('');
+  const [tenantId, setTenantId] = useState(tenantIdInicial ?? '');
   const [planoId, setPlanoId] = useState('');
 
   // Defaults: primeiro município da lista e o plano mais alto (vê tudo).

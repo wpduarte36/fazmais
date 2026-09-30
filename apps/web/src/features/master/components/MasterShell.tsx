@@ -4,6 +4,7 @@ import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
 import { VerComoEducadorModal } from './VerComoEducadorModal';
+import { AcessarComoAdminModal } from './AcessarComoAdminModal';
 
 interface MasterShellProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: Maste
   const user = useAuthStore((state) => state.user);
   const handleLogout = useLogout();
   const [verComoEducadorAberto, setVerComoEducadorAberto] = useState(false);
+  const [acessarComoAdminAberto, setAcessarComoAdminAberto] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -43,6 +45,13 @@ export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: Maste
               >
                 👁 Ver como educador
               </button>
+              <button
+                type="button"
+                onClick={() => setAcessarComoAdminAberto(true)}
+                className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+              >
+                🛠 Acessar como admin
+              </button>
             </div>
           </div>
           <button
@@ -58,6 +67,7 @@ export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: Maste
       <main className={`mx-auto ${maxWidthClassName} px-7 py-8`}>{children}</main>
 
       {verComoEducadorAberto && <VerComoEducadorModal onClose={() => setVerComoEducadorAberto(false)} />}
+      {acessarComoAdminAberto && <AcessarComoAdminModal onClose={() => setAcessarComoAdminAberto(false)} />}
     </div>
   );
 }

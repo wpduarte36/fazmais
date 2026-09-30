@@ -4,8 +4,10 @@ import { createTenant, deleteTenant, listTenants, updateTenant } from '../api/te
 
 const TENANTS_KEY = ['tenants'];
 
-export function useTenants() {
-  return useQuery({ queryKey: TENANTS_KEY, queryFn: listTenants });
+// enabled=false deixa montar o hook em tela que Admin também usa (a rota
+// /tenants é só do Master).
+export function useTenants(enabled = true) {
+  return useQuery({ queryKey: TENANTS_KEY, queryFn: listTenants, enabled });
 }
 
 export function useCreateTenant() {

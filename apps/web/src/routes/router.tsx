@@ -32,7 +32,8 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <RequireRole role={Role.ADMIN}>
+      // MASTER também entra, pelo "Acessar como admin" da aba Municípios.
+      <RequireRole role={[Role.ADMIN, Role.MASTER]}>
         <AdminPanelPage />
       </RequireRole>
     ),

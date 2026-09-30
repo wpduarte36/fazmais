@@ -1,19 +1,28 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
+import { VerComoEducadorModal } from '../../master/components/VerComoEducadorModal';
+import { useTenantAlvo } from '../tenantAlvo';
 
 interface AdminShellProps {
   children: ReactNode;
   maxWidthClassName?: string;
+  // Nome do município quando o Master está no "Acessar como admin".
+  tenantAlvoNome?: string;
 }
 
-export function AdminShell({ children, maxWidthClassName = 'max-w-5xl' }: AdminShellProps) {
+export function AdminShell({ children, maxWidthClassName = 'max-w-5xl', tenantAlvoNome }: AdminShellProps) {
   const user = useAuthStore((state) => state.user);
   const handleLogout = useLogout();
   const navigate = useNavigate();
+  const tenantAlvo = useTenantAlvo();
+  const isMasterComoAdmin = Boolean(tenantAlvo);
+  const [verComoEducadorAberto, setVerComoEducadorAberto] = useState(false);
+  const linkClassName =
+    'mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600';
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -35,14 +44,24 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl' }: AdminS
             </span>
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.name}</div>
-              <div className="text-[11px] text-neutral-500">Admin</div>
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
-              >
-                👁 Ver como educador
-              </button>
+              {isMasterComoAdmin ? (
+                <>
+                  <div className="text-[11px] text-neutral-500">{tenantAlvoNome ?? 'Município'} · Admin</div>
+                  <button type="button" onClick={() => navigate('/master')} className={linkClassName}>
+                    ← Painel Master
+                  </button>
+                  <button type="button" onClick={() => setVerComoEducadorAberto(true)} className={linkClassName}>
+                    👁 Ver como educador
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="text-[11px] text-neutral-500">Admin</div>
+                  <button type="button" onClick={() => navigate('/')} className={linkClassName}>
+                    👁 Ver como educador
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <button
@@ -56,6 +75,10 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl' }: AdminS
       </header>
 
       <main className={`mx-auto ${maxWidthClassName} px-7 py-8`}>{children}</main>
+
+      {verComoEducadorAberto && (
+        <VerComoEducadorModal tenantIdInicial={tenantAlvo} onClose={() => setVerComoEducadorAberto(false)} />
+      )}
     </div>
   );
 }

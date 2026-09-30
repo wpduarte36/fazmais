@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { TenantSummary } from '@fazmais/shared';
 import { ApiError } from '../../../lib/apiClient';
 import { useDeleteTenant, useTenants } from '../hooks/useTenants';
@@ -11,6 +12,7 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 
 export function MunicipiosTab() {
   const { data: tenants, isLoading, error } = useTenants();
   const deleteTenant = useDeleteTenant();
+  const navigate = useNavigate();
   const [modal, setModal] = useState<ModalState>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -109,6 +111,14 @@ export function MunicipiosTab() {
                   <td className="px-4 py-3 text-neutral-400">{dateFormatter.format(new Date(tenant.createdAt))}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin?${new URLSearchParams({ tenant: tenant.id }).toString()}`)}
+                        title="Abrir o Painel Admin deste município e agir como admin dele"
+                        className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md border border-amber-400/30 px-2 text-xs font-semibold text-amber-300 transition hover:bg-amber-400/10 light:text-amber-700"
+                      >
+                        Acessar como admin
+                      </button>
                       <button
                         type="button"
                         onClick={() => setModal({ mode: 'edit', tenant })}

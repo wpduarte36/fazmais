@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,48 +17,68 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
+import { PrismaService } from '../prisma/prisma.service';
+import { resolverTenantAlvo } from '../common/tenant-alvo.util';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ADMIN')
+// MASTER entra pelo "Acessar como admin" (aba Municípios), informando o
+// município via ?tenantId= — ver resolverTenantAlvo.
+@Roles('ADMIN', 'MASTER')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get()
-  list(@CurrentUser() user: JwtPayload) {
-    return this.usersService.list(user.tenantId as string);
+  async list(@CurrentUser() user: JwtPayload, @Query('tenantId') tenantId?: string) {
+    return this.usersService.list(await resolverTenantAlvo(this.prisma, user, tenantId));
   }
 
   @Get('stats')
-  stats(@CurrentUser() user: JwtPayload) {
-    return this.usersService.stats(user.tenantId as string);
+  async stats(@CurrentUser() user: JwtPayload, @Query('tenantId') tenantId?: string) {
+    return this.usersService.stats(await resolverTenantAlvo(this.prisma, user, tenantId));
   }
 
   @Post()
-  create(@CurrentUser() user: JwtPayload, @Body() dto: CreateUserDto) {
-    return this.usersService.create(user.tenantId as string, dto);
+  async create(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: CreateUserDto,
+    @Query('tenantId') tenantId?: string,
+  ) {
+    return this.usersService.create(await resolverTenantAlvo(this.prisma, user, tenantId), dto);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUserDto,
+    @Query('tenantId') tenantId?: string,
   ) {
-    return this.usersService.update(user.tenantId as string, user.sub, id, dto);
+    return this.usersService.update(await resolverTenantAlvo(this.prisma, user, tenantId), user.sub, id, dto);
   }
 
   @Post(':id/reset-password')
-  resetPassword(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.resetPassword(user.tenantId as string, id);
+  async resetPassword(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('tenantId') tenantId?: string,
+  ) {
+    return this.usersService.resetPassword(await resolverTenantAlvo(this.prisma, user, tenantId), id);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.remove(user.tenantId as string, user.sub, id);
+  async remove(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('tenantId') tenantId?: string,
+  ) {
+    return this.usersService.remove(await resolverTenantAlvo(this.prisma, user, tenantId), user.sub, id);
   }
 }

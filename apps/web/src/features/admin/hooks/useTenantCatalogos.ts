@@ -1,29 +1,34 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ativarCatalogo, desativarCatalogo, listCatalogosDisponiveis } from '../api/catalogos.api';
+import { useTenantAlvo } from '../tenantAlvo';
 
-const TENANT_CATALOGOS_KEY = ['admin', 'tenant-catalogos'];
+const tenantCatalogosKey = (tenantId?: string) => ['admin', 'tenant-catalogos', tenantId ?? null];
 
 export function useTenantCatalogos() {
-  return useQuery({ queryKey: TENANT_CATALOGOS_KEY, queryFn: listCatalogosDisponiveis });
+  const tenantId = useTenantAlvo();
+  return useQuery({ queryKey: tenantCatalogosKey(tenantId), queryFn: () => listCatalogosDisponiveis(tenantId) });
 }
 
 function useInvalidateTenantCatalogos() {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: TENANT_CATALOGOS_KEY });
+  const tenantId = useTenantAlvo();
+  return () => queryClient.invalidateQueries({ queryKey: tenantCatalogosKey(tenantId) });
 }
 
 export function useAtivarCatalogo() {
+  const tenantId = useTenantAlvo();
   const invalidate = useInvalidateTenantCatalogos();
   return useMutation({
-    mutationFn: (catalogoId: string) => ativarCatalogo(catalogoId),
+    mutationFn: (catalogoId: string) => ativarCatalogo(catalogoId, tenantId),
     onSuccess: invalidate,
   });
 }
 
 export function useDesativarCatalogo() {
+  const tenantId = useTenantAlvo();
   const invalidate = useInvalidateTenantCatalogos();
   return useMutation({
-    mutationFn: (catalogoId: string) => desativarCatalogo(catalogoId),
+    mutationFn: (catalogoId: string) => desativarCatalogo(catalogoId, tenantId),
     onSuccess: invalidate,
   });
 }
