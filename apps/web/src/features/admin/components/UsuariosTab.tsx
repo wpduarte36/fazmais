@@ -6,6 +6,7 @@ import { useCreateUser, useDeleteUser, useResetPassword, useUpdateUser, useUsers
 import { usePlanos } from '../hooks/usePlanos';
 import { ResetPasswordModal } from './ResetPasswordModal';
 import { EditUserModal } from './EditUserModal';
+import { ImportarUsuariosModal } from './ImportarUsuariosModal';
 
 const STATUS_LABEL: Record<UserStatus, string> = {
   ATIVO: 'Ativo',
@@ -47,6 +48,7 @@ export function UsuariosTab() {
   const [roleFilter, setRoleFilter] = useState<ManagedUserRole | 'TODOS'>('TODOS');
 
   const [creating, setCreating] = useState(false);
+  const [importando, setImportando] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: '',
     login: '',
@@ -177,6 +179,17 @@ export function UsuariosTab() {
             ))}
           </div>
         </div>
+        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setImportando(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-neutral-300 transition hover:border-amber-400/50 hover:text-amber-300 light:border-black/15 light:text-neutral-600 light:hover:text-amber-700"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+          </svg>
+          Importar planilha
+        </button>
         <button
           type="button"
           onClick={() => setCreating((v) => !v)}
@@ -187,6 +200,7 @@ export function UsuariosTab() {
           </svg>
           Novo usuário
         </button>
+        </div>
       </div>
 
       {actionError && (
@@ -350,6 +364,14 @@ export function UsuariosTab() {
           </table>
         </div>
       </div>
+
+      {importando && (
+        <ImportarUsuariosModal
+          usuariosExistentes={users ?? []}
+          planos={planos ?? []}
+          onClose={() => setImportando(false)}
+        />
+      )}
 
       {resetResult && (
         <ResetPasswordModal
