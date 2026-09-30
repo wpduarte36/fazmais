@@ -17,7 +17,8 @@ import { FavoritesService } from './favorites.service';
 
 @Controller('favorites')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PROFESSOR')
+// ADMIN entra aqui pela "visão do educador" (ver conteudo-visibility.util).
+@Roles('PROFESSOR', 'ADMIN')
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 

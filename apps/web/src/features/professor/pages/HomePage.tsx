@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import type { ConteudoSummary } from '@fazmais/shared';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Role, type ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
@@ -25,6 +25,11 @@ const HOME_ID = '__home__';
 export function HomePage() {
   const user = useAuthStore((state) => state.user);
   const handleLogout = useLogout();
+  const navigate = useNavigate();
+  // Admin chega aqui pelo link "Ver como educador" embaixo do nome no Painel Admin — vê o
+  // acervo inteiro do município (plano mais alto, ver conteudo-visibility.util
+  // na API); embaixo do nome aparece "Visão do educador" e, abaixo, o link "← Painel Admin".
+  const isAdminPreview = user?.role === Role.ADMIN;
   const { data: feed, isLoading, error } = useHomeFeed();
   const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
   // O eixo ativo mora na URL (?eixo=<id>), não em estado local: assim o
@@ -134,7 +139,20 @@ export function HomePage() {
             </span>
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.name}</div>
-              <div className="text-[11px] text-neutral-500">Educador</div>
+              {isAdminPreview ? (
+                <>
+                  <div className="text-[11px] text-neutral-500">Visão do educador</div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/admin')}
+                    className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+                  >
+                    ← Painel Admin
+                  </button>
+                </>
+              ) : (
+                <div className="text-[11px] text-neutral-500">Educador</div>
+              )}
             </div>
           </div>
           <button

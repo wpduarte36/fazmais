@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
@@ -12,6 +13,7 @@ interface AdminShellProps {
 export function AdminShell({ children, maxWidthClassName = 'max-w-5xl' }: AdminShellProps) {
   const user = useAuthStore((state) => state.user);
   const handleLogout = useLogout();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -34,6 +36,13 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl' }: AdminS
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.name}</div>
               <div className="text-[11px] text-neutral-500">Admin</div>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+              >
+                👁 Ver como educador
+              </button>
             </div>
           </div>
           <button

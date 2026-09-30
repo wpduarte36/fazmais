@@ -9,6 +9,9 @@ import { PrismaService } from '../prisma/prisma.service';
 // - com planoMinimo.level <= o level do plano do professor. Professor sem
 //   plano atribuído é tratado como Padrão (level 0) — só enxerga o acervo
 //   básico, nunca conteúdo Bronze/Prata/Ouro sem um plano pago de verdade.
+//   Admin (na "visão do educador") enxerga como o plano mais alto que
+//   existir (hoje Ouro) — decisão de produto: o Admin vê tudo o que o
+//   município dele tem, independente do plano.
 // É a MESMA regra usada em HomeService.getFeed pra montar a lista visível —
 // as duas precisam andar juntas, por isso a lógica mora aqui.
 export async function conteudoVisivelWhere(
@@ -18,9 +21,13 @@ export async function conteudoVisivelWhere(
 ): Promise<Prisma.ConteudoWhereInput> {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { plano: { select: { level: true } } },
+    select: { role: true, plano: { select: { level: true } } },
   });
-  const userPlanoLevel = user.plano?.level ?? 0;
+  let userPlanoLevel = user.plano?.level ?? 0;
+  if (user.role === 'ADMIN') {
+    const maior = await prisma.plano.aggregate({ _max: { level: true } });
+    userPlanoLevel = maior._max.level ?? 0;
+  }
 
   const access = await prisma.tenantCatalogoAccess.findMany({
     where: { tenantId },

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   assertConteudoVisivel,
@@ -219,16 +220,21 @@ export class HomeService {
     conteudoId: string,
     userId: string,
     tenantId: string,
+    role: Role,
   ): Promise<void> {
     await assertConteudoVisivel(this.prisma, userId, tenantId, conteudoId);
     const conteudo = await this.prisma.conteudo.findUniqueOrThrow({
       where: { id: conteudoId },
       select: { mediaType: true },
     });
-    await this.prisma.conteudo.update({
-      where: { id: conteudoId },
-      data: { viewCount: { increment: 1 } },
-    });
+    // Admin navegando na visão do educador não conta no viewCount — senão
+    // conferir o acervo distorceria o "Top 10 mais acessados" dos educadores.
+    if (role !== 'ADMIN') {
+      await this.prisma.conteudo.update({
+        where: { id: conteudoId },
+        data: { viewCount: { increment: 1 } },
+      });
+    }
 
     if (conteudo.mediaType === 'PDF' || conteudo.mediaType === 'ARTIGO') {
       await this.prisma.progress.upsert({

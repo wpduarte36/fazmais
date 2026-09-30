@@ -18,7 +18,8 @@ import { AtualizarProgressoDto } from './dto/atualizar-progresso.dto';
 
 @Controller('progress')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PROFESSOR')
+// ADMIN entra aqui pela "visão do educador" (ver conteudo-visibility.util).
+@Roles('PROFESSOR', 'ADMIN')
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 

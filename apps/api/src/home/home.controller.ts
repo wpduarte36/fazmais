@@ -17,7 +17,8 @@ import { HomeService } from './home.service';
 
 @Controller('home')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PROFESSOR')
+// ADMIN entra aqui pela "visão do educador" (ver conteudo-visibility.util).
+@Roles('PROFESSOR', 'ADMIN')
 export class HomeController {
   constructor(private readonly homeService: HomeService) {}
 
@@ -29,6 +30,6 @@ export class HomeController {
   @Post('view/:conteudoId')
   @HttpCode(HttpStatus.NO_CONTENT)
   registrarView(@CurrentUser() user: JwtPayload, @Param('conteudoId', ParseUUIDPipe) conteudoId: string) {
-    return this.homeService.registrarView(conteudoId, user.sub, user.tenantId as string);
+    return this.homeService.registrarView(conteudoId, user.sub, user.tenantId as string, user.role);
   }
 }

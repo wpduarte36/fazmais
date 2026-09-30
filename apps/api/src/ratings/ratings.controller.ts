@@ -18,7 +18,8 @@ import { AvaliarDto } from './dto/avaliar.dto';
 
 @Controller('ratings')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PROFESSOR')
+// ADMIN entra aqui pela "visão do educador" (ver conteudo-visibility.util).
+@Roles('PROFESSOR', 'ADMIN')
 export class RatingsController {
   constructor(private readonly ratingsService: RatingsService) {}
 
