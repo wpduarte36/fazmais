@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
+import { VerComoEducadorModal } from './VerComoEducadorModal';
 
 interface MasterShellProps {
   children: ReactNode;
@@ -12,6 +13,7 @@ interface MasterShellProps {
 export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: MasterShellProps) {
   const user = useAuthStore((state) => state.user);
   const handleLogout = useLogout();
+  const [verComoEducadorAberto, setVerComoEducadorAberto] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -34,6 +36,13 @@ export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: Maste
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.name}</div>
               <div className="text-[11px] text-neutral-500">Master</div>
+              <button
+                type="button"
+                onClick={() => setVerComoEducadorAberto(true)}
+                className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+              >
+                👁 Ver como educador
+              </button>
             </div>
           </div>
           <button
@@ -47,6 +56,8 @@ export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: Maste
       </header>
 
       <main className={`mx-auto ${maxWidthClassName} px-7 py-8`}>{children}</main>
+
+      {verComoEducadorAberto && <VerComoEducadorModal onClose={() => setVerComoEducadorAberto(false)} />}
     </div>
   );
 }

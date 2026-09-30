@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { useRatings } from '../hooks/useRatings';
+import { useSomenteLeitura } from '../hooks/useSomenteLeitura';
 
 interface StarRatingProps {
   conteudo: ConteudoSummary;
@@ -11,6 +12,7 @@ interface StarRatingProps {
 export function StarRating({ conteudo, size = 13, className }: StarRatingProps) {
   const [rating, setRating] = useState(conteudo.myRating ?? 0);
   const { avaliar } = useRatings();
+  const somenteLeitura = useSomenteLeitura();
 
   useEffect(() => {
     setRating(conteudo.myRating ?? 0);
@@ -21,6 +23,8 @@ export function StarRating({ conteudo, size = 13, className }: StarRatingProps) 
     setRating(score);
     avaliar.mutate({ conteudoId: conteudo.id, score });
   }
+
+  if (somenteLeitura) return null;
 
   return (
     <div className={`flex items-center gap-0.5 ${className ?? ''}`} onClick={(event) => event.stopPropagation()}>

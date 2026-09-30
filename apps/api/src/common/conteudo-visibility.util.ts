@@ -28,7 +28,17 @@ export async function conteudoVisivelWhere(
     const maior = await prisma.plano.aggregate({ _max: { level: true } });
     userPlanoLevel = maior._max.level ?? 0;
   }
+  return visibilidadeWhere(prisma, tenantId, userPlanoLevel);
+}
 
+// A regra em si, sem depender de quem é o usuário: o que um educador do
+// `tenantId` com plano de nível `planoLevel` enxerga. Usada direto pela
+// "visão do educador" do Master, que escolhe município e plano na mão.
+export async function visibilidadeWhere(
+  prisma: PrismaService,
+  tenantId: string,
+  planoLevel: number,
+): Promise<Prisma.ConteudoWhereInput> {
   const access = await prisma.tenantCatalogoAccess.findMany({
     where: { tenantId },
     select: { catalogoId: true },
@@ -44,7 +54,7 @@ export async function conteudoVisivelWhere(
       },
     ],
     planoMinimoId: { not: null },
-    planoMinimo: { level: { lte: userPlanoLevel } },
+    planoMinimo: { level: { lte: planoLevel } },
   };
 }
 

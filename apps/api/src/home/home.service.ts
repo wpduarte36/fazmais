@@ -1,21 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   assertConteudoVisivel,
   conteudoVisivelWhere,
+  visibilidadeWhere,
 } from '../common/conteudo-visibility.util';
+
+// Master não tem município nem plano: na "visão do educador" ele escolhe os
+// dois e o feed sai como um educador daquele município/plano veria.
+export interface VisaoMaster {
+  tenantId: string;
+  planoLevel: number;
+  tenantName: string;
+  planoName: string;
+}
 
 @Injectable()
 export class HomeService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getFeed(userId: string, tenantId: string) {
+  async resolverVisaoMaster(tenantId?: string, planoId?: string): Promise<VisaoMaster> {
+    if (!tenantId || !planoId) {
+      throw new BadRequestException('Escolha o município e o plano para ver como educador');
+    }
+    const [tenant, plano] = await Promise.all([
+      this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } }),
+      this.prisma.plano.findUnique({ where: { id: planoId }, select: { name: true, level: true } }),
+    ]);
+    if (!tenant || !plano) {
+      throw new NotFoundException('Município ou plano não encontrado');
+    }
+    return { tenantId, planoLevel: plano.level, tenantName: tenant.name, planoName: plano.name };
+  }
+
+  async getFeed(userId: string, tenantId: string, visaoMaster?: VisaoMaster) {
     // Filtro do que esse professor pode enxergar (tenant + catálogos
     // ativados + nível de plano, rascunho de fora) — mesma regra que
     // assertConteudoVisivel aplica nas rotas de escrita.
     const conteudos = await this.prisma.conteudo.findMany({
-      where: await conteudoVisivelWhere(this.prisma, userId, tenantId),
+      where: visaoMaster
+        ? await visibilidadeWhere(this.prisma, visaoMaster.tenantId, visaoMaster.planoLevel)
+        : await conteudoVisivelWhere(this.prisma, userId, tenantId),
       include: {
         colecao: { include: { eixo: true } },
       },
@@ -209,6 +235,9 @@ export class HomeService {
       continuarAssistindo,
       recomendados,
       rows,
+      visao: visaoMaster
+        ? { tenantName: visaoMaster.tenantName, planoName: visaoMaster.planoName }
+        : null,
     };
   }
 

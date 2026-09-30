@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Role, type ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
@@ -10,6 +10,7 @@ import { extrairTermos, matchScore } from '../../../lib/textSearch';
 import { sanitizeHtml } from '../../../lib/sanitizeHtml';
 import { useHomeFeed } from '../hooks/useHomeFeed';
 import { useRegistrarView } from '../hooks/useRegistrarView';
+import { useSomenteLeitura } from '../hooks/useSomenteLeitura';
 import { ArtigoModal } from '../components/ArtigoModal';
 import { VideoModal } from '../components/VideoModal';
 import { PdfModal } from '../components/PdfModal';
@@ -30,19 +31,27 @@ export function HomePage() {
   // acervo inteiro do município (plano mais alto, ver conteudo-visibility.util
   // na API); embaixo do nome aparece "Visão do educador" e, abaixo, o link "← Painel Admin".
   const isAdminPreview = user?.role === Role.ADMIN;
-  const { data: feed, isLoading, error } = useHomeFeed();
-  const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
   // O eixo ativo mora na URL (?eixo=<id>), não em estado local: assim o
   // botão voltar do navegador/celular volta pro eixo anterior (ou pra Home)
   // em vez de sair da página, e um F5 mantém o educador onde estava.
   const [searchParams, setSearchParams] = useSearchParams();
+  // Master chega aqui pelo "Ver como educador" do Painel Master, escolhendo
+  // município e plano — que vêm na URL (?tenant=&plano=) e vão pra API.
+  const isMasterPreview = user?.role === Role.MASTER;
+  const tenantParam = searchParams.get('tenant');
+  const planoParam = searchParams.get('plano');
+  const visaoMaster =
+    isMasterPreview && tenantParam && planoParam ? { tenantId: tenantParam, planoId: planoParam } : undefined;
+  const somenteLeitura = useSomenteLeitura();
+  const { data: feed, isLoading, error } = useHomeFeed(visaoMaster);
+  const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [aiChatPergunta, setAiChatPergunta] = useState<string | null>(null);
   const registrarView = useRegistrarView();
 
   function abrirConteudo(conteudo: ConteudoSummary) {
     setConteudoAberto(conteudo);
-    registrarView.mutate(conteudo.id);
+    if (!somenteLeitura) registrarView.mutate(conteudo.id);
   }
 
   const eixos = useMemo(() => {
@@ -68,7 +77,11 @@ export function HomePage() {
 
   function setEixoAtivoId(id: string) {
     if (id === eixoAtivoId) return;
-    setSearchParams(id === HOME_ID ? {} : { eixo: id });
+    // Mantém os outros parâmetros (município/plano da visão do Master).
+    const next = new URLSearchParams(searchParams);
+    if (id === HOME_ID) next.delete('eixo');
+    else next.set('eixo', id);
+    setSearchParams(next);
     window.scrollTo({ top: 0 });
   }
 
@@ -85,6 +98,13 @@ export function HomePage() {
       (conteudo) => matchScore(`${conteudo.title} ${conteudo.description}`, termos) === termos.length,
     );
   }, [feed, searchQuery]);
+
+
+  // Master sem município/plano escolhidos (URL digitada, link antigo): volta
+  // pro painel, onde fica o "Ver como educador".
+  if (isMasterPreview && !visaoMaster) {
+    return <Navigate to="/master" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -139,7 +159,20 @@ export function HomePage() {
             </span>
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.name}</div>
-              {isAdminPreview ? (
+              {isMasterPreview ? (
+                <>
+                  <div className="text-[11px] text-neutral-500">
+                    {feed?.visao ? `${feed.visao.tenantName} · ${feed.visao.planoName}` : 'Visão do educador'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/master')}
+                    className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+                  >
+                    ← Painel Master
+                  </button>
+                </>
+              ) : isAdminPreview ? (
                 <>
                   <div className="text-[11px] text-neutral-500">Visão do educador</div>
                   <button

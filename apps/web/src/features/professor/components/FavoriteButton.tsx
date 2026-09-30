@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { useFavorites } from '../hooks/useFavorites';
+import { useSomenteLeitura } from '../hooks/useSomenteLeitura';
 
 interface FavoriteButtonProps {
   conteudo: ConteudoSummary;
@@ -10,6 +11,7 @@ interface FavoriteButtonProps {
 export function FavoriteButton({ conteudo, className }: FavoriteButtonProps) {
   const [isFavorito, setIsFavorito] = useState(conteudo.isFavorito);
   const { favoritar, desfavoritar } = useFavorites();
+  const somenteLeitura = useSomenteLeitura();
 
   useEffect(() => {
     setIsFavorito(conteudo.isFavorito);
@@ -25,6 +27,8 @@ export function FavoriteButton({ conteudo, className }: FavoriteButtonProps) {
       desfavoritar.mutate(conteudo.id);
     }
   }
+
+  if (somenteLeitura) return null;
 
   return (
     <button

@@ -41,8 +41,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      // ADMIN também entra, pela "visão do educador" (botão no Painel Admin).
-      <RequireRole role={[Role.PROFESSOR, Role.ADMIN]}>
+      // ADMIN e MASTER também entram, pela "visão do educador" (link embaixo
+      // do nome nos painéis; o Master escolhe município e plano).
+      <RequireRole role={[Role.PROFESSOR, Role.ADMIN, Role.MASTER]}>
         <HomePage />
       </RequireRole>
     ),
