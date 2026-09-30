@@ -24,7 +24,7 @@ export function AcervoTab() {
   return (
     <div>
       <p className="mb-4 text-sm text-neutral-400 light:text-neutral-600">
-        Catálogos disponíveis, montados pelo Painel Master. Ative os que devem aparecer pros professores do seu
+        Catálogos disponíveis, montados pelo Painel Master. Ative os que devem aparecer pros educadores do seu
         município.
       </p>
 

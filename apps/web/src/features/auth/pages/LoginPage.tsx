@@ -35,7 +35,7 @@ export function LoginPage() {
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-neutral-300 light:text-neutral-600">
             Nós acreditamos que educação se faz juntos e, por isso, desenvolvemos uma série de materiais que visam
-            apoiar o trabalho docente respeitando a autonomia do professor e a individualidade de cada aluno. Nossos
+            apoiar o trabalho docente respeitando a autonomia do educador e a individualidade de cada aluno. Nossos
             materiais são referenciais e se inspiram em experiências educacionais de sucesso no Brasil e no exterior.
             Aqui o educador encontra ideias, recursos e dicas de como ampliar o potencial das suas aulas aliando
             tecnologia, pedagogia e desenvolvimento das habilidades socioemocionais. Conheça nossos eixos de trabalho

@@ -1,13 +1,15 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ApiError } from '../../../lib/apiClient';
 import { ThemeToggle } from '../../../components/ThemeToggle';
+import { BackButton } from '../../../components/BackButton';
 import { AbstractGradientBg } from '../components/AbstractGradientBg';
 import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
 import { useSetPassword } from '../hooks/useSetPassword';
 
 export function DefinirSenhaPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const token = searchParams.get('token');
   const [password, setPasswordValue] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -133,6 +135,10 @@ export function DefinirSenhaPage() {
                     </button>
                   </div>
                 </form>
+
+                <div className="mt-5 flex justify-center">
+                  <BackButton label="Voltar ao login" onClick={() => navigate('/login')} />
+                </div>
               </>
             )}
           </div>

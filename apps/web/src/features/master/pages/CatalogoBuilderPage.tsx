@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { ColecaoNode, ConteudoSummary, CreateConteudoRequest, EixoNode, UpdateConteudoRequest } from '@fazmais/shared';
 import { ApiError } from '../../../lib/apiClient';
+import { BackButton } from '../../../components/BackButton';
 import { MasterShell } from '../components/MasterShell';
 import { NameOnlyModal } from '../components/NameOnlyModal';
 import { ConteudoModal } from '../components/ConteudoModal';
@@ -68,6 +69,7 @@ export function CatalogoBuilderPage() {
   if (error || !tree) {
     return (
       <MasterShell maxWidthClassName="max-w-6xl">
+        <BackButton onClick={() => navigate('/master', { state: { tab: 'catalogos' } })} className="mb-4" />
         <p className="text-sm text-rose-300">Não foi possível carregar este catálogo.</p>
       </MasterShell>
     );
@@ -241,6 +243,7 @@ export function CatalogoBuilderPage() {
   return (
     <MasterShell maxWidthClassName="max-w-6xl">
       <div className="mb-4 flex items-center gap-1.5 text-sm text-neutral-500">
+        <BackButton onClick={() => navigate('/master', { state: { tab: 'catalogos' } })} className="mr-2" />
         <button type="button" onClick={() => navigate('/master', { state: { tab: 'catalogos' } })} className="hover:text-neutral-200">
           Painel Master
         </button>
@@ -566,7 +569,7 @@ export function CatalogoBuilderPage() {
           initialName={eixoModal.mode === 'edit' ? eixoModal.eixo.name : ''}
           showDescription
           initialDescription={(eixoModal.mode === 'edit' ? eixoModal.eixo.description : '') ?? ''}
-          descriptionPlaceholder="Texto de apresentação exibido pro professor ao abrir esse eixo (opcional)."
+          descriptionPlaceholder="Texto de apresentação exibido pro educador ao abrir esse eixo (opcional)."
           pending={builder.createEixo.isPending || builder.updateEixo.isPending}
           onClose={() => setEixoModal(null)}
           onSave={(name, description) => {

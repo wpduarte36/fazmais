@@ -30,7 +30,7 @@ Plataforma multi-tenant de catálogo educacional (vídeos, PDFs, artigos) para m
 2. Arquivos `.env` (gitignorados, não estão no repo) precisam existir em `C:\fazmais\.env`, `apps\api\.env`, `apps\web\.env`. Use os `.env.example` correspondentes como base — só falta a senha do Postgres e os segredos JWT.
 3. `pnpm install` na raiz, depois `pnpm turbo run dev` (web em `:5173`, api em `:3000`).
 4. Se o banco for recriado do zero: `pnpm exec prisma migrate dev` (aplica a migration já commitada em `prisma/migrations/`) e depois `pnpm db:seed`.
-5. Logins de teste (seed, senha `fazmais123` para todos): `master` (MASTER), `admin.demo` (ADMIN), `professor.demo` (PROFESSOR).
+5. Logins de teste (seed, senha `fazmais123` para todos): `master` (MASTER), `admin.demo` (ADMIN), `educador.demo` (PROFESSOR).
 
 ## Deploy web (preparado 2026-09-10, ainda não publicado)
 
@@ -159,7 +159,7 @@ Contexto: já existe um FazMais legado no ar ("Faz+", `admfazmais.fazeducacao.co
 - **Eixo Tecnológico → Coleção Mão na massa**: 42 conteúdos PDF. Cada "Arquivo" PDF do legado não é um arquivo puro — é um link pro visualizador de flipbook de terceiros **FlipHTML5** (`online.fliphtml5.com/{id}/{hash}/#p=1`), URL limpa/permanente (sem assinatura, ao contrário da imagem de capa e do link de download). `pageCount` migrado do campo "Total páginas" do legado.
 - **Eixo Notícias → Coleção Educação**: 17 conteúdos ARTIGO. Essa seção do legado ("Artigos" no menu, na verdade um agregador de notícias) tinha uma mistura que só apareceu durante a extração: **2 artigos pedagógicos originais** da Faz Educação (autor nomeado, corpo completo, ex: "Documentação Pedagógica...") e **15 notícias de terceiro** sindicadas via "Canguru News" (link pra `escolanaminhacasa.com.br`, algumas com o artigo inteiro copiado no campo de corpo). Decisão tomada com o usuário por causa de direitos autorais: os 2 originais entraram com o corpo completo; os 15 de terceiro entraram só com um excerpt curto + link pra fonte + autor como citação — nunca o corpo inteiro reproduzido, independente do que a fonte tinha.
 - **Extração completa (todos os Eixos/Categorias do catálogo principal) foi tentada e abandonada** numa rodada anterior: só enumerar a lista (sem nem entrar no detalhe de cada item) consumiu ~470k tokens e não terminou — o catálogo real é uma biblioteca curricular grande (200-400+ itens, por série/matéria: Inglês, Avaliação, Plano de Aula por disciplina etc.), não um punhado de tutoriais. Se for migrar o resto, **não tentar via clique-a-clique de novo sem antes conseguir acesso melhor** (export/API/DB de verdade da equipe Faz Educação) — foi a própria recomendação do agente que tentou. Quando já se sabe o(s) código(s) de antemão (ex: filtrando por Categoria no admin antes de disparar a extração), a extração fica bem mais barata — o piloto de PDFs (42 itens) só levou ~776k tokens porque o agente já recebeu a lista pronta, sem precisar paginar a lista de "Arquivos" do zero.
-- **Estado atual do banco local**: catálogo "Faz+ Legado" ativado (`tenant_catalogo_access`) pro tenant "Município Demo" (mesmo tenant de `admin.demo`/`professor.demo`); 1 conteúdo (`AirPlay`) marcado `isFeatured: true` pra popular o hero da Home do Professor.
+- **Estado atual do banco local**: catálogo "Faz+ Legado" ativado (`tenant_catalogo_access`) pro tenant "Município Demo" (mesmo tenant de `admin.demo`/`educador.demo`); 1 conteúdo (`AirPlay`) marcado `isFeatured: true` pra popular o hero da Home do Professor.
 
 ## Home do Professor — US-050/051/052, parcial (falta favoritar/avaliar/progresso/busca)
 
@@ -206,7 +206,7 @@ O usuário notou que o legado (Faz+) já tratava essas 15 notícias do Canguru N
 - **Backfill dos 15 itens já migrados** (script descartável, não ficou no repo): preencheu `externalUrl`/`sourceName` (= `autor`, sempre "Canguru News" nesses 15) a partir do mesmo JSON já usado na migração original, e **limpou o `htmlContent`** pra conter só o parágrafo de excerpt (removeu o `<p>Fonte: <a>...` que antes duplicava a mesma informação dentro do HTML).
 - **`ArtigoModal`**: quando `conteudo.externalUrl` existe, o badge vira "🔗 Conteúdo externo · {sourceName}" (em vez de "📰 Artigo") e aparece um botão CTA no rodapé do modal ("Ler matéria completa em {sourceName}", `target="_blank"`) — deixa explícito que é um ponteiro pra fonte externa, não um artigo completo hospedado no FazMais. Artigos originais (sem `externalUrl`) continuam abrindo exatamente como antes.
 - **`ConteudoCard`** (grade da Home): badge do card também vira "🔗 Externo" quando `externalUrl` existe, em vez do badge de mídia padrão — dá pra distinguir antes mesmo de abrir o modal.
-- **Testado e confirmado no navegador** logado como `professor.demo`: cards de notícia mostram "🔗 Externo"; abrir um mostra o CTA de fonte externa correto; abrir um dos 2 artigos originais (sem `externalUrl`) continua mostrando "📰 Artigo" e o conteúdo completo, sem CTA.
+- **Testado e confirmado no navegador** logado como `educador.demo`: cards de notícia mostram "🔗 Externo"; abrir um mostra o CTA de fonte externa correto; abrir um dos 2 artigos originais (sem `externalUrl`) continua mostrando "📰 Artigo" e o conteúdo completo, sem CTA.
 - **Pareamento de navegador**: nesta sessão a extensão voltou a mostrar 2 browsers conectados (o bug de "outra máquina" documentado acima voltou a acontecer) — resolvido simplesmente escolhendo o browser certo via `select_browser` a partir da lista, sem precisar fechar/reabrir a extensão desta vez.
 
 ## Correção: fluxo de 1º acesso estava quebrado (2026-08-19)
@@ -521,7 +521,7 @@ navegador** (comportamento conhecido/documentado — não é bug desta feature,
 o mesmo padrão já existe em `MunicipiosTab`) — fechei a aba e validei
 auto-exclusão (403) e exclusão de verdade (204) via `curl` direto contra a
 API em vez de clicar no navegador; usuário de teste removido, banco voltou
-ao estado original (`master`/`admin.demo`/`professor.demo`).
+ao estado original (`master`/`admin.demo`/`educador.demo`).
 
 ## Trabalho não commitado desde `f5e54eb` (2026-08-20 → 2026-08-26) — reconstruído por diff em 2026-08-28
 

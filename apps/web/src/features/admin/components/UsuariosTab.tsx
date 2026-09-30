@@ -21,13 +21,13 @@ const STATUS_CLASSES: Record<UserStatus, string> = {
 
 const ROLE_LABEL: Record<ManagedUserRole, string> = {
   ADMIN: 'Admin',
-  PROFESSOR: 'Professor',
+  PROFESSOR: 'Educador',
 };
 
 const ROLE_FILTERS: Array<{ value: ManagedUserRole | 'TODOS'; label: string }> = [
   { value: 'TODOS', label: 'Todos' },
   { value: 'ADMIN', label: 'Admin' },
-  { value: 'PROFESSOR', label: 'Professor' },
+  { value: 'PROFESSOR', label: 'Educador' },
 ];
 
 function normalize(text: string): string {
@@ -212,7 +212,7 @@ export function UsuariosTab() {
                 onChange={(event) => setCreateForm((f) => ({ ...f, role: event.target.value as ManagedUserRole }))}
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
               >
-                <option value="PROFESSOR">Professor</option>
+                <option value="PROFESSOR">Educador</option>
                 <option value="ADMIN">Admin</option>
               </select>
             </div>

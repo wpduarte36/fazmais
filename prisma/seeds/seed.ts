@@ -76,13 +76,13 @@ async function main() {
     },
   });
 
-  const professor = await prisma.user.upsert({
-    where: { login: 'professor.demo' },
+  const educador = await prisma.user.upsert({
+    where: { login: 'educador.demo' },
     update: {},
     create: {
-      login: 'professor.demo',
-      name: 'Professor Demo',
-      email: 'professor@municipiodemo.fazmais.dev',
+      login: 'educador.demo',
+      name: 'Educador Demo',
+      email: 'educador@municipiodemo.fazmais.dev',
       password: passwordHash,
       role: 'PROFESSOR',
       status: 'ATIVO',
@@ -93,7 +93,7 @@ async function main() {
 
   console.log('Seed concluído:');
   console.log({ tenant: tenant.name, planoPadrao: planoPadrao.name });
-  console.log({ master: master.login, admin: admin.login, professor: professor.login });
+  console.log({ master: master.login, admin: admin.login, educador: educador.login });
   console.log('Senha de todos os usuários de seed: fazmais123');
 }
 

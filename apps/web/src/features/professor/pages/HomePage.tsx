@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
+import { BackButton } from '../../../components/BackButton';
 import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
 import { extrairTermos, matchScore } from '../../../lib/textSearch';
 import { sanitizeHtml } from '../../../lib/sanitizeHtml';
@@ -25,7 +27,10 @@ export function HomePage() {
   const handleLogout = useLogout();
   const { data: feed, isLoading, error } = useHomeFeed();
   const [conteudoAberto, setConteudoAberto] = useState<ConteudoSummary | null>(null);
-  const [eixoAtivoId, setEixoAtivoId] = useState<string>(HOME_ID);
+  // O eixo ativo mora na URL (?eixo=<id>), não em estado local: assim o
+  // botão voltar do navegador/celular volta pro eixo anterior (ou pra Home)
+  // em vez de sair da página, e um F5 mantém o educador onde estava.
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [aiChatPergunta, setAiChatPergunta] = useState<string | null>(null);
   const registrarView = useRegistrarView();
@@ -50,6 +55,17 @@ export function HomePage() {
       ...Array.from(vistos, ([id, { name, description }]) => ({ id, name, description })),
     ];
   }, [feed]);
+
+  // Eixo da URL que não existe (mais) no feed do educador — link antigo,
+  // eixo removido, catálogo desativado — cai pra Home em vez de tela vazia.
+  const eixoParam = searchParams.get('eixo');
+  const eixoAtivoId = eixoParam && eixos.some((eixo) => eixo.id === eixoParam) ? eixoParam : HOME_ID;
+
+  function setEixoAtivoId(id: string) {
+    if (id === eixoAtivoId) return;
+    setSearchParams(id === HOME_ID ? {} : { eixo: id });
+    window.scrollTo({ top: 0 });
+  }
 
   const isHome = eixoAtivoId === HOME_ID;
   const rowsDoEixo = feed?.rows.filter((row) => row.eixoId === eixoAtivoId) ?? [];
@@ -118,7 +134,7 @@ export function HomePage() {
             </span>
             <div className="leading-tight">
               <div className="text-sm font-semibold">{user?.name}</div>
-              <div className="text-[11px] text-neutral-500">Professor</div>
+              <div className="text-[11px] text-neutral-500">Educador</div>
             </div>
           </div>
           <button
@@ -152,6 +168,16 @@ export function HomePage() {
       </header>
 
       <main className="px-7 py-8">
+        {(isSearching || !isHome) && (
+          <div className="mb-6 flex justify-end">
+            {isSearching ? (
+              <BackButton onClick={() => setSearchQuery('')} />
+            ) : (
+              <BackButton label="Voltar para Home" onClick={() => setEixoAtivoId(HOME_ID)} />
+            )}
+          </div>
+        )}
+
         {isLoading && <p className="text-sm text-neutral-400">Carregando...</p>}
         {error && <p className="text-sm text-rose-300">Não foi possível carregar o catálogo.</p>}
 

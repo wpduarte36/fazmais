@@ -1,4 +1,4 @@
-// Cria admin.ti / professor.ti / master.ti em produção reaproveitando o hash
+// Cria admin.ti / educador.ti / master.ti em produção reaproveitando o hash
 // bcrypt de um usuário já existente com a mesma senha (fazmais123) — evita
 // depender do log da Railway pra pegar o token de 1º acesso (que o endpoint
 // POST /tenants/:id/admins não retorna no JSON, só loga). Idempotente
@@ -47,9 +47,9 @@ async function main() {
         id: randomUUID(),
         tenant_id: TENANT_TI_ID,
         plano_id: padrao.id,
-        name: 'Professor TI',
-        login: 'professor.ti',
-        email: 'professor@empresati.fazmais.dev',
+        name: 'Educador TI',
+        login: 'educador.ti',
+        email: 'educador@empresati.fazmais.dev',
         role: 'PROFESSOR',
       },
       {
@@ -74,7 +74,7 @@ async function main() {
     }
 
     const check = await db.$queryRawUnsafe(
-      `select login, role, status, tenant_id from users where login in ('admin.ti','professor.ti','master.ti') order by login`,
+      `select login, role, status, tenant_id from users where login in ('admin.ti','educador.ti','master.ti') order by login`,
     );
     console.table(check);
   } finally {

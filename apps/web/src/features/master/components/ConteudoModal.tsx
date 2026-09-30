@@ -287,11 +287,11 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
                 <RichTextEditor
                   value={htmlContent}
                   onChange={setHtmlContent}
-                  placeholder={externalUrl.trim() ? 'Resumo curto — o professor lê a matéria inteira no site de origem' : 'Texto do artigo'}
+                  placeholder={externalUrl.trim() ? 'Resumo curto — o educador lê a matéria inteira no site de origem' : 'Texto do artigo'}
                 />
                 {externalUrl.trim() && (
                   <p className="mt-1 text-xs text-neutral-500">
-                    O professor vê este resumo e o botão "Ler matéria inteira", que abre o link acima.
+                    O educador vê este resumo e o botão "Ler matéria inteira", que abre o link acima.
                   </p>
                 )}
               </Field>
@@ -323,7 +323,7 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
                   );
                 })}
                 <p className="text-xs text-neutral-500">
-                  Com link, vira um botão na janela do professor. Sem link, aparece só "Disponível na ...".
+                  Com link, vira um botão na janela do educador. Sem link, aparece só "Disponível na ...".
                 </p>
               </div>
             </Field>
@@ -452,7 +452,7 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
           <div className="flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 light:border-black/10 light:bg-black/[0.02]">
             <div>
               <p className="text-sm font-semibold text-neutral-100 light:text-neutral-900">Destacar no catálogo</p>
-              <p className="text-xs text-neutral-400 light:text-neutral-500">Vira candidato a hero na Home do professor</p>
+              <p className="text-xs text-neutral-400 light:text-neutral-500">Vira candidato a hero na Home do educador</p>
             </div>
             <button
               type="button"
@@ -497,7 +497,7 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
             </div>
             <p className="mt-1 text-xs text-neutral-500">
               Visível pra quem tem esse plano ou um superior (ex.: marcar "Prata" também libera pra quem é Ouro). "Sem plano" deixa como
-              rascunho, invisível pra qualquer professor.
+              rascunho, invisível pra qualquer educador.
             </p>
           </Field>
 
@@ -518,7 +518,7 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
               começar mais rápido, a partir do título + descrição — nunca é obrigatório usar.
             </p>
             <p className="mb-3 text-xs text-neutral-400 light:text-neutral-500">
-              É por título, descrição, tags e resumo que o chat de IA do professor (Fabinho) encontra e entende esse conteúdo quando
+              É por título, descrição, tags e resumo que o chat de IA do educador (Fabinho) encontra e entende esse conteúdo quando
               alguém pergunta algo relacionado — quanto mais completos e relevantes, maior a chance de aparecer numa resposta.
             </p>
 

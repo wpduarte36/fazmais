@@ -19,7 +19,7 @@ const ABERTURAS_COM_RESULTADO = [
 ];
 
 const ABERTURAS_SEM_RESULTADO = [
-  (pergunta: string) => `Não encontrei nada específico sobre "${pergunta}" no acervo, mas esses conteúdos estão em alta entre os professores:`,
+  (pergunta: string) => `Não encontrei nada específico sobre "${pergunta}" no acervo, mas esses conteúdos estão em alta entre os educadores:`,
   (pergunta: string) => `Ainda não temos algo direto sobre "${pergunta}", mas aqui estão alguns conteúdos populares que podem interessar:`,
 ];
 

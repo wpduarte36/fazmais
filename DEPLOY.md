@@ -65,7 +65,7 @@ docker run --rm -p 3000:3000 --env-file apps/api/.env fazmais-api
    DATABASE_URL="postgresql://postgres.<ref>:<senha>@...pooler.supabase.com:5432/postgres" \
      pnpm exec prisma db seed
    ```
-   O seed cria os usuários `master` / `admin.demo` / `professor.demo`
+   O seed cria os usuários `master` / `admin.demo` / `educador.demo`
    (senha `fazmais123`) e o tenant "Município Demo". **Troque a senha do
    `master` depois do primeiro login** (ou edite o seed antes de rodar).
 
