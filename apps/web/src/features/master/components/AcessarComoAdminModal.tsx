@@ -6,7 +6,7 @@ interface AcessarComoAdminModalProps {
   onClose: () => void;
 }
 
-// Escolha do município pro "Acessar como admin" a partir do nome no header
+// Escolha do município pra "Área do Admin" a partir do nome no header
 // (a aba Municípios tem o mesmo atalho por linha). Abre /admin?tenant=.
 export function AcessarComoAdminModal({ onClose }: AcessarComoAdminModalProps) {
   const navigate = useNavigate();
@@ -32,8 +32,8 @@ export function AcessarComoAdminModal({ onClose }: AcessarComoAdminModalProps) {
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Painel Admin</p>
-            <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">Acessar como admin</h3>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Painel Master</p>
+            <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">Área do Admin</h3>
           </div>
           <button
             type="button"
@@ -47,7 +47,7 @@ export function AcessarComoAdminModal({ onClose }: AcessarComoAdminModalProps) {
 
         <div className="flex flex-col gap-4 px-6 py-4">
           <p className="text-sm leading-relaxed text-neutral-400 light:text-neutral-500">
-            Abre o Painel Admin do município escolhido. Você age como admin dele: o que mudar lá vale de verdade.
+            Abre o Painel Admin do município escolhido. Você gerencia o município como o admin dele: o que mudar lá vale de verdade e fica registrado na auditoria.
           </p>
 
           <div className="flex flex-col gap-1.5">

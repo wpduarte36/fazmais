@@ -64,6 +64,7 @@ model Tenant {
   ratings             Rating[]
   progress            Progress[]
   sharedCatalogAccess TenantCatalogoAccess[]
+  auditLogs           AuditLog[]
 
   @@map("tenants")
 }
@@ -103,6 +104,7 @@ model User {
   progress            Progress[]
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
 
   // login é único globalmente (não por tenant) — o backend descobre o tenant
   // do usuário só pelo login, sem precisar de seletor de município no login.
@@ -316,4 +318,30 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// Trilha de auditoria das ações do Master sobre um município ("Acessar como
+// admin" e gestão de municípios/admins no Painel Master). Nome do autor e do
+// município ficam copiados no registro: se um ou outro for excluído depois,
+// o histórico continua legível (as FKs viram NULL). acao é texto livre no
+// banco — o conjunto de valores fica no AuditAcao de @fazmais/shared.
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_id")
+  actorName  String   @map("actor_name")
+  actorLogin String   @map("actor_login")
+  tenantId   String?  @map("tenant_id")
+  tenantName String?  @map("tenant_name")
+  acao       String
+  descricao  String
+  detalhes   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  actor  User?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([tenantId, createdAt])
+  @@index([actorId, tenantId, acao, createdAt])
+  @@map("audit_logs")
 }

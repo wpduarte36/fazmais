@@ -35,7 +35,7 @@ const USER_SELECT = {
   plano: { select: { id: true, name: true } },
 } as const;
 
-function toSummary(user: { plano: { id: string; name: string } | null } & Record<string, unknown>) {
+function toSummary<T extends { plano: { id: string; name: string } | null }>(user: T) {
   const { plano, ...rest } = user;
   return { ...rest, planoId: plano?.id ?? null, planoName: plano?.name ?? null };
 }

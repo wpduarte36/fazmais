@@ -27,15 +27,15 @@ export function HomePage() {
   const user = useAuthStore((state) => state.user);
   const handleLogout = useLogout();
   const navigate = useNavigate();
-  // Admin chega aqui pelo link "Ver como educador" embaixo do nome no Painel Admin — vê o
+  // Admin chega aqui pelo link "Área do Educador" embaixo do nome no Painel Admin — vê o
   // acervo inteiro do município (plano mais alto, ver conteudo-visibility.util
-  // na API); embaixo do nome aparece "Visão do educador" e, abaixo, o link "← Painel Admin".
+  // na API); embaixo do nome aparece "Área do Educador" e, abaixo, o link "← Painel Admin".
   const isAdminPreview = user?.role === Role.ADMIN;
   // O eixo ativo mora na URL (?eixo=<id>), não em estado local: assim o
   // botão voltar do navegador/celular volta pro eixo anterior (ou pra Home)
   // em vez de sair da página, e um F5 mantém o educador onde estava.
   const [searchParams, setSearchParams] = useSearchParams();
-  // Master chega aqui pelo "Ver como educador" do Painel Master, escolhendo
+  // Master chega aqui pela "Área do Educador" do Painel Master, escolhendo
   // município e plano — que vêm na URL (?tenant=&plano=) e vão pra API.
   const isMasterPreview = user?.role === Role.MASTER;
   const tenantParam = searchParams.get('tenant');
@@ -101,7 +101,7 @@ export function HomePage() {
 
 
   // Master sem município/plano escolhidos (URL digitada, link antigo): volta
-  // pro painel, onde fica o "Ver como educador".
+  // pro painel, onde fica a "Área do Educador".
   if (isMasterPreview && !visaoMaster) {
     return <Navigate to="/master" replace />;
   }
@@ -162,7 +162,7 @@ export function HomePage() {
               {isMasterPreview ? (
                 <>
                   <div className="text-[11px] text-neutral-500">
-                    {feed?.visao ? `${feed.visao.tenantName} · ${feed.visao.planoName}` : 'Visão do educador'}
+                    {feed?.visao ? `${feed.visao.tenantName} · ${feed.visao.planoName}` : 'Área do Educador'}
                   </div>
                   <button
                     type="button"
@@ -174,7 +174,7 @@ export function HomePage() {
                 </>
               ) : isAdminPreview ? (
                 <>
-                  <div className="text-[11px] text-neutral-500">Visão do educador</div>
+                  <div className="text-[11px] text-neutral-500">Área do Educador</div>
                   <button
                     type="button"
                     onClick={() => navigate('/admin')}

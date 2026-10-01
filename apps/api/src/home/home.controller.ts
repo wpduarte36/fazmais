@@ -18,7 +18,7 @@ import { HomeService } from './home.service';
 
 @Controller('home')
 @UseGuards(JwtAuthGuard, RolesGuard)
-// ADMIN e MASTER entram aqui pela "visão do educador" (ver
+// ADMIN e MASTER entram aqui pela "Área do Educador" (ver
 // conteudo-visibility.util). Master só lê o feed — as escritas (view,
 // favoritos, avaliações, progresso) continuam fechadas pra ele.
 @Roles('PROFESSOR', 'ADMIN', 'MASTER')

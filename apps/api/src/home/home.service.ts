@@ -7,7 +7,7 @@ import {
   visibilidadeWhere,
 } from '../common/conteudo-visibility.util';
 
-// Master não tem município nem plano: na "visão do educador" ele escolhe os
+// Master não tem município nem plano: na "Área do Educador" ele escolhe os
 // dois e o feed sai como um educador daquele município/plano veria.
 export interface VisaoMaster {
   tenantId: string;
@@ -22,7 +22,7 @@ export class HomeService {
 
   async resolverVisaoMaster(tenantId?: string, planoId?: string): Promise<VisaoMaster> {
     if (!tenantId || !planoId) {
-      throw new BadRequestException('Escolha o município e o plano para ver como educador');
+      throw new BadRequestException('Escolha o município e o plano para entrar na Área do Educador');
     }
     const [tenant, plano] = await Promise.all([
       this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } }),
@@ -256,7 +256,7 @@ export class HomeService {
       where: { id: conteudoId },
       select: { mediaType: true },
     });
-    // Admin navegando na visão do educador não conta no viewCount — senão
+    // Admin navegando na Área do Educador não conta no viewCount — senão
     // conferir o acervo distorceria o "Top 10 mais acessados" dos educadores.
     if (role !== 'ADMIN') {
       await this.prisma.conteudo.update({

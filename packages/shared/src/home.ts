@@ -17,12 +17,12 @@ export interface HomeFeed {
   continuarAssistindo: ConteudoSummary[];
   recomendados: ConteudoSummary[];
   rows: HomeRow[];
-  // Preenchido só na "visão do educador" do Master: qual município e plano
+  // Preenchido só na "Área do Educador" do Master: qual município e plano
   // ele escolheu simular. Nulo pra educador e Admin.
   visao: { tenantName: string; planoName: string } | null;
 }
 
-// Escolha do Master ao "ver como educador" — vai na URL da Home (?tenant=&plano=).
+// Escolha do Master ao entrar na "Área do Educador" — vai na URL da Home (?tenant=&plano=).
 export interface VisaoEducadorParams {
   tenantId: string;
   planoId: string;

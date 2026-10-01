@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 // - com planoMinimo.level <= o level do plano do professor. Professor sem
 //   plano atribuído é tratado como Padrão (level 0) — só enxerga o acervo
 //   básico, nunca conteúdo Bronze/Prata/Ouro sem um plano pago de verdade.
-//   Admin (na "visão do educador") enxerga como o plano mais alto que
+//   Admin (na "Área do Educador") enxerga como o plano mais alto que
 //   existir (hoje Ouro) — decisão de produto: o Admin vê tudo o que o
 //   município dele tem, independente do plano.
 // É a MESMA regra usada em HomeService.getFeed pra montar a lista visível —
@@ -33,7 +33,7 @@ export async function conteudoVisivelWhere(
 
 // A regra em si, sem depender de quem é o usuário: o que um educador do
 // `tenantId` com plano de nível `planoLevel` enxerga. Usada direto pela
-// "visão do educador" do Master, que escolhe município e plano na mão.
+// "Área do Educador" do Master, que escolhe município e plano na mão.
 export async function visibilidadeWhere(
   prisma: PrismaService,
   tenantId: string,

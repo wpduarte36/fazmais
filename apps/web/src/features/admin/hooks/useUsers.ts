@@ -3,8 +3,8 @@ import type { CreateUserRequest, UpdateUserRequest } from '@fazmais/shared';
 import { createUser, deleteUser, getUserStats, listUsers, resetUserPassword, updateUser } from '../api/users.api';
 import { useTenantAlvo } from '../tenantAlvo';
 
-// O município alvo entra na chave pra cada município (no "Acessar como
-// admin" do Master) ter o próprio cache.
+// O município alvo entra na chave pra cada município (na "Área do
+// Admin" do Master) ter o próprio cache.
 const usersKey = (tenantId?: string) => ['admin', 'users', tenantId ?? null];
 const statsKey = (tenantId?: string) => ['admin', 'users', 'stats', tenantId ?? null];
 

@@ -4,8 +4,9 @@ import { MasterShell } from '../components/MasterShell';
 import { StatsCards } from '../components/StatsCards';
 import { MunicipiosTab } from '../components/MunicipiosTab';
 import { CatalogosTab } from '../components/CatalogosTab';
+import { AuditoriaTab } from '../components/AuditoriaTab';
 
-type MasterTab = 'municipios' | 'catalogos';
+type MasterTab = 'municipios' | 'catalogos' | 'auditoria';
 
 export function MasterPanelPage() {
   const location = useLocation();
@@ -46,10 +47,22 @@ export function MasterPanelPage() {
         >
           Catálogos
         </button>
+        <button
+          type="button"
+          onClick={() => setTab('auditoria')}
+          className={
+            tab === 'auditoria'
+              ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
+          }
+        >
+          Auditoria
+        </button>
       </div>
 
       {tab === 'municipios' && <MunicipiosTab />}
       {tab === 'catalogos' && <CatalogosTab />}
+      {tab === 'auditoria' && <AuditoriaTab />}
     </MasterShell>
   );
 }

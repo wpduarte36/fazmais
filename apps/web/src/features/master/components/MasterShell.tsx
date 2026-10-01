@@ -43,14 +43,14 @@ export function MasterShell({ children, maxWidthClassName = 'max-w-5xl' }: Maste
                 onClick={() => setVerComoEducadorAberto(true)}
                 className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
               >
-                👁 Ver como educador
+                📚 Área do Educador
               </button>
               <button
                 type="button"
                 onClick={() => setAcessarComoAdminAberto(true)}
                 className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
               >
-                🛠 Acessar como admin
+                🛠 Área do Admin
               </button>
             </div>
           </div>

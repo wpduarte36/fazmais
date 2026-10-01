@@ -114,10 +114,10 @@ export function MunicipiosTab() {
                       <button
                         type="button"
                         onClick={() => navigate(`/admin?${new URLSearchParams({ tenant: tenant.id }).toString()}`)}
-                        title="Abrir o Painel Admin deste município e agir como admin dele"
+                        title="Abrir a Área do Admin deste município"
                         className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md border border-amber-400/30 px-2 text-xs font-semibold text-amber-300 transition hover:bg-amber-400/10 light:text-amber-700"
                       >
-                        Acessar como admin
+                        Área do Admin
                       </button>
                       <button
                         type="button"

@@ -15,7 +15,7 @@ export function AdminPanelPage() {
   const location = useLocation();
   const initialTab = (location.state as { tab?: AdminTab } | null)?.tab ?? 'usuarios';
   const [tab, setTab] = useState<AdminTab>(initialTab);
-  // Master chega aqui pelo "Acessar como admin" da aba Municípios, com o
+  // Master chega aqui pela "Área do Admin" da aba Municípios, com o
   // município na URL (?tenant=). Admin ignora o parâmetro: vale o dele.
   const [searchParams] = useSearchParams();
   const isMaster = useAuthStore((state) => state.user?.role === Role.MASTER);
@@ -36,7 +36,7 @@ export function AdminPanelPage() {
         </h1>
         <p className="text-sm text-neutral-400 light:text-neutral-600">
           {isMaster
-            ? 'Você está agindo como admin deste município: o que mudar aqui vale de verdade.'
+            ? 'Você está na Área do Admin deste município: o que mudar aqui vale de verdade e fica registrado na auditoria.'
             : 'Gestão do acervo e dos usuários do seu município.'}
         </p>
       </div>

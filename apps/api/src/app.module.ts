@@ -16,6 +16,7 @@ import { ProgressModule } from './progress/progress.module';
 import { StatsModule } from './stats/stats.module';
 import { UsersModule } from './users/users.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { AuditoriaModule } from './auditoria/auditoria.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UploadsModule } from './uploads/uploads.module';
     StatsModule,
     UsersModule,
     UploadsModule,
+    AuditoriaModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

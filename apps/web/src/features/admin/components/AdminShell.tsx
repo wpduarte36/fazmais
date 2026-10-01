@@ -10,7 +10,7 @@ import { useTenantAlvo } from '../tenantAlvo';
 interface AdminShellProps {
   children: ReactNode;
   maxWidthClassName?: string;
-  // Nome do município quando o Master está no "Acessar como admin".
+  // Nome do município quando o Master está na "Área do Admin".
   tenantAlvoNome?: string;
 }
 
@@ -51,14 +51,14 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl', tenantAl
                     ← Painel Master
                   </button>
                   <button type="button" onClick={() => setVerComoEducadorAberto(true)} className={linkClassName}>
-                    👁 Ver como educador
+                    📚 Área do Educador
                   </button>
                 </>
               ) : (
                 <>
                   <div className="text-[11px] text-neutral-500">Admin</div>
                   <button type="button" onClick={() => navigate('/')} className={linkClassName}>
-                    👁 Ver como educador
+                    📚 Área do Educador
                   </button>
                 </>
               )}

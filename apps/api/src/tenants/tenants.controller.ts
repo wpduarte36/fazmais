@@ -14,6 +14,10 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/strategies/jwt.strategy';
+import { PrismaService } from '../prisma/prisma.service';
+import { AuditoriaService } from '../auditoria/auditoria.service';
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
@@ -24,7 +28,11 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('MASTER')
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly prisma: PrismaService,
+    private readonly auditoria: AuditoriaService,
+  ) {}
 
   @Get()
   list() {
@@ -32,19 +40,43 @@ export class TenantsController {
   }
 
   @Post()
-  create(@Body() dto: CreateTenantDto) {
-    return this.tenantsService.create(dto);
+  async create(@CurrentUser() user: JwtPayload, @Body() dto: CreateTenantDto) {
+    const tenant = await this.tenantsService.create(dto);
+    await this.auditoria.registrar(user, {
+      tenantId: tenant.id,
+      acao: 'MUNICIPIO_CRIADO',
+      descricao: `Criou o município ${tenant.name}`,
+    });
+    return tenant;
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTenantDto) {
-    return this.tenantsService.update(id, dto);
+  async update(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTenantDto) {
+    const anterior = await this.prisma.tenant.findUnique({ where: { id }, select: { name: true } });
+    const tenant = await this.tenantsService.update(id, dto);
+    await this.auditoria.registrar(user, {
+      tenantId: id,
+      acao: 'MUNICIPIO_ALTERADO',
+      descricao:
+        anterior && anterior.name !== tenant.name
+          ? `Renomeou o município ${anterior.name} para ${tenant.name}`
+          : `Alterou o município ${tenant.name}`,
+      detalhes: { alteracoes: { ...dto } },
+    });
+    return tenant;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.tenantsService.remove(id);
+  async remove(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
+    const excluido = await this.prisma.tenant.findUnique({ where: { id }, select: { name: true } });
+    await this.tenantsService.remove(id);
+    await this.auditoria.registrar(user, {
+      tenantId: id,
+      tenantNameFallback: excluido?.name,
+      acao: 'MUNICIPIO_EXCLUIDO',
+      descricao: `Excluiu o município ${excluido?.name}`,
+    });
   }
 
   @Get(':id/admins')
@@ -53,22 +85,52 @@ export class TenantsController {
   }
 
   @Post(':id/admins')
-  createAdmin(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateAdminDto) {
-    return this.tenantsService.createAdmin(id, dto);
+  async createAdmin(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateAdminDto) {
+    const admin = await this.tenantsService.createAdmin(id, dto);
+    await this.auditoria.registrar(user, {
+      tenantId: id,
+      acao: 'ADMIN_CRIADO',
+      descricao: `Criou o admin ${admin.name} (${admin.login})`,
+      detalhes: { userId: admin.id, email: admin.email },
+    });
+    return admin;
   }
 
   @Patch(':id/admins/:userId')
-  updateAdmin(
+  async updateAdmin(
+    @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: UpdateAdminDto,
   ) {
-    return this.tenantsService.updateAdmin(id, userId, dto);
+    const admin = await this.tenantsService.updateAdmin(id, userId, dto);
+    await this.auditoria.registrar(user, {
+      tenantId: id,
+      acao: 'ADMIN_ALTERADO',
+      descricao: `Alterou o admin ${admin.name} (${admin.login})`,
+      detalhes: { userId, alteracoes: { ...dto } },
+    });
+    return admin;
   }
 
   @Delete(':id/admins/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeAdmin(@Param('id', ParseUUIDPipe) id: string, @Param('userId', ParseUUIDPipe) userId: string) {
-    return this.tenantsService.removeAdmin(id, userId);
+  async removeAdmin(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ) {
+    // Lido antes: depois do delete não há mais nome pra pôr no registro.
+    const excluido = await this.prisma.user.findFirst({
+      where: { id: userId, tenantId: id, role: 'ADMIN' },
+      select: { name: true, login: true },
+    });
+    await this.tenantsService.removeAdmin(id, userId);
+    await this.auditoria.registrar(user, {
+      tenantId: id,
+      acao: 'ADMIN_EXCLUIDO',
+      descricao: `Excluiu o admin ${excluido?.name} (${excluido?.login})`,
+      detalhes: { userId },
+    });
   }
 }

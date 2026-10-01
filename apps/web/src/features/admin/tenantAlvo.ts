@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 // Município sobre o qual o Painel Admin age. Pro Admin fica vazio (a API usa
-// o município dele); pro Master no "Acessar como admin" é o município que ele
+// o município dele); pro Master na "Área do Admin" é o município que ele
 // escolheu na aba Municípios — vai como ?tenantId= em toda chamada do painel.
 export const TenantAlvoContext = createContext<string | undefined>(undefined);
 

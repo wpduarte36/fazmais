@@ -5,7 +5,7 @@ import { usePlanos } from '../hooks/usePlanos';
 
 interface VerComoEducadorModalProps {
   onClose: () => void;
-  // Já vem escolhido quando aberto de dentro do "Acessar como admin".
+  // Já vem escolhido quando aberto de dentro do "Área do Admin".
   tenantIdInicial?: string;
 }
 
@@ -48,8 +48,8 @@ export function VerComoEducadorModal({ onClose, tenantIdInicial }: VerComoEducad
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Visão do educador</p>
-            <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">Ver como educador</h3>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Painel Master</p>
+            <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">Área do Educador</h3>
           </div>
           <button
             type="button"

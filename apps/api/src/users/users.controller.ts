@@ -19,24 +19,31 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolverTenantAlvo } from '../common/tenant-alvo.util';
+import { AuditoriaService, ROLE_LABEL } from '../auditoria/auditoria.service';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-// MASTER entra pelo "Acessar como admin" (aba Municípios), informando o
+// MASTER entra pela "Área do Admin" (aba Municípios), informando o
 // município via ?tenantId= — ver resolverTenantAlvo.
 @Roles('ADMIN', 'MASTER')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly prisma: PrismaService,
+    private readonly auditoria: AuditoriaService,
   ) {}
+
+  // Ações do Master aqui ("Área do Admin") vão pra trilha de auditoria;
+  // as do próprio Admin não (AuditoriaService.registrar ignora quem não é Master).
 
   @Get()
   async list(@CurrentUser() user: JwtPayload, @Query('tenantId') tenantId?: string) {
-    return this.usersService.list(await resolverTenantAlvo(this.prisma, user, tenantId));
+    const alvo = await resolverTenantAlvo(this.prisma, user, tenantId);
+    await this.auditoria.registrarAcessoPainel(user, alvo);
+    return this.usersService.list(alvo);
   }
 
   @Get('stats')
@@ -50,7 +57,15 @@ export class UsersController {
     @Body() dto: CreateUserDto,
     @Query('tenantId') tenantId?: string,
   ) {
-    return this.usersService.create(await resolverTenantAlvo(this.prisma, user, tenantId), dto);
+    const alvo = await resolverTenantAlvo(this.prisma, user, tenantId);
+    const criado = await this.usersService.create(alvo, dto);
+    await this.auditoria.registrar(user, {
+      tenantId: alvo,
+      acao: 'USUARIO_CRIADO',
+      descricao: `Criou o usuário ${criado.name} (${criado.login}) · ${ROLE_LABEL[criado.role]}`,
+      detalhes: { userId: criado.id, email: criado.email, planoName: criado.planoName },
+    });
+    return criado;
   }
 
   @Patch(':id')
@@ -60,7 +75,15 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
     @Query('tenantId') tenantId?: string,
   ) {
-    return this.usersService.update(await resolverTenantAlvo(this.prisma, user, tenantId), user.sub, id, dto);
+    const alvo = await resolverTenantAlvo(this.prisma, user, tenantId);
+    const atualizado = await this.usersService.update(alvo, user.sub, id, dto);
+    await this.auditoria.registrar(user, {
+      tenantId: alvo,
+      acao: 'USUARIO_ALTERADO',
+      descricao: `Alterou o usuário ${atualizado.name} (${atualizado.login})`,
+      detalhes: { userId: id, alteracoes: { ...dto } },
+    });
+    return atualizado;
   }
 
   @Post(':id/reset-password')
@@ -69,7 +92,18 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query('tenantId') tenantId?: string,
   ) {
-    return this.usersService.resetPassword(await resolverTenantAlvo(this.prisma, user, tenantId), id);
+    const alvo = await resolverTenantAlvo(this.prisma, user, tenantId);
+    const resultado = await this.usersService.resetPassword(alvo, id);
+    if (user.role === 'MASTER') {
+      const resetado = await this.prisma.user.findUnique({ where: { id }, select: { name: true, login: true } });
+      await this.auditoria.registrar(user, {
+        tenantId: alvo,
+        acao: 'USUARIO_SENHA_RESETADA',
+        descricao: `Gerou link de redefinição de senha para ${resetado?.name} (${resetado?.login})`,
+        detalhes: { userId: id },
+      });
+    }
+    return resultado;
   }
 
   @Delete(':id')
@@ -79,6 +113,21 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query('tenantId') tenantId?: string,
   ) {
-    return this.usersService.remove(await resolverTenantAlvo(this.prisma, user, tenantId), user.sub, id);
+    const alvo = await resolverTenantAlvo(this.prisma, user, tenantId);
+    // Lido antes: depois do delete não há mais nome pra pôr no registro.
+    const excluido =
+      user.role === 'MASTER'
+        ? await this.prisma.user.findFirst({
+            where: { id, tenantId: alvo },
+            select: { name: true, login: true, role: true },
+          })
+        : null;
+    await this.usersService.remove(alvo, user.sub, id);
+    await this.auditoria.registrar(user, {
+      tenantId: alvo,
+      acao: 'USUARIO_EXCLUIDO',
+      descricao: `Excluiu o usuário ${excluido?.name} (${excluido?.login}) · ${ROLE_LABEL[excluido?.role ?? ''] ?? ''}`,
+      detalhes: { userId: id },
+    });
   }
 }
