@@ -1,12 +1,21 @@
-import { MARCA_PADRAO_SLUG } from '@fazmais/shared';
+import { MARCA_PADRAO_SLUG, type MarcaPublica } from '@fazmais/shared';
 import { useMarca } from '../store/marcaStore';
 import { FazMaisLegacyLogo } from './FazMaisLegacyLogo';
 
 // Logo da marca da URL. Sem logo cadastrado: a marca padrão usa o logo
 // FazMais; as outras mostram o nome em texto, na cor da marca, até subirem um.
 export function BrandLogo({ className = '' }: { className?: string }) {
-  const marca = useMarca();
+  return <BrandLogoView marca={useMarca()} className={className} />;
+}
 
+// Versão sem store, pra prévia no Painel Master com valores ainda não salvos.
+export function BrandLogoView({
+  marca,
+  className = '',
+}: {
+  marca: Pick<MarcaPublica, 'slug' | 'logoUrl' | 'nomeExibicao'>;
+  className?: string;
+}) {
   if (marca.logoUrl) {
     return <img src={marca.logoUrl} alt={marca.nomeExibicao} className={`object-contain ${className}`} />;
   }

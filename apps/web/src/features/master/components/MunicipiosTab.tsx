@@ -57,11 +57,14 @@ export function MunicipiosTab() {
 
       <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.035] light:border-black/10 light:bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
+          <table className="w-full min-w-[660px] border-collapse text-sm">
             <thead>
               <tr>
                 <th className="border-b border-white/10 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500 light:border-black/10">
                   Nome
+                </th>
+                <th className="border-b border-white/10 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500 light:border-black/10">
+                  Empresa
                 </th>
                 <th className="border-b border-white/10 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500 light:border-black/10">
                   Admins
@@ -80,21 +83,21 @@ export function MunicipiosTab() {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
+                  <td colSpan={6} className="px-4 py-6 text-center text-neutral-500">
                     Carregando...
                   </td>
                 </tr>
               )}
               {error && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-rose-300 light:text-rose-700">
+                  <td colSpan={6} className="px-4 py-6 text-center text-rose-300 light:text-rose-700">
                     Não foi possível carregar os municípios.
                   </td>
                 </tr>
               )}
               {!isLoading && tenants?.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
+                  <td colSpan={6} className="px-4 py-6 text-center text-neutral-500">
                     Nenhum município cadastrado ainda.
                   </td>
                 </tr>
@@ -106,6 +109,7 @@ export function MunicipiosTab() {
                   className="cursor-pointer border-b border-white/10 last:border-b-0 hover:bg-white/[0.02] light:border-black/10 light:hover:bg-black/[0.02]"
                 >
                   <td className="px-4 py-3 font-semibold">{tenant.name}</td>
+                  <td className="px-4 py-3 text-neutral-400">{tenant.marcaNome ?? 'Padrão'}</td>
                   <td className="px-4 py-3 tabular-nums text-neutral-400">{tenant.adminsCount}</td>
                   <td className="px-4 py-3 tabular-nums text-neutral-400">{tenant.usersCount}</td>
                   <td className="px-4 py-3 text-neutral-400">{dateFormatter.format(new Date(tenant.createdAt))}</td>

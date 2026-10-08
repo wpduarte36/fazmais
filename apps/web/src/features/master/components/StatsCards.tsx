@@ -2,11 +2,22 @@ import type { ReactNode } from 'react';
 import { useMasterStats } from '../hooks/useMasterStats';
 
 const CARDS: Array<{
-  key: 'municipios' | 'admins' | 'professores' | 'conteudos';
+  key: 'empresas' | 'municipios' | 'admins' | 'professores' | 'conteudos';
   label: string;
   gradient: string;
   icon: ReactNode;
 }> = [
+  {
+    key: 'empresas',
+    label: 'Empresas',
+    gradient: 'from-sky-500 to-sky-700',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="7" width="18" height="13" rx="2" />
+        <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18" />
+      </svg>
+    ),
+  },
   {
     key: 'municipios',
     label: 'Municípios',
@@ -65,7 +76,7 @@ export function StatsCards() {
   }
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {CARDS.map((card) => (
         <div
           key={card.key}

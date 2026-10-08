@@ -33,17 +33,27 @@ function hexParaOklch(hex: string): { c: number; h: number } | null {
   return { c: Math.hypot(a, bb), h: h < 0 ? h + 360 : h };
 }
 
+// Variáveis --brand-* geradas a partir da cor; null se a cor for inválida.
+// Também serve pra pré-visualizar uma cor só dentro de um elemento (style).
+export function escalaDaCor(corPrimaria: string): Record<string, string> | null {
+  const cor = hexParaOklch(corPrimaria);
+  if (!cor) return null;
+  return Object.fromEntries(
+    DEGRAUS.map((degrau, i) => {
+      const croma = CROMA_AMBER[i] * (cor.c / CROMA_AMBER_400);
+      return [`--brand-${degrau}`, `oklch(${LUMINOSIDADE[i]}% ${croma.toFixed(3)} ${cor.h.toFixed(2)})`];
+    }),
+  );
+}
+
 // Cor nula/inválida remove as variáveis inline e volta pra paleta padrão do index.css.
 export function aplicarCorDaMarca(corPrimaria: string | null): void {
   const raiz = document.documentElement.style;
-  const cor = corPrimaria ? hexParaOklch(corPrimaria) : null;
-  DEGRAUS.forEach((degrau, i) => {
-    if (!cor) {
-      raiz.removeProperty(`--brand-${degrau}`);
-      return;
-    }
-    const croma = CROMA_AMBER[i] * (cor.c / CROMA_AMBER_400);
-    raiz.setProperty(`--brand-${degrau}`, `oklch(${LUMINOSIDADE[i]}% ${croma.toFixed(3)} ${cor.h.toFixed(2)})`);
+  const escala = corPrimaria ? escalaDaCor(corPrimaria) : null;
+  DEGRAUS.forEach((degrau) => {
+    const variavel = `--brand-${degrau}`;
+    if (escala) raiz.setProperty(variavel, escala[variavel]);
+    else raiz.removeProperty(variavel);
   });
 }
 

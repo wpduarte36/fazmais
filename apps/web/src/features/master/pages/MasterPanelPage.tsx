@@ -5,12 +5,13 @@ import { StatsCards } from '../components/StatsCards';
 import { MunicipiosTab } from '../components/MunicipiosTab';
 import { CatalogosTab } from '../components/CatalogosTab';
 import { AuditoriaTab } from '../components/AuditoriaTab';
+import { MarcasTab } from '../components/MarcasTab';
 
-type MasterTab = 'municipios' | 'catalogos' | 'auditoria';
+type MasterTab = 'municipios' | 'catalogos' | 'marcas' | 'auditoria';
 
 export function MasterPanelPage() {
   const location = useLocation();
-  const initialTab = (location.state as { tab?: MasterTab } | null)?.tab ?? 'municipios';
+  const initialTab = (location.state as { tab?: MasterTab } | null)?.tab ?? 'marcas';
   const [tab, setTab] = useState<MasterTab>(initialTab);
 
   return (
@@ -18,13 +19,24 @@ export function MasterPanelPage() {
       <div className="mb-6">
         <h1 className="text-xl font-bold tracking-tight">Painel Master</h1>
         <p className="text-sm text-neutral-400 light:text-neutral-600">
-          Visão global da plataforma: municípios e catálogos compartilhados.
+          Visão global da plataforma: empresas, municípios e catálogos compartilhados.
         </p>
       </div>
 
       <StatsCards />
 
       <div className="mb-6 inline-flex gap-1 rounded-full border border-white/15 bg-white/[0.03] p-1 light:border-black/10 light:bg-black/[0.03]">
+        <button
+          type="button"
+          onClick={() => setTab('marcas')}
+          className={
+            tab === 'marcas'
+              ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
+          }
+        >
+          Empresas
+        </button>
         <button
           type="button"
           onClick={() => setTab('municipios')}
@@ -60,6 +72,7 @@ export function MasterPanelPage() {
         </button>
       </div>
 
+      {tab === 'marcas' && <MarcasTab />}
       {tab === 'municipios' && <MunicipiosTab />}
       {tab === 'catalogos' && <CatalogosTab />}
       {tab === 'auditoria' && <AuditoriaTab />}

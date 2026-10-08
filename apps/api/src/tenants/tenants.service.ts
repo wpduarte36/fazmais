@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -30,6 +31,7 @@ export class TenantsService {
     const tenants = await this.prisma.tenant.findMany({
       orderBy: { name: 'asc' },
       include: {
+        marca: { select: { nomeExibicao: true } },
         _count: {
           select: {
             users: true,
@@ -53,18 +55,22 @@ export class TenantsService {
       createdAt: tenant.createdAt,
       usersCount: tenant._count.users,
       adminsCount: adminCountByTenant.get(tenant.id) ?? 0,
+      marcaId: tenant.marcaId,
+      marcaNome: tenant.marca?.nomeExibicao ?? null,
     }));
   }
 
   async create(dto: CreateTenantDto) {
-    return this.prisma.tenant.create({ data: { name: dto.name } });
+    await this.assertMarcaExiste(dto.marcaId);
+    return this.prisma.tenant.create({ data: { name: dto.name, marcaId: dto.marcaId ?? null } });
   }
 
   async update(id: string, dto: UpdateTenantDto) {
     await this.findTenantOrThrow(id);
+    await this.assertMarcaExiste(dto.marcaId);
     return this.prisma.tenant.update({
       where: { id },
-      data: { name: dto.name },
+      data: { name: dto.name, marcaId: dto.marcaId },
     });
   }
 
@@ -164,6 +170,14 @@ export class TenantsService {
   async removeAdmin(tenantId: string, userId: string): Promise<void> {
     await this.findAdminOrThrow(tenantId, userId);
     await this.prisma.user.delete({ where: { id: userId } });
+  }
+
+  private async assertMarcaExiste(marcaId: string | null | undefined) {
+    if (!marcaId) return;
+    const marca = await this.prisma.marca.findUnique({ where: { id: marcaId }, select: { id: true } });
+    if (!marca) {
+      throw new BadRequestException('Empresa não encontrada');
+    }
   }
 
   private async findTenantOrThrow(id: string) {

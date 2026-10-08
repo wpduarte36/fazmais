@@ -52,8 +52,14 @@ export class TenantsController {
 
   @Patch(':id')
   async update(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTenantDto) {
-    const anterior = await this.prisma.tenant.findUnique({ where: { id }, select: { name: true } });
+    const anterior = await this.prisma.tenant.findUnique({ where: { id }, select: { name: true, marcaId: true } });
     const tenant = await this.tenantsService.update(id, dto);
+    // Na trilha vai o nome da marca (o id não diz nada pra quem lê), e só se mudou.
+    const { marcaId, ...alteracoes } = dto;
+    if (marcaId !== undefined && marcaId !== anterior?.marcaId) {
+      const marca = marcaId ? await this.prisma.marca.findUnique({ where: { id: marcaId }, select: { nomeExibicao: true } }) : null;
+      Object.assign(alteracoes, { marca: marca?.nomeExibicao ?? 'padrão' });
+    }
     await this.auditoria.registrar(user, {
       tenantId: id,
       acao: 'MUNICIPIO_ALTERADO',
@@ -61,7 +67,7 @@ export class TenantsController {
         anterior && anterior.name !== tenant.name
           ? `Renomeou o município ${anterior.name} para ${tenant.name}`
           : `Alterou o município ${tenant.name}`,
-      detalhes: { alteracoes: { ...dto } },
+      detalhes: { alteracoes },
     });
     return tenant;
   }

@@ -6,13 +6,14 @@ export class StatsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getMasterStats() {
-    const [municipios, admins, professores, conteudos] = await Promise.all([
+    const [empresas, municipios, admins, professores, conteudos] = await Promise.all([
+      this.prisma.marca.count(),
       this.prisma.tenant.count(),
       this.prisma.user.count({ where: { role: 'ADMIN' } }),
       this.prisma.user.count({ where: { role: 'PROFESSOR' } }),
       this.prisma.conteudo.count(),
     ]);
 
-    return { municipios, admins, professores, conteudos };
+    return { empresas, municipios, admins, professores, conteudos };
   }
 }

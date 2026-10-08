@@ -6,14 +6,18 @@ export interface TenantSummary {
   createdAt: string;
   usersCount: number;
   adminsCount: number;
+  marcaId: string | null; // nulo = marca padrão (FazMais)
+  marcaNome: string | null;
 }
 
 export interface CreateTenantRequest {
   name: string;
+  marcaId?: string | null;
 }
 
 export interface UpdateTenantRequest {
   name: string;
+  marcaId?: string | null;
 }
 
 export interface AdminSummary {

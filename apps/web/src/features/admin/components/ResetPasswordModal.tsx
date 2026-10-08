@@ -4,14 +4,16 @@ interface ResetPasswordModalProps {
   userName: string;
   token: string;
   expiresAt: string;
+  // Endereço da marca do município; nulo = o endereço onde o link foi gerado.
+  appUrl: string | null;
   onClose: () => void;
 }
 
 const dateTimeFormatter = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-export function ResetPasswordModal({ userName, token, expiresAt, onClose }: ResetPasswordModalProps) {
+export function ResetPasswordModal({ userName, token, expiresAt, appUrl, onClose }: ResetPasswordModalProps) {
   const [copied, setCopied] = useState(false);
-  const link = `${window.location.origin}/definir-senha?token=${token}`;
+  const link = `${appUrl ?? window.location.origin}/definir-senha?token=${token}`;
 
   async function handleCopy() {
     await navigator.clipboard.writeText(link);

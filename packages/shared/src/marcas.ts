@@ -9,3 +9,18 @@ export interface MarcaPublica {
 }
 
 export const MARCA_PADRAO_SLUG = 'fazmais';
+
+// Visão completa, só pro Painel Master.
+export interface MarcaAdmin extends MarcaPublica {
+  id: string;
+  dominios: string[];
+  tenantsCount: number;
+}
+
+export interface UpdateMarcaRequest {
+  nomeExibicao: string;
+  nomeAssistente: string;
+  corPrimaria: string | null;
+  logoUrl: string | null;
+  dominios: string[];
+}

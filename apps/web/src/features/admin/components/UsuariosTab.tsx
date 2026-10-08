@@ -63,7 +63,7 @@ export function UsuariosTab() {
   const [editError, setEditError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const [resetResult, setResetResult] = useState<{ userName: string; token: string; expiresAt: string } | null>(null);
+  const [resetResult, setResetResult] = useState<{ userName: string; token: string; expiresAt: string; appUrl: string | null } | null>(null);
 
   const filteredUsers = useMemo(() => {
     const termo = normalize(searchQuery.trim());
@@ -102,6 +102,7 @@ export function UsuariosTab() {
             userName: data.name,
             token: data.firstAccessToken,
             expiresAt: data.firstAccessExpiresAt,
+            appUrl: data.appUrl,
           });
         },
         onError: (err) => setCreateError(err instanceof ApiError ? err.message : 'Não foi possível criar o usuário.'),
@@ -132,7 +133,7 @@ export function UsuariosTab() {
   function handleResetPassword(user: UserSummary) {
     setActionError(null);
     resetPassword.mutate(user.id, {
-      onSuccess: (data) => setResetResult({ userName: user.name, token: data.token, expiresAt: data.expiresAt }),
+      onSuccess: (data) => setResetResult({ userName: user.name, token: data.token, expiresAt: data.expiresAt, appUrl: data.appUrl }),
       onError: (err) => setActionError(err instanceof ApiError ? err.message : 'Não foi possível gerar o token de redefinição.'),
     });
   }
@@ -378,6 +379,7 @@ export function UsuariosTab() {
           userName={resetResult.userName}
           token={resetResult.token}
           expiresAt={resetResult.expiresAt}
+          appUrl={resetResult.appUrl}
           onClose={() => setResetResult(null)}
         />
       )}

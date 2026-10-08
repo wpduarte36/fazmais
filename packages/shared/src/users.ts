@@ -38,12 +38,16 @@ export interface UpdateUserRequest {
   planoId?: string | null;
 }
 
+// appUrl: endereço da marca do município (ex: https://app.plannetamais.com.br)
+// pra montar o link de definir senha; nulo = usar o endereço atual.
 export interface ResetPasswordResponse {
   token: string;
   expiresAt: string;
+  appUrl: string | null;
 }
 
 export interface CreateUserResponse extends UserSummary {
   firstAccessToken: string;
   firstAccessExpiresAt: string;
+  appUrl: string | null;
 }

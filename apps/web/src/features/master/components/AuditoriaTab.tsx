@@ -25,6 +25,7 @@ const ACAO_LABEL: Record<AuditAcao, string> = {
   [AuditAcao.ADMIN_CRIADO]: 'Admin criado',
   [AuditAcao.ADMIN_ALTERADO]: 'Admin alterado',
   [AuditAcao.ADMIN_EXCLUIDO]: 'Admin excluído',
+  [AuditAcao.MARCA_ALTERADA]: 'Empresa alterada',
 };
 
 const CAMPO_LABEL: Record<string, string> = {
@@ -32,6 +33,12 @@ const CAMPO_LABEL: Record<string, string> = {
   email: 'e-mail',
   whatsapp: 'WhatsApp',
   status: 'status',
+  marca: 'empresa',
+  nomeExibicao: 'nome',
+  nomeAssistente: 'assistente',
+  corPrimaria: 'cor',
+  logoUrl: 'logo',
+  dominios: 'domínios',
 };
 
 // Só o "o que mudou" de uma alteração — ids e demais detalhes técnicos ficam

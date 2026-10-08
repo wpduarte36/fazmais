@@ -48,7 +48,7 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl', tenantAl
               {isMasterComoAdmin ? (
                 <>
                   <div className="text-[11px] text-neutral-500">{tenantAlvoNome ?? 'Município'} · Admin</div>
-                  <button type="button" onClick={() => navigate('/master')} className={linkClassName}>
+                  <button type="button" onClick={() => navigate('/master', { state: { tab: 'municipios' } })} className={linkClassName}>
                     ← Painel Master
                   </button>
                   <button type="button" onClick={() => setVerComoEducadorAberto(true)} className={linkClassName}>

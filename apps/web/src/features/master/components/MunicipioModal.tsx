@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import type { TenantSummary } from '@fazmais/shared';
+import { MARCA_PADRAO_SLUG, type TenantSummary } from '@fazmais/shared';
 import { ApiError } from '../../../lib/apiClient';
 import { useCreateTenant, useUpdateTenant } from '../hooks/useTenants';
+import { useMarcas } from '../hooks/useMarcas';
 import { AdminsPopup } from './AdminsPopup';
 
 type ModalState = { mode: 'create' } | { mode: 'edit'; tenant: TenantSummary };
@@ -14,6 +15,9 @@ interface MunicipioModalProps {
 export function MunicipioModal({ state, onClose }: MunicipioModalProps) {
   const isEdit = state.mode === 'edit';
   const [name, setName] = useState(isEdit ? state.tenant.name : '');
+  // '' = marca padrão (marcaId nulo)
+  const [marcaId, setMarcaId] = useState(isEdit ? (state.tenant.marcaId ?? '') : '');
+  const { data: marcas } = useMarcas();
   const [adminsOpen, setAdminsOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const createTenant = useCreateTenant();
@@ -31,9 +35,9 @@ export function MunicipioModal({ state, onClose }: MunicipioModalProps) {
     };
 
     if (isEdit) {
-      updateTenant.mutate({ id: state.tenant.id, dto: { name } }, { onSuccess: onClose, onError });
+      updateTenant.mutate({ id: state.tenant.id, dto: { name, marcaId: marcaId || null } }, { onSuccess: onClose, onError });
     } else {
-      createTenant.mutate({ name }, { onSuccess: onClose, onError });
+      createTenant.mutate({ name, marcaId: marcaId || null }, { onSuccess: onClose, onError });
     }
   }
 
@@ -81,6 +85,29 @@ export function MunicipioModal({ state, onClose }: MunicipioModalProps) {
                 placeholder="Ex.: Presidente Prudente"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:focus:bg-white"
               />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="tenant-marca" className="text-xs font-semibold text-neutral-300 light:text-neutral-600">
+                Empresa
+              </label>
+              <select
+                id="tenant-marca"
+                value={marcaId}
+                onChange={(event) => setMarcaId(event.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 [&>option]:bg-neutral-900 light:[&>option]:bg-white"
+              >
+                {marcas?.map((marca) => (
+                  <option key={marca.id} value={marca.slug === MARCA_PADRAO_SLUG ? '' : marca.id}>
+                    {marca.nomeExibicao}
+                    {marca.slug === MARCA_PADRAO_SLUG ? ' (padrão)' : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-500">
+                Usada nos links de definir senha enviados aos usuários deste município. O visual de cada tela segue o
+                endereço acessado.
+              </p>
             </div>
 
             {formError && (

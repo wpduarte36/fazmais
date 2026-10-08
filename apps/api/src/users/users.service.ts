@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { MarcasService } from '../marcas/marcas.service';
 import { runUniqueCheckedWrite } from '../common/unique-constraint.util';
 import { issuePasswordToken } from '../common/password-token.util';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -44,7 +45,10 @@ function toSummary<T extends { plano: { id: string; name: string } | null }>(use
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly marcas: MarcasService,
+  ) {}
 
   async list(tenantId: string) {
     const users = await this.prisma.user.findMany({
@@ -91,7 +95,12 @@ export class UsersService {
       `[dev only, sem envio de e-mail] token de 1º acesso para ${created.login}: ${token}`,
     );
 
-    return { ...toSummary(created), firstAccessToken: token, firstAccessExpiresAt: expiresAt };
+    return {
+      ...toSummary(created),
+      firstAccessToken: token,
+      firstAccessExpiresAt: expiresAt,
+      appUrl: await this.marcas.appUrlDoTenant(tenantId),
+    };
   }
 
   async update(tenantId: string, currentUserId: string, userId: string, dto: UpdateUserDto) {
@@ -121,7 +130,7 @@ export class UsersService {
     await this.findUserOrThrow(tenantId, userId);
     const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
     const token = await issuePasswordToken(this.prisma, userId, 'RESET', RESET_TOKEN_TTL_MS);
-    return { token, expiresAt };
+    return { token, expiresAt, appUrl: await this.marcas.appUrlDoTenant(tenantId) };
   }
 
   async remove(tenantId: string, currentUserId: string, userId: string): Promise<void> {
