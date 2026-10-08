@@ -1,6 +1,7 @@
 import type { AppPlatform, ConteudoSummary } from '@fazmais/shared';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
+import { useTextoDaMarca } from '../../../lib/textoDaMarca';
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
@@ -37,6 +38,7 @@ interface AppModalProps {
 }
 
 export function AppModal({ conteudo, onClose }: AppModalProps) {
+  const textoDaMarca = useTextoDaMarca();
   // Mostra só as plataformas marcadas no cadastro — com link vira botão, sem
   // link vira texto. Nenhuma marcada (ex.: App migrado ainda não revisado) =
   // não afirma nada sobre onde está disponível.
@@ -87,7 +89,7 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
           </div>
 
           <p className="text-[15px] leading-relaxed text-neutral-300 light:text-neutral-700">
-            {conteudo.description}
+            {textoDaMarca(conteudo.description)}
           </p>
 
           {disponibilidade.length > 0 && (

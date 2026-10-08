@@ -29,3 +29,10 @@
 - **Aplicado em**: 2026-10-08, banco local `fazmais_dev`. Produção aplica no próximo deploy da API (`prisma migrate deploy` no start da Railway).
 - **Resumo**: tabela `marcas` (nome de exibição, nome do assistente de IA, cor primária, logo, domínios) + `tenants.marca_id` opcional (`ON DELETE SET NULL`; nulo = marca padrão). Já insere as marcas `fazmais` (Fabinho) e `plannetamais` (Planinho, nome provisório). Todos os tenants existentes ficam sem marca = FazMais.
 - **Escrita à mão** (sem `migrate dev`), pelo mesmo motivo das anteriores: não derrubar o índice GIN `conteudos_tags_gin_idx`.
+
+## 20261008130000_add_marca_assistente_imagens
+
+- **Pedido por**: Wagner, 2026-10-08 — imagem do assistente de IA configurável por empresa.
+- **Aplicado em**: 2026-10-08, banco local `fazmais_dev`. Produção aplica no próximo deploy da API.
+- **Resumo**: `marcas.assistente_imagem_url` (figura de corpo inteiro) e `marcas.assistente_avatar_url` (rosto), ambas opcionais; nulas = imagens padrão do Fabinho.
+- **Escrita à mão**, mesmo motivo das anteriores (índice GIN).

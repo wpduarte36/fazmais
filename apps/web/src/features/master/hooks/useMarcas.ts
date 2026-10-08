@@ -1,12 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { UpdateMarcaRequest } from '@fazmais/shared';
-import { listMarcas, updateMarca } from '../api/marcas.api';
+import type { CreateMarcaRequest, UpdateMarcaRequest } from '@fazmais/shared';
+import { createMarca, listMarcas, updateMarca } from '../api/marcas.api';
 import { carregarMarca } from '../../../store/marcaStore';
 
 const MARCAS_KEY = ['marcas'];
 
 export function useMarcas() {
   return useQuery({ queryKey: MARCAS_KEY, queryFn: listMarcas });
+}
+
+export function useCreateMarca() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dto: CreateMarcaRequest) => createMarca(dto),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: MARCAS_KEY }),
+  });
 }
 
 export function useUpdateMarca() {

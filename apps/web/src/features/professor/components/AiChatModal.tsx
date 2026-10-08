@@ -3,8 +3,7 @@ import type { ConteudoSummary, HomeFeed } from '@fazmais/shared';
 import { buildMockAiResponse, type SugestaoIa } from '../lib/mockAiChat';
 import { ConteudoCard } from './ConteudoCard';
 import { useMarca } from '../../../store/marcaStore';
-import fabinhoFigura from '../../../assets/fabinho.webp';
-import fabinhoAvatar from '../../../assets/fabinho-avatar.webp';
+import { imagensDoAssistente } from '../../../lib/imagensAssistente';
 
 interface Mensagem {
   autor: 'usuario' | 'ia';
@@ -34,6 +33,7 @@ const PERGUNTAS_SUGERIDAS = [
 
 export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }: AiChatModalProps) {
   const marca = useMarca();
+  const imagens = imagensDoAssistente(marca);
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [isThinking, setIsThinking] = useState(false);
   const [novaPergunta, setNovaPergunta] = useState('');
@@ -83,9 +83,9 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
         <div className="mb-3 flex shrink-0 items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img
-              src={fabinhoAvatar}
+              src={imagens.avatar}
               alt=""
-              className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
+              className={`h-8 w-8 shrink-0 rounded-full object-cover ${imagens.avatarPosicao} ring-1 ring-white/15 light:ring-black/10`}
             />
             <h1 className="text-base font-bold">{marca.nomeAssistente}</h1>
           </div>
@@ -105,7 +105,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
           {mensagens.length === 0 && !isThinking && (
             <div className="space-y-3">
               <img
-                src={fabinhoFigura}
+                src={imagens.figura}
                 alt={`${marca.nomeAssistente}, a IA do ${marca.nomeExibicao}`}
                 className="mx-auto h-36 w-auto drop-shadow-xl"
               />
@@ -133,9 +133,9 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
             <div key={index} className={mensagem.autor === 'usuario' ? 'flex justify-end' : 'flex justify-start gap-2'}>
               {mensagem.autor === 'ia' && (
                 <img
-                  src={fabinhoAvatar}
+                  src={imagens.avatar}
                   alt=""
-                  className="mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
+                  className={`mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ${imagens.avatarPosicao} ring-1 ring-white/15 light:ring-black/10`}
                 />
               )}
               <div
@@ -170,9 +170,9 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
           {isThinking && (
             <div className="flex justify-start gap-2">
               <img
-                src={fabinhoAvatar}
+                src={imagens.avatar}
                 alt=""
-                className="mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
+                className={`mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ${imagens.avatarPosicao} ring-1 ring-white/15 light:ring-black/10`}
               />
               <div className="rounded-2xl rounded-bl-sm bg-white/[0.06] px-3.5 py-2.5 text-sm text-neutral-400 light:bg-black/[0.04]">
                 <span className="inline-flex gap-1">

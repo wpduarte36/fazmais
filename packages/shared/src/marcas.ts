@@ -6,6 +6,8 @@ export interface MarcaPublica {
   nomeAssistente: string;
   corPrimaria: string | null; // hex #rrggbb; nulo = paleta padrão
   logoUrl: string | null; // nulo = logo padrão
+  assistenteImagemUrl: string | null; // nulo = Fabinho
+  assistenteAvatarUrl: string | null; // nulo = topo da imagem acima (ou Fabinho)
 }
 
 export const MARCA_PADRAO_SLUG = 'fazmais';
@@ -17,10 +19,18 @@ export interface MarcaAdmin extends MarcaPublica {
   tenantsCount: number;
 }
 
+export interface CreateMarcaRequest {
+  slug: string;
+  nomeExibicao: string;
+  nomeAssistente: string;
+}
+
 export interface UpdateMarcaRequest {
   nomeExibicao: string;
   nomeAssistente: string;
   corPrimaria: string | null;
   logoUrl: string | null;
+  assistenteImagemUrl: string | null;
+  assistenteAvatarUrl: string | null;
   dominios: string[];
 }

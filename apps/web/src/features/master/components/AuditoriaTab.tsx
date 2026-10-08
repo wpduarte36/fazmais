@@ -25,6 +25,7 @@ const ACAO_LABEL: Record<AuditAcao, string> = {
   [AuditAcao.ADMIN_CRIADO]: 'Admin criado',
   [AuditAcao.ADMIN_ALTERADO]: 'Admin alterado',
   [AuditAcao.ADMIN_EXCLUIDO]: 'Admin excluído',
+  [AuditAcao.MARCA_CRIADA]: 'Empresa criada',
   [AuditAcao.MARCA_ALTERADA]: 'Empresa alterada',
 };
 
@@ -38,6 +39,8 @@ const CAMPO_LABEL: Record<string, string> = {
   nomeAssistente: 'assistente',
   corPrimaria: 'cor',
   logoUrl: 'logo',
+  assistenteImagemUrl: 'imagem do assistente',
+  assistenteAvatarUrl: 'avatar do assistente',
   dominios: 'domínios',
 };
 

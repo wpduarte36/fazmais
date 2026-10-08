@@ -2,6 +2,7 @@ import type { ConteudoSummary } from '@fazmais/shared';
 import { sanitizeHtml } from '../../../lib/sanitizeHtml';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
+import { useTextoDaMarca } from '../../../lib/textoDaMarca';
 
 const iconButtonClass =
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:border-black/15 aria-pressed:border-rose-400/40 aria-pressed:bg-rose-400/10 aria-pressed:text-rose-400';
@@ -13,7 +14,8 @@ interface ArtigoModalProps {
 
 export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
   const isExternal = Boolean(conteudo.externalUrl);
-  const sanitizedHtml = sanitizeHtml(conteudo.htmlContent);
+  const textoDaMarca = useTextoDaMarca();
+  const sanitizedHtml = sanitizeHtml(textoDaMarca(conteudo.htmlContent ?? '', 'html'));
 
   return (
     <div

@@ -355,7 +355,10 @@ model Marca {
   id             String   @id @default(uuid())
   slug           String   @unique // identificador estável (ex: "fazmais"); a marca padrão é "fazmais"
   nomeExibicao   String   @map("nome_exibicao") // substitui "FazMais" nos textos e no título da aba
-  nomeAssistente String   @map("nome_assistente") // nome do mascote da IA (a imagem é a mesma pra todas)
+  nomeAssistente String   @map("nome_assistente") // nome do mascote da IA
+  // Imagens do mascote da IA; nulas = Fabinho. Avatar nulo usa o topo da figura.
+  assistenteImagemUrl String? @map("assistente_imagem_url") // corpo inteiro, topo do chat
+  assistenteAvatarUrl String? @map("assistente_avatar_url") // rosto, recortado em círculo
   corPrimaria    String?  @map("cor_primaria") // hex #rrggbb; nulo = paleta padrão (âmbar)
   logoUrl        String?  @map("logo_url") // nulo = logo padrão (FazMais) ou nome em texto
   dominios       String[] @default([]) // hosts sem porta, minúsculos (ex: "app.plannetamais.com.br")

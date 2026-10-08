@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
+import { CreateMarcaDto } from './dto/create-marca.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 // Espelha MarcaPublica/MARCA_PADRAO_SLUG de @fazmais/shared (a API não depende do pacote).
@@ -11,6 +12,8 @@ export interface MarcaPublica {
   nomeAssistente: string;
   corPrimaria: string | null;
   logoUrl: string | null;
+  assistenteImagemUrl: string | null;
+  assistenteAvatarUrl: string | null;
 }
 
 const SELECT_PUBLICO = {
@@ -19,6 +22,8 @@ const SELECT_PUBLICO = {
   nomeAssistente: true,
   corPrimaria: true,
   logoUrl: true,
+  assistenteImagemUrl: true,
+  assistenteAvatarUrl: true,
 } as const;
 
 // Fallback se nem a marca padrão existir no banco (ex: migration ainda não
@@ -29,6 +34,8 @@ const MARCA_PADRAO_FIXA: MarcaPublica = {
   nomeAssistente: 'Fabinho',
   corPrimaria: null,
   logoUrl: null,
+  assistenteImagemUrl: null,
+  assistenteAvatarUrl: null,
 };
 
 // "App.PlannetaMais.com.br:443" -> "app.plannetamais.com.br"
@@ -68,6 +75,14 @@ export class MarcasService {
     }));
   }
 
+  async criar(dto: CreateMarcaDto) {
+    const existente = await this.prisma.marca.findUnique({ where: { slug: dto.slug }, select: { id: true } });
+    if (existente) throw new ConflictException(`Já existe uma empresa com o identificador ${dto.slug}`);
+    return this.prisma.marca.create({
+      data: { slug: dto.slug, nomeExibicao: dto.nomeExibicao.trim(), nomeAssistente: dto.nomeAssistente.trim() },
+    });
+  }
+
   async atualizar(id: string, dto: UpdateMarcaDto) {
     const anterior = await this.prisma.marca.findUnique({ where: { id } });
     if (!anterior) throw new NotFoundException('Empresa não encontrada');
@@ -91,6 +106,8 @@ export class MarcasService {
         nomeAssistente: dto.nomeAssistente.trim(),
         corPrimaria: dto.corPrimaria ? dto.corPrimaria.toLowerCase() : null,
         logoUrl: dto.logoUrl || null,
+        assistenteImagemUrl: dto.assistenteImagemUrl || null,
+        assistenteAvatarUrl: dto.assistenteAvatarUrl || null,
         dominios,
       },
     });

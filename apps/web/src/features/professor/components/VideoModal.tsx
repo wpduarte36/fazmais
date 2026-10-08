@@ -5,6 +5,7 @@ import { parseVimeoUrl, toPlayerUrl } from '../lib/vimeo';
 import { useProgress } from '../hooks/useProgress';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
+import { useTextoDaMarca } from '../../../lib/textoDaMarca';
 
 const INTERVALO_SALVAR_PROGRESSO_MS = 10_000;
 
@@ -18,6 +19,7 @@ interface VideoModalProps {
 
 export function VideoModal({ conteudo, onClose }: VideoModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const textoDaMarca = useTextoDaMarca();
   const [error, setError] = useState<string | null>(null);
   // Memoizado por mediaUrl: parseVimeoUrl cria um objeto novo a cada
   // chamada, e o efeito abaixo (que monta/destrói o player de verdade) usa
@@ -142,7 +144,7 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
         {vimeoRef && <div ref={containerRef} className="w-full overflow-hidden rounded-xl" />}
 
         {conteudo.description && (
-          <p className="mt-4 text-sm text-neutral-400 light:text-neutral-600">{conteudo.description}</p>
+          <p className="mt-4 text-sm text-neutral-400 light:text-neutral-600">{textoDaMarca(conteudo.description)}</p>
         )}
       </div>
     </div>

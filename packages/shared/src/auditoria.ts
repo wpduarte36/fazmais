@@ -14,6 +14,7 @@ export const AuditAcao = {
   ADMIN_CRIADO: 'ADMIN_CRIADO',
   ADMIN_ALTERADO: 'ADMIN_ALTERADO',
   ADMIN_EXCLUIDO: 'ADMIN_EXCLUIDO',
+  MARCA_CRIADA: 'MARCA_CRIADA',
   MARCA_ALTERADA: 'MARCA_ALTERADA',
 } as const;
 export type AuditAcao = (typeof AuditAcao)[keyof typeof AuditAcao];

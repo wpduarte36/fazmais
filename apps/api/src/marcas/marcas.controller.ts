@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -6,9 +6,10 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
+import { CreateMarcaDto } from './dto/create-marca.dto';
 import { MarcasService } from './marcas.service';
 
-const CAMPOS_AUDITADOS = ['nomeExibicao', 'nomeAssistente', 'corPrimaria', 'logoUrl', 'dominios'] as const;
+const CAMPOS_AUDITADOS = ['nomeExibicao', 'nomeAssistente', 'corPrimaria', 'logoUrl', 'assistenteImagemUrl', 'assistenteAvatarUrl', 'dominios'] as const;
 
 @Controller('marcas')
 export class MarcasController {
@@ -33,6 +34,20 @@ export class MarcasController {
   @Roles('MASTER')
   listar() {
     return this.marcasService.listar();
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('MASTER')
+  async criar(@CurrentUser() user: JwtPayload, @Body() dto: CreateMarcaDto) {
+    const marca = await this.marcasService.criar(dto);
+    await this.auditoria.registrar(user, {
+      tenantId: null,
+      acao: 'MARCA_CRIADA',
+      descricao: `Criou a empresa ${marca.nomeExibicao}`,
+      detalhes: { marcaId: marca.id, slug: marca.slug },
+    });
+    return marca;
   }
 
   @Patch(':id')

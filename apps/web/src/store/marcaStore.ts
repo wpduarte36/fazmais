@@ -9,6 +9,8 @@ const MARCA_PADRAO: MarcaPublica = {
   nomeAssistente: 'Fabinho',
   corPrimaria: null,
   logoUrl: null,
+  assistenteImagemUrl: null,
+  assistenteAvatarUrl: null,
 };
 
 // ?marca=<slug> simula outra marca sem precisar do domínio (localhost,

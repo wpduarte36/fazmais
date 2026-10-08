@@ -17,16 +17,19 @@ import { VideoModal } from '../components/VideoModal';
 import { PdfModal } from '../components/PdfModal';
 import { AppModal } from '../components/AppModal';
 import { AiChatModal } from '../components/AiChatModal';
-import fabinhoAvatar from '../../../assets/fabinho-avatar.webp';
+import { imagensDoAssistente } from '../../../lib/imagensAssistente';
 import { AcervoStatsRow } from '../components/AcervoStatsRow';
 import { ConteudoCard } from '../components/ConteudoCard';
 import { HeroCarousel } from '../components/HeroCarousel';
+import { useTextoDaMarca } from '../../../lib/textoDaMarca';
 
 const HOME_ID = '__home__';
 
 export function HomePage() {
   const user = useAuthStore((state) => state.user);
   const marca = useMarca();
+  const textoDaMarca = useTextoDaMarca();
+  const imagensAssistente = imagensDoAssistente(marca);
   const handleLogout = useLogout();
   const navigate = useNavigate();
   // Admin chega aqui pelo link "Área do Educador" embaixo do nome no Painel Admin — vê o
@@ -317,7 +320,7 @@ export function HomePage() {
             {!isHome && eixoAtivoDescription && (
               <div
                 className="mb-8 max-w-5xl text-sm leading-relaxed text-neutral-400 [&_a]:text-brand-400 [&_a]:underline [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:text-neutral-200 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-600 light:[&_strong]:text-neutral-800 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(eixoAtivoDescription) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(textoDaMarca(eixoAtivoDescription, 'html')) }}
               />
             )}
 
@@ -365,7 +368,7 @@ export function HomePage() {
             aria-label={`Perguntar ao ${marca.nomeAssistente}`}
             className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-400 to-brand-500 shadow-lg shadow-brand-500/30 ring-2 ring-brand-400/60 transition hover:scale-105 hover:shadow-brand-500/50"
           >
-            <img src={fabinhoAvatar} alt="" className="h-full w-full object-cover" />
+            <img src={imagensAssistente.avatar} alt="" className={`h-full w-full object-cover ${imagensAssistente.avatarPosicao}`} />
           </button>
           <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 w-max max-w-[220px] -translate-x-0 rounded-lg bg-neutral-900 px-3 py-1.5 text-center text-xs font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100 light:bg-neutral-800">
             Pergunte ao {marca.nomeAssistente} e encontre o conteúdo certo em segundos

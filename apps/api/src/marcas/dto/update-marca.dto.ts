@@ -31,6 +31,17 @@ export class UpdateMarcaDto {
   @MaxLength(500)
   logoUrl: string | null;
 
+  // null = imagens padrão do Fabinho
+  @IsOptional()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true, require_tld: false }, { message: 'Imagem do assistente inválida' })
+  @MaxLength(500)
+  assistenteImagemUrl: string | null;
+
+  @IsOptional()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true, require_tld: false }, { message: 'Avatar do assistente inválido' })
+  @MaxLength(500)
+  assistenteAvatarUrl: string | null;
+
   // Só o host, sem protocolo nem caminho: "app.plannetamais.com.br"
   @IsArray()
   @ArrayMaxSize(10)

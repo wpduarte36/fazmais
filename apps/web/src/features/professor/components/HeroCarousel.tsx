@@ -3,6 +3,7 @@ import type { ConteudoSummary } from '@fazmais/shared';
 import { FavoriteButton } from './FavoriteButton';
 import { StarRating } from './StarRating';
 import { GRADIENTS, MEDIA_BADGE, OPENABLE_TYPES } from './ConteudoCard';
+import { useTextoDaMarca } from '../../../lib/textoDaMarca';
 
 const AUTO_ADVANCE_MS = 7000;
 
@@ -14,6 +15,7 @@ export function HeroCarousel({
   onOpen: (conteudo: ConteudoSummary) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const textoDaMarca = useTextoDaMarca();
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
@@ -89,7 +91,7 @@ export function HeroCarousel({
               {MEDIA_BADGE[conteudo.mediaType]} · destaque
             </span>
             <h1 className="relative max-w-xl text-2xl font-bold text-white">{conteudo.title}</h1>
-            <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{conteudo.description}</p>
+            <p className="relative mt-1 max-w-xl line-clamp-2 text-sm text-white/80">{textoDaMarca(conteudo.description)}</p>
             <StarRating conteudo={conteudo} size={17} className="relative mt-2" />
           </div>
         );

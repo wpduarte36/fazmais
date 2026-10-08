@@ -18,6 +18,7 @@ export const AUDIT_ACOES = [
   'ADMIN_CRIADO',
   'ADMIN_ALTERADO',
   'ADMIN_EXCLUIDO',
+  'MARCA_CRIADA',
   'MARCA_ALTERADA',
 ] as const;
 export type AuditAcao = (typeof AUDIT_ACOES)[number];

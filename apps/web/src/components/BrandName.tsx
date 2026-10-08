@@ -1,7 +1,7 @@
 import { useMarca } from '../store/marcaStore';
 
 // Nome da marca com a última palavra (em CamelCase) na cor da marca:
-// "FazMais" -> Faz + Mais, "PlannetaMais" -> Planneta + Mais. Nome sem
+// "FazMais" -> Faz + Mais, "PlanetaMais" -> Planeta + Mais. Nome sem
 // segunda palavra em maiúscula sai inteiro, sem destaque. `nome` sobrescreve
 // a marca da URL (prévia no Painel Master).
 export function BrandName({ nome }: { nome?: string }) {
