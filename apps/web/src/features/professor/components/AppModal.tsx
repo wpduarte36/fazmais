@@ -54,16 +54,21 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-[#0d0d14] shadow-2xl light:border-black/10 light:bg-white"
+        className="w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-[#0d0d14] shadow-2xl light:border-black/10 light:bg-white"
         onClick={(event) => event.stopPropagation()}
       >
-        {conteudo.imageUrl && (
-          <img src={conteudo.imageUrl} alt="" className="h-40 w-full object-cover" />
-        )}
-
         <div className="p-7">
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <div>
+          <div className="mb-4 flex items-center justify-between gap-4">
+            {/* Ícone inteiro e pequeno ao lado do nome, como na Biblioteca de
+                Apps externa — esticado como capa (object-cover) ficava ruim. */}
+            {conteudo.imageUrl && (
+              <img
+                src={conteudo.imageUrl}
+                alt=""
+                className="h-28 w-28 shrink-0 rounded-3xl bg-white object-contain shadow-md"
+              />
+            )}
+            <div className="flex min-w-0 flex-1 flex-col items-center text-center">
               <span className="mb-1.5 inline-block rounded-full bg-brand-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300 light:text-brand-700">
                 📱 App
               </span>
