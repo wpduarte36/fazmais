@@ -21,7 +21,7 @@ export function BibliotecaAppsExterna() {
     <iframe
       ref={iframeRef}
       src={BIBLIOTECA_APPS_URL}
-      title="Explorar Apps"
+      title="Biblioteca de Apps"
       onLoad={enviarTema}
       className="h-[calc(100vh-11rem)] min-h-[560px] w-full rounded-xl border border-white/10 bg-white light:border-black/10"
     />

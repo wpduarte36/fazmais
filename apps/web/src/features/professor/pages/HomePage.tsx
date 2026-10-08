@@ -26,7 +26,7 @@ import { BibliotecaAppsExterna } from '../components/BibliotecaAppsExterna';
 
 const HOME_ID = '__home__';
 // Opção fixa do menu (não é eixo do catálogo): Biblioteca de Apps externa incorporada.
-const EXPLORAR_APPS_ID = 'explorar-apps';
+const BIBLIOTECA_APPS_ID = 'biblioteca-apps';
 
 export function HomePage() {
   const user = useAuthStore((state) => state.user);
@@ -77,7 +77,7 @@ export function HomePage() {
       ...Array.from(vistos, ([id, { name, description }]) => ({ id, name, description })),
       // A página incorporada tem a marca Faz Educação no topo: só na FazMais,
       // pra não quebrar o white-label das outras empresas.
-      ...(marca.slug === MARCA_PADRAO_SLUG ? [{ id: EXPLORAR_APPS_ID, name: 'Explorar Apps', description: null }] : []),
+      ...(marca.slug === MARCA_PADRAO_SLUG ? [{ id: BIBLIOTECA_APPS_ID, name: 'Biblioteca de Apps', description: null }] : []),
     ];
   }, [feed, marca.slug]);
 
@@ -262,7 +262,7 @@ export function HomePage() {
               ))}
             </div>
           </section>
-        ) : eixoAtivoId === EXPLORAR_APPS_ID ? (
+        ) : eixoAtivoId === BIBLIOTECA_APPS_ID ? (
           <BibliotecaAppsExterna />
         ) : (
           <>
@@ -368,8 +368,8 @@ export function HomePage() {
         />
       )}
 
-      {/* Some no Explorar Apps: o botão cobriria os apps da página incorporada. */}
-      {!conteudoAberto && aiChatPergunta === null && eixoAtivoId !== EXPLORAR_APPS_ID && (
+      {/* Some na Biblioteca de Apps: o botão cobriria os apps da página incorporada. */}
+      {!conteudoAberto && aiChatPergunta === null && eixoAtivoId !== BIBLIOTECA_APPS_ID && (
         <div className="group fixed bottom-6 right-6 z-30">
           <button
             type="button"
