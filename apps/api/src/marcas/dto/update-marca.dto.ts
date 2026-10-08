@@ -31,6 +31,12 @@ export class UpdateMarcaDto {
   @MaxLength(500)
   logoUrl: string | null;
 
+  // null = usa o logo como ícone da aba
+  @IsOptional()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true, require_tld: false }, { message: 'Ícone inválido' })
+  @MaxLength(500)
+  iconeUrl: string | null;
+
   // null = imagens padrão do Fabinho
   @IsOptional()
   @IsUrl({ protocols: ['http', 'https'], require_protocol: true, require_tld: false }, { message: 'Imagem do assistente inválida' })

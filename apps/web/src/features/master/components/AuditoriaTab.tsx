@@ -39,6 +39,7 @@ const CAMPO_LABEL: Record<string, string> = {
   nomeAssistente: 'assistente',
   corPrimaria: 'cor',
   logoUrl: 'logo',
+  iconeUrl: 'ícone',
   assistenteImagemUrl: 'imagem do assistente',
   assistenteAvatarUrl: 'avatar do assistente',
   dominios: 'domínios',

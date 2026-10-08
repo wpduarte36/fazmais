@@ -6,6 +6,7 @@ export interface MarcaPublica {
   nomeAssistente: string;
   corPrimaria: string | null; // hex #rrggbb; nulo = paleta padrão
   logoUrl: string | null; // nulo = logo padrão
+  iconeUrl: string | null; // ícone da aba; nulo = usa o logo
   assistenteImagemUrl: string | null; // nulo = Fabinho
   assistenteAvatarUrl: string | null; // nulo = topo da imagem acima (ou Fabinho)
 }
@@ -30,6 +31,7 @@ export interface UpdateMarcaRequest {
   nomeAssistente: string;
   corPrimaria: string | null;
   logoUrl: string | null;
+  iconeUrl: string | null;
   assistenteImagemUrl: string | null;
   assistenteAvatarUrl: string | null;
   dominios: string[];

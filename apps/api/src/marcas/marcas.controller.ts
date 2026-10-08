@@ -9,7 +9,7 @@ import { UpdateMarcaDto } from './dto/update-marca.dto';
 import { CreateMarcaDto } from './dto/create-marca.dto';
 import { MarcasService } from './marcas.service';
 
-const CAMPOS_AUDITADOS = ['nomeExibicao', 'nomeAssistente', 'corPrimaria', 'logoUrl', 'assistenteImagemUrl', 'assistenteAvatarUrl', 'dominios'] as const;
+const CAMPOS_AUDITADOS = ['nomeExibicao', 'nomeAssistente', 'corPrimaria', 'logoUrl', 'iconeUrl', 'assistenteImagemUrl', 'assistenteAvatarUrl', 'dominios'] as const;
 
 @Controller('marcas')
 export class MarcasController {

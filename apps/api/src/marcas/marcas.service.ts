@@ -12,6 +12,7 @@ export interface MarcaPublica {
   nomeAssistente: string;
   corPrimaria: string | null;
   logoUrl: string | null;
+  iconeUrl: string | null;
   assistenteImagemUrl: string | null;
   assistenteAvatarUrl: string | null;
 }
@@ -22,6 +23,7 @@ const SELECT_PUBLICO = {
   nomeAssistente: true,
   corPrimaria: true,
   logoUrl: true,
+  iconeUrl: true,
   assistenteImagemUrl: true,
   assistenteAvatarUrl: true,
 } as const;
@@ -34,6 +36,7 @@ const MARCA_PADRAO_FIXA: MarcaPublica = {
   nomeAssistente: 'Fabinho',
   corPrimaria: null,
   logoUrl: null,
+  iconeUrl: null,
   assistenteImagemUrl: null,
   assistenteAvatarUrl: null,
 };
@@ -106,6 +109,7 @@ export class MarcasService {
         nomeAssistente: dto.nomeAssistente.trim(),
         corPrimaria: dto.corPrimaria ? dto.corPrimaria.toLowerCase() : null,
         logoUrl: dto.logoUrl || null,
+        iconeUrl: dto.iconeUrl || null,
         assistenteImagemUrl: dto.assistenteImagemUrl || null,
         assistenteAvatarUrl: dto.assistenteAvatarUrl || null,
         dominios,

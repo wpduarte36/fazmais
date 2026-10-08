@@ -361,6 +361,7 @@ model Marca {
   assistenteAvatarUrl String? @map("assistente_avatar_url") // rosto, recortado em círculo
   corPrimaria    String?  @map("cor_primaria") // hex #rrggbb; nulo = paleta padrão (âmbar)
   logoUrl        String?  @map("logo_url") // nulo = logo padrão (FazMais) ou nome em texto
+  iconeUrl       String?  @map("icone_url") // ícone da aba do navegador; nulo = usa o logo
   dominios       String[] @default([]) // hosts sem porta, minúsculos (ex: "app.plannetamais.com.br")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")

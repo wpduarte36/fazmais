@@ -9,6 +9,7 @@ const MARCA_PADRAO: MarcaPublica = {
   nomeAssistente: 'Fabinho',
   corPrimaria: null,
   logoUrl: null,
+  iconeUrl: null,
   assistenteImagemUrl: null,
   assistenteAvatarUrl: null,
 };

@@ -62,7 +62,9 @@ export function aplicarMarcaNoDocumento(marca: MarcaPublica): void {
   document.title = marca.nomeExibicao;
   const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
   if (favicon) {
-    favicon.type = marca.logoUrl ? '' : 'image/svg+xml';
-    favicon.href = marca.logoUrl ?? '/favicon.svg';
+    // Ícone próprio > logo (fica espremido se for largo) > ícone padrão.
+    const icone = marca.iconeUrl ?? marca.logoUrl;
+    favicon.type = icone ? '' : 'image/svg+xml';
+    favicon.href = icone ?? '/favicon.svg';
   }
 }

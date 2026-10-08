@@ -36,3 +36,10 @@
 - **Aplicado em**: 2026-10-08, banco local `fazmais_dev`. Produção aplica no próximo deploy da API.
 - **Resumo**: `marcas.assistente_imagem_url` (figura de corpo inteiro) e `marcas.assistente_avatar_url` (rosto), ambas opcionais; nulas = imagens padrão do Fabinho.
 - **Escrita à mão**, mesmo motivo das anteriores (índice GIN).
+
+## 20261008140000_add_marca_icone
+
+- **Pedido por**: Wagner, 2026-10-08 — ícone da aba do navegador separado do logo (logo largo fica ilegível como favicon).
+- **Aplicado em**: 2026-10-08, banco local `fazmais_dev`. Produção aplica no próximo deploy da API.
+- **Resumo**: `marcas.icone_url` opcional; nulo = usa o logo da empresa (ou o ícone padrão).
+- **Escrita à mão**, mesmo motivo das anteriores (índice GIN).

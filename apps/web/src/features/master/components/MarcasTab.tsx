@@ -74,6 +74,7 @@ function MarcaCard({ marca }: { marca: MarcaAdmin }) {
   const [usarCorPadrao, setUsarCorPadrao] = useState(marca.corPrimaria === null);
   const [cor, setCor] = useState(marca.corPrimaria ?? COR_INICIAL_SUGERIDA);
   const [logoUrl, setLogoUrl] = useState(marca.logoUrl);
+  const [iconeUrl, setIconeUrl] = useState(marca.iconeUrl);
   const [assistenteImagemUrl, setAssistenteImagemUrl] = useState(marca.assistenteImagemUrl);
   const [assistenteAvatarUrl, setAssistenteAvatarUrl] = useState(marca.assistenteAvatarUrl);
   const [enviandoImagens, setEnviandoImagens] = useState(0);
@@ -109,6 +110,7 @@ function MarcaCard({ marca }: { marca: MarcaAdmin }) {
           nomeAssistente: nomeAssistente.trim(),
           corPrimaria: usarCorPadrao ? null : cor.toLowerCase(),
           logoUrl,
+          iconeUrl,
           assistenteImagemUrl,
           assistenteAvatarUrl,
           dominios,
@@ -209,14 +211,24 @@ function MarcaCard({ marca }: { marca: MarcaAdmin }) {
             )}
           </div>
 
-          <CampoImagem
-            titulo="Logo"
-            dica="PNG ou WebP com fundo transparente, até 10 MB"
-            url={logoUrl}
-            onChange={setLogoUrl}
-            onEnviando={(ativo) => setEnviandoImagens((n) => n + (ativo ? 1 : -1))}
-            onErro={setFormError}
-          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <CampoImagem
+              titulo="Logo"
+              dica="PNG ou WebP com fundo transparente, até 10 MB"
+              url={logoUrl}
+              onChange={setLogoUrl}
+              onEnviando={(ativo) => setEnviandoImagens((n) => n + (ativo ? 1 : -1))}
+              onErro={setFormError}
+            />
+            <CampoImagem
+              titulo="Ícone da aba do navegador"
+              dica="PNG quadrado, ex.: 512×512. Vazio = usa o logo"
+              url={iconeUrl}
+              onChange={setIconeUrl}
+              onEnviando={(ativo) => setEnviandoImagens((n) => n + (ativo ? 1 : -1))}
+              onErro={setFormError}
+            />
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <CampoImagem
