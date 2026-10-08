@@ -26,6 +26,32 @@ function linkDa(conteudo: ConteudoSummary, platform: AppPlatform): string | null
   return conteudo.webUrl;
 }
 
+type Aparelho = 'android' | 'ios' | 'outro';
+
+// iPadOS se apresenta como Mac ("Macintosh") — o toque é o que denuncia.
+function detectarAparelho(): Aparelho {
+  const ua = navigator.userAgent;
+  if (/android/i.test(ua)) return 'android';
+  if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  return 'outro';
+}
+
+// A loja que o aparelho consegue usar; a outra vira só um aviso em texto.
+const LOJA_DO_APARELHO: Record<Exclude<Aparelho, 'outro'>, AppPlatform> = {
+  android: 'PLAY_STORE',
+  ios: 'APP_STORE',
+};
+
+const NOME_DO_APARELHO: Record<Exclude<Aparelho, 'outro'>, string> = {
+  android: 'Android',
+  ios: 'iPhone e iPad',
+};
+
+const PARA_QUEM: Partial<Record<AppPlatform, string>> = {
+  APP_STORE: 'para iPhone e iPad',
+  PLAY_STORE: 'para Android',
+};
+
 // ["na App Store", "na Play Store"] -> "na App Store e na Play Store"
 function juntar(partes: string[]): string {
   if (partes.length <= 1) return partes.join('');
@@ -45,8 +71,18 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
   const disponibilidade = PLATFORM_ORDER.filter((platform) => conteudo.appPlatforms.includes(platform)).map(
     (platform) => ({ platform, url: linkDa(conteudo, platform) }),
   );
-  const comLink = disponibilidade.filter((item) => item.url);
-  const semLink = disponibilidade.filter((item) => !item.url);
+  // No celular, botão de baixar só da loja daquele aparelho (e a versão web,
+  // que abre em qualquer um); a loja do outro sistema aparece como aviso.
+  // No computador (ou aparelho não identificado) mostra tudo, como antes.
+  const aparelho = detectarAparelho();
+  const minhaLoja = aparelho === 'outro' ? null : LOJA_DO_APARELHO[aparelho];
+  const outraLoja = disponibilidade.find(
+    (item) => minhaLoja && item.platform !== 'WEB' && item.platform !== minhaLoja,
+  );
+  const visiveis = disponibilidade.filter((item) => item !== outraLoja);
+  const comLink = visiveis.filter((item) => item.url);
+  const semLink = visiveis.filter((item) => !item.url);
+  const temMinhaLoja = visiveis.some((item) => item.platform === minhaLoja);
 
   return (
     <div
@@ -121,6 +157,12 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
               {semLink.length > 0 && (
                 <p className="text-xs text-neutral-500">
                   Disponível {juntar(semLink.map(({ platform }) => PLATFORM_ONDE[platform]))}.
+                </p>
+              )}
+              {outraLoja && aparelho !== 'outro' && (
+                <p className="text-xs text-neutral-500">
+                  {temMinhaLoja ? 'Também disponível' : `Não disponível para ${NOME_DO_APARELHO[aparelho]}. Disponível`}{' '}
+                  {PLATFORM_ONDE[outraLoja.platform]}, {PARA_QUEM[outraLoja.platform]}.
                 </p>
               )}
             </div>
