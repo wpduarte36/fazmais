@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Role, type ConteudoSummary } from '@fazmais/shared';
+import { MARCA_PADRAO_SLUG, Role, type ConteudoSummary } from '@fazmais/shared';
 import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
@@ -22,8 +22,11 @@ import { AcervoStatsRow } from '../components/AcervoStatsRow';
 import { ConteudoCard } from '../components/ConteudoCard';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { useTextoDaMarca } from '../../../lib/textoDaMarca';
+import { BibliotecaAppsExterna } from '../components/BibliotecaAppsExterna';
 
 const HOME_ID = '__home__';
+// Opção fixa do menu (não é eixo do catálogo): Biblioteca de Apps externa incorporada.
+const EXPLORAR_APPS_ID = 'explorar-apps';
 
 export function HomePage() {
   const user = useAuthStore((state) => state.user);
@@ -72,8 +75,11 @@ export function HomePage() {
     return [
       { id: HOME_ID, name: 'Home', description: null },
       ...Array.from(vistos, ([id, { name, description }]) => ({ id, name, description })),
+      // A página incorporada tem a marca Faz Educação no topo: só na FazMais,
+      // pra não quebrar o white-label das outras empresas.
+      ...(marca.slug === MARCA_PADRAO_SLUG ? [{ id: EXPLORAR_APPS_ID, name: 'Explorar Apps', description: null }] : []),
     ];
-  }, [feed]);
+  }, [feed, marca.slug]);
 
   // Eixo da URL que não existe (mais) no feed do educador — link antigo,
   // eixo removido, catálogo desativado — cai pra Home em vez de tela vazia.
@@ -256,6 +262,8 @@ export function HomePage() {
               ))}
             </div>
           </section>
+        ) : eixoAtivoId === EXPLORAR_APPS_ID ? (
+          <BibliotecaAppsExterna />
         ) : (
           <>
             {isHome && feed && feed.featured.length > 0 && (
@@ -360,7 +368,8 @@ export function HomePage() {
         />
       )}
 
-      {!conteudoAberto && aiChatPergunta === null && (
+      {/* Some no Explorar Apps: o botão cobriria os apps da página incorporada. */}
+      {!conteudoAberto && aiChatPergunta === null && eixoAtivoId !== EXPLORAR_APPS_ID && (
         <div className="group fixed bottom-6 right-6 z-30">
           <button
             type="button"
