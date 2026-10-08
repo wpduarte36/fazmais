@@ -7,3 +7,4 @@ export * from './home';
 export * from './stats';
 export * from './users';
 export * from './auditoria';
+export * from './marcas';

@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
       </RequireRole>
     ),
   },
-  { path: '/pesquisa-ia', element: <PlaceholderPage title="Resultado da busca do Fabinho" /> },
+  { path: '/pesquisa-ia', element: <PlaceholderPage title="Resultado da busca da IA" /> },
   {
     path: '/',
     element: (

@@ -52,6 +52,8 @@ enum PasswordTokenType {
 model Tenant {
   id        String   @id @default(uuid())
   name      String
+  // Marca (white-label) do tenant. Nulo = marca padrão (FazMais).
+  marcaId   String?  @map("marca_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -65,6 +67,7 @@ model Tenant {
   progress            Progress[]
   sharedCatalogAccess TenantCatalogoAccess[]
   auditLogs           AuditLog[]
+  marca               Marca?                 @relation(fields: [marcaId], references: [id], onDelete: SetNull)
 
   @@map("tenants")
 }
@@ -344,4 +347,22 @@ model AuditLog {
   @@index([tenantId, createdAt])
   @@index([actorId, tenantId, acao, createdAt])
   @@map("audit_logs")
+}
+
+// Identidade visual (white-label) escolhida pela URL de acesso. Vários tenants
+// podem compartilhar uma marca. É só visual: não restringe quem pode logar.
+model Marca {
+  id             String   @id @default(uuid())
+  slug           String   @unique // identificador estável (ex: "fazmais"); a marca padrão é "fazmais"
+  nomeExibicao   String   @map("nome_exibicao") // substitui "FazMais" nos textos e no título da aba
+  nomeAssistente String   @map("nome_assistente") // nome do mascote da IA (a imagem é a mesma pra todas)
+  corPrimaria    String?  @map("cor_primaria") // hex #rrggbb; nulo = paleta padrão (âmbar)
+  logoUrl        String?  @map("logo_url") // nulo = logo padrão (FazMais) ou nome em texto
+  dominios       String[] @default([]) // hosts sem porta, minúsculos (ex: "app.plannetamais.com.br")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  tenants Tenant[]
+
+  @@map("marcas")
 }

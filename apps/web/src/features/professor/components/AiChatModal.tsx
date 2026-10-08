@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ConteudoSummary, HomeFeed } from '@fazmais/shared';
 import { buildMockAiResponse, type SugestaoIa } from '../lib/mockAiChat';
 import { ConteudoCard } from './ConteudoCard';
+import { useMarca } from '../../../store/marcaStore';
 import fabinhoFigura from '../../../assets/fabinho.webp';
 import fabinhoAvatar from '../../../assets/fabinho-avatar.webp';
 
@@ -20,7 +21,9 @@ interface AiChatModalProps {
 
 const DELAY_RESPOSTA_MS = 700;
 
-const SAUDACAO = 'Oi! Eu sou o Fabinho, assistente do Faz+. Me conta o que você está planejando ensinar e eu busco os melhores materiais do acervo pra sua aula. Pode perguntar com suas palavras, tipo:';
+function saudacao(nomeAssistente: string, nomeMarca: string): string {
+  return `Oi! Eu sou o ${nomeAssistente}, assistente do ${nomeMarca}. Me conta o que você está planejando ensinar e eu busco os melhores materiais do acervo pra sua aula. Pode perguntar com suas palavras, tipo:`;
+}
 
 const PERGUNTAS_SUGERIDAS = [
   'Quero uma atividade sobre o ciclo da borboleta',
@@ -30,6 +33,7 @@ const PERGUNTAS_SUGERIDAS = [
 ];
 
 export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }: AiChatModalProps) {
+  const marca = useMarca();
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [isThinking, setIsThinking] = useState(false);
   const [novaPergunta, setNovaPergunta] = useState('');
@@ -83,7 +87,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
               alt=""
               className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-white/15 light:ring-black/10"
             />
-            <h1 className="text-base font-bold">Fabinho</h1>
+            <h1 className="text-base font-bold">{marca.nomeAssistente}</h1>
           </div>
           <button
             type="button"
@@ -102,12 +106,12 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
             <div className="space-y-3">
               <img
                 src={fabinhoFigura}
-                alt="Fabinho, a IA do Faz+"
+                alt={`${marca.nomeAssistente}, a IA do ${marca.nomeExibicao}`}
                 className="mx-auto h-36 w-auto drop-shadow-xl"
               />
               <div className="flex justify-start">
                 <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-white/[0.06] px-3.5 py-2.5 text-sm text-neutral-200 light:bg-black/[0.04] light:text-neutral-800">
-                  <p>{SAUDACAO}</p>
+                  <p>{saudacao(marca.nomeAssistente, marca.nomeExibicao)}</p>
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
                     {PERGUNTAS_SUGERIDAS.map((pergunta) => (
                       <button
@@ -188,7 +192,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
             type="text"
             value={novaPergunta}
             onChange={(event) => setNovaPergunta(event.target.value)}
-            placeholder="Pergunte ao Fabinho..."
+            placeholder={`Pergunte ao ${marca.nomeAssistente}...`}
             className="w-full flex-1 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-brand-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
           />
           <button

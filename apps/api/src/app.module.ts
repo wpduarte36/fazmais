@@ -17,6 +17,7 @@ import { StatsModule } from './stats/stats.module';
 import { UsersModule } from './users/users.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
+import { MarcasModule } from './marcas/marcas.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AuditoriaModule } from './auditoria/auditoria.module';
     UsersModule,
     UploadsModule,
     AuditoriaModule,
+    MarcasModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

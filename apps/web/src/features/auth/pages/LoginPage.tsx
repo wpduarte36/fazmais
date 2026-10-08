@@ -3,7 +3,8 @@ import { useLogin } from '../hooks/useLogin';
 import { ApiError } from '../../../lib/apiClient';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { AbstractGradientBg } from '../components/AbstractGradientBg';
-import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
+import { BrandLogo } from '../../../components/BrandLogo';
+import { BrandName } from '../../../components/BrandName';
 
 export function LoginPage() {
   const [login, setLoginValue] = useState('');
@@ -31,7 +32,7 @@ export function LoginPage() {
         {/* Boas-vindas */}
         <div className="max-w-lg text-center animate-[fadeIn_0.6s_ease-out] md:text-left">
           <h1 className="text-3xl font-bold tracking-tight text-white light:text-neutral-900">
-            Bem-vindo ao portal Faz<span className="text-brand-400">Mais</span>
+            Bem-vindo ao portal <BrandName />
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-neutral-300 light:text-neutral-600">
             Nós acreditamos que educação se faz juntos e, por isso, desenvolvemos uma série de materiais que visam
@@ -47,7 +48,7 @@ export function LoginPage() {
         <div className="w-full max-w-sm shrink-0 animate-[fadeIn_0.6s_ease-out] md:mr-6 lg:mr-14">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl light:border-black/10 light:bg-white light:shadow-black/10">
             <div className="mb-6 flex justify-center">
-              <FazMaisLegacyLogo className="h-16" />
+              <BrandLogo className="h-16" />
             </div>
 
             <h2 className="mb-6 text-center text-lg font-semibold text-white light:text-neutral-900">

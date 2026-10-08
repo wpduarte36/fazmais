@@ -22,3 +22,10 @@
 - **Aplicado em**: 2026-10-01, banco local `fazmais_dev`. Produção aplica no próximo deploy da API (`prisma migrate deploy` no start da Railway).
 - **Resumo**: tabela `audit_logs` — trilha das ações do Master sobre municípios (entrada no Painel Admin via "Acessar como admin", usuários, catálogos do município, municípios e admins). Nome do autor e do município copiados no registro; FKs `actor_id`/`tenant_id` com `ON DELETE SET NULL` pra o histórico sobreviver a exclusões.
 - **Escrita à mão** (sem `migrate dev`), pelo mesmo motivo das anteriores: não derrubar o índice GIN `conteudos_tags_gin_idx`.
+
+## 20261008120000_add_marcas
+
+- **Pedido por**: Wagner, 2026-10-08 — identidade visual por URL (white-label FazMais / PlannetaMais).
+- **Aplicado em**: 2026-10-08, banco local `fazmais_dev`. Produção aplica no próximo deploy da API (`prisma migrate deploy` no start da Railway).
+- **Resumo**: tabela `marcas` (nome de exibição, nome do assistente de IA, cor primária, logo, domínios) + `tenants.marca_id` opcional (`ON DELETE SET NULL`; nulo = marca padrão). Já insere as marcas `fazmais` (Fabinho) e `plannetamais` (Planinho, nome provisório). Todos os tenants existentes ficam sem marca = FazMais.
+- **Escrita à mão** (sem `migrate dev`), pelo mesmo motivo das anteriores: não derrubar o índice GIN `conteudos_tags_gin_idx`.

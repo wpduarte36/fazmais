@@ -5,7 +5,8 @@ import { useAuthStore } from '../../../store/authStore';
 import { useLogout } from '../../auth/hooks/useLogout';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { BackButton } from '../../../components/BackButton';
-import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
+import { BrandLogo } from '../../../components/BrandLogo';
+import { useMarca } from '../../../store/marcaStore';
 import { extrairTermos, matchScore } from '../../../lib/textSearch';
 import { sanitizeHtml } from '../../../lib/sanitizeHtml';
 import { useHomeFeed } from '../hooks/useHomeFeed';
@@ -25,6 +26,7 @@ const HOME_ID = '__home__';
 
 export function HomePage() {
   const user = useAuthStore((state) => state.user);
+  const marca = useMarca();
   const handleLogout = useLogout();
   const navigate = useNavigate();
   // Admin chega aqui pelo link "Área do Educador" embaixo do nome no Painel Admin — vê o
@@ -111,7 +113,7 @@ export function HomePage() {
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#07070c] light:border-black/10 light:bg-[#f6f4ef]">
       <div className="flex items-center gap-4 px-7 py-3.5">
         <div className="flex shrink-0 items-center">
-          <FazMaisLegacyLogo className="h-12 w-auto" />
+          <BrandLogo className="h-12 w-auto" />
         </div>
 
         <div className="mx-auto flex w-full max-w-2xl items-center gap-2">
@@ -360,13 +362,13 @@ export function HomePage() {
           <button
             type="button"
             onClick={() => setAiChatPergunta('')}
-            aria-label="Perguntar ao Fabinho"
+            aria-label={`Perguntar ao ${marca.nomeAssistente}`}
             className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-400 to-brand-500 shadow-lg shadow-brand-500/30 ring-2 ring-brand-400/60 transition hover:scale-105 hover:shadow-brand-500/50"
           >
             <img src={fabinhoAvatar} alt="" className="h-full w-full object-cover" />
           </button>
           <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 w-max max-w-[220px] -translate-x-0 rounded-lg bg-neutral-900 px-3 py-1.5 text-center text-xs font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100 light:bg-neutral-800">
-            Pergunte ao Fabinho e encontre o conteúdo certo em segundos
+            Pergunte ao {marca.nomeAssistente} e encontre o conteúdo certo em segundos
           </span>
         </div>
       )}

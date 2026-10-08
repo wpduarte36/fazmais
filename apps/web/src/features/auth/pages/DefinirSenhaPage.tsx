@@ -4,7 +4,7 @@ import { ApiError } from '../../../lib/apiClient';
 import { ThemeToggle } from '../../../components/ThemeToggle';
 import { BackButton } from '../../../components/BackButton';
 import { AbstractGradientBg } from '../components/AbstractGradientBg';
-import { FazMaisLegacyLogo } from '../../../components/FazMaisLegacyLogo';
+import { BrandLogo } from '../../../components/BrandLogo';
 import { useSetPassword } from '../hooks/useSetPassword';
 
 export function DefinirSenhaPage() {
@@ -49,7 +49,7 @@ export function DefinirSenhaPage() {
         <div className="w-full max-w-sm animate-[fadeIn_0.6s_ease-out]">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl light:border-black/10 light:bg-white light:shadow-black/10">
             <div className="mb-6 flex justify-center">
-              <FazMaisLegacyLogo className="h-16" />
+              <BrandLogo className="h-16" />
             </div>
 
             {!token ? (

@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router-dom'
 import { queryClient } from './lib/queryClient'
 import { refreshAccessToken } from './lib/apiClient'
+import { carregarMarca } from './store/marcaStore'
 import { router } from './routes/router'
 
 // O access token só vive em memória (nunca em localStorage — ver
@@ -10,11 +11,12 @@ import { router } from './routes/router'
 // token (cookie httpOnly, 7 dias) ainda válido. Antes de renderizar as
 // rotas, tenta trocar esse cookie por um access token novo silenciosamente;
 // se não houver cookie ou ele já tiver expirado, cai no login normalmente.
+// A marca da URL carrega junto, pra a primeira tela já sair com ela.
 function App() {
   const [isBootstrapping, setIsBootstrapping] = useState(true)
 
   useEffect(() => {
-    void refreshAccessToken().finally(() => setIsBootstrapping(false))
+    void Promise.allSettled([refreshAccessToken(), carregarMarca()]).finally(() => setIsBootstrapping(false))
   }, [])
 
   if (isBootstrapping) {

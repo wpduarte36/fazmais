@@ -518,7 +518,7 @@ export function ConteudoModal({ mode, breadcrumb, conteudo, saving, onClose, onC
               começar mais rápido, a partir do título + descrição — nunca é obrigatório usar.
             </p>
             <p className="mb-3 text-xs text-neutral-400 light:text-neutral-500">
-              É por título, descrição, tags e resumo que o chat de IA do educador (Fabinho) encontra e entende esse conteúdo quando
+              É por título, descrição, tags e resumo que o chat de IA do educador encontra e entende esse conteúdo quando
               alguém pergunta algo relacionado — quanto mais completos e relevantes, maior a chance de aparecer numa resposta.
             </p>
 
