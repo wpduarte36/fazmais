@@ -126,7 +126,7 @@ export function HeroCarousel({
                 onClick={() => goTo(index)}
                 aria-label={`Ir para destaque ${index + 1}`}
                 className={`h-1.5 rounded-full transition-all ${
-                  index === activeIndex ? 'w-6 bg-amber-400' : 'w-1.5 bg-white/40 hover:bg-white/60'
+                  index === activeIndex ? 'w-6 bg-brand-400' : 'w-1.5 bg-white/40 hover:bg-white/60'
                 }`}
               />
             ))}

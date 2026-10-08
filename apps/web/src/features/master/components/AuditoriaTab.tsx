@@ -53,7 +53,7 @@ function corDaAcao(acao: AuditAcao): string {
   if (acao === AuditAcao.ACESSO_PAINEL_ADMIN) {
     return 'border-sky-500/30 bg-sky-500/10 text-sky-300 light:text-sky-700';
   }
-  return 'border-amber-400/30 bg-amber-400/10 text-amber-300 light:text-amber-700';
+  return 'border-brand-400/30 bg-brand-400/10 text-brand-300 light:text-brand-700';
 }
 
 export function AuditoriaTab() {
@@ -76,7 +76,7 @@ export function AuditoriaTab() {
         <select
           value={tenantId}
           onChange={(event) => setTenantId(event.target.value)}
-          className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-sm text-neutral-100 outline-none focus:border-amber-400/60 light:border-black/15 light:bg-white light:text-neutral-900"
+          className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-sm text-neutral-100 outline-none focus:border-brand-400/60 light:border-black/15 light:bg-white light:text-neutral-900"
         >
           <option value="">Todos os municípios</option>
           {tenants?.map((tenant) => (

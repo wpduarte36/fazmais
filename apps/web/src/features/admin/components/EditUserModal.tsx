@@ -34,7 +34,7 @@ export function EditUserModal({ user, planos, isSelf, pending, error, onSave, on
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-300 light:text-brand-700">
               Editar usuário
             </p>
             <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">{user.name}</h3>
@@ -55,7 +55,7 @@ export function EditUserModal({ user, planos, isSelf, pending, error, onSave, on
               value={name}
               onChange={(event) => setName(event.target.value)}
               required
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
             />
           </Field>
 
@@ -65,7 +65,7 @@ export function EditUserModal({ user, planos, isSelf, pending, error, onSave, on
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
             />
           </Field>
 
@@ -74,7 +74,7 @@ export function EditUserModal({ user, planos, isSelf, pending, error, onSave, on
               value={whatsapp}
               onChange={(event) => setWhatsapp(event.target.value)}
               placeholder="(11) 90000-0000"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900"
             />
           </Field>
 
@@ -123,7 +123,7 @@ export function EditUserModal({ user, planos, isSelf, pending, error, onSave, on
             <button
               type="submit"
               disabled={pending}
-              className="flex-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? 'Salvando...' : 'Salvar'}
             </button>

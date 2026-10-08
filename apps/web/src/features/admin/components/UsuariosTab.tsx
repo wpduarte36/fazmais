@@ -159,7 +159,7 @@ export function UsuariosTab() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Buscar por nome ou login..."
-              className="w-56 rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-3 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
+              className="w-56 rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-3 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-brand-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
             />
           </div>
           <div className="inline-flex gap-1 rounded-full border border-white/15 bg-white/[0.03] p-1 light:border-black/10 light:bg-black/[0.03]">
@@ -170,7 +170,7 @@ export function UsuariosTab() {
                 onClick={() => setRoleFilter(filter.value)}
                 className={
                   roleFilter === filter.value
-                    ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1 text-xs font-semibold text-neutral-950'
+                    ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1 text-xs font-semibold text-neutral-950'
                     : 'rounded-full px-3 py-1 text-xs font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
                 }
               >
@@ -183,7 +183,7 @@ export function UsuariosTab() {
         <button
           type="button"
           onClick={() => setImportando(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-neutral-300 transition hover:border-amber-400/50 hover:text-amber-300 light:border-black/15 light:text-neutral-600 light:hover:text-amber-700"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3.5 py-2 text-sm font-semibold text-neutral-300 transition hover:border-brand-400/50 hover:text-brand-300 light:border-black/15 light:text-neutral-600 light:hover:text-brand-700"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
@@ -193,7 +193,7 @@ export function UsuariosTab() {
         <button
           type="button"
           onClick={() => setCreating((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3.5 py-2 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
@@ -261,7 +261,7 @@ export function UsuariosTab() {
             <button
               type="submit"
               disabled={createUser.isPending}
-              className="rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
+              className="rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
             >
               {createUser.isPending ? 'Salvando...' : 'Salvar usuário'}
             </button>
@@ -416,7 +416,7 @@ function FormField({ label, value, onChange, type = 'text', placeholder, require
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         required={required}
-        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
+        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
       />
     </div>
   );

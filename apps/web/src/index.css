@@ -4,6 +4,39 @@
    liga as variantes light:, aplicadas pelo toggle de tema (useThemeStore). */
 @custom-variant light (&:where(.light, .light *));
 
+/* Cor da marca. As utilities brand-* leem as variáveis --brand-* em tempo de
+   execução (@theme inline), então trocar a marca é só sobrescrever essas
+   variáveis no :root. O padrão abaixo é a escala amber do Tailwind.
+   Âmbar com significado próprio (estrela de avaliação, status pendente, aviso)
+   continua como amber-* e não muda com a marca. */
+:root {
+  --brand-50: oklch(98.7% 0.022 95.277);
+  --brand-100: oklch(96.2% 0.059 95.617);
+  --brand-200: oklch(92.4% 0.12 95.746);
+  --brand-300: oklch(87.9% 0.169 91.605);
+  --brand-400: oklch(82.8% 0.189 84.429);
+  --brand-500: oklch(76.9% 0.188 70.08);
+  --brand-600: oklch(66.6% 0.179 58.318);
+  --brand-700: oklch(55.5% 0.163 48.998);
+  --brand-800: oklch(47.3% 0.137 46.201);
+  --brand-900: oklch(41.4% 0.112 45.904);
+  --brand-950: oklch(27.9% 0.077 45.635);
+}
+
+@theme inline {
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

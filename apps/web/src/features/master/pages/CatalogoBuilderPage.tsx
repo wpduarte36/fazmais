@@ -261,7 +261,7 @@ export function CatalogoBuilderPage() {
         </span>
         <div>
           <h1 className="text-xl font-bold tracking-tight">{tree.name}</h1>
-          <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
+          <span className="rounded-full border border-brand-400/25 bg-brand-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300 light:text-brand-700">
             catálogo global · público
           </span>
         </div>
@@ -269,7 +269,7 @@ export function CatalogoBuilderPage() {
           <button
             type="button"
             onClick={() => setEixoModal({ mode: 'create' })}
-            className="inline-flex min-w-[132px] items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+            className="inline-flex min-w-[132px] items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
@@ -327,7 +327,7 @@ export function CatalogoBuilderPage() {
             <button
               type="button"
               onClick={() => setColecaoModal({ mode: 'create', eixoId: activeEixo.id })}
-              className="inline-flex min-w-[132px] items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+              className="inline-flex min-w-[132px] items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -374,7 +374,7 @@ export function CatalogoBuilderPage() {
                 dragEixoId === eixo.id
                   ? 'rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-sm font-semibold text-neutral-400 opacity-35 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
                   : isActive
-                    ? 'rounded-full border border-amber-400/50 bg-amber-400/15 px-4 py-1.5 text-sm font-semibold text-amber-200 light:border-amber-500/50 light:bg-amber-500/10 light:text-amber-800'
+                    ? 'rounded-full border border-brand-400/50 bg-brand-400/15 px-4 py-1.5 text-sm font-semibold text-brand-200 light:border-brand-500/50 light:bg-brand-500/10 light:text-brand-800'
                     : dragOverEixoId === eixo.id
                       ? 'rounded-full border border-blue-400/60 bg-blue-400/15 px-4 py-1.5 text-sm font-semibold text-blue-300'
                       : 'rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:border-black/15 light:bg-black/[0.02] light:text-neutral-500'
@@ -462,7 +462,7 @@ export function CatalogoBuilderPage() {
                   <button
                     type="button"
                     onClick={() => setConteudoModal({ mode: 'create', colecaoId: colecao.id })}
-                    className="inline-flex min-w-[132px] items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+                    className="inline-flex min-w-[132px] items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                       <path d="M12 5v14M5 12h14" />
@@ -656,7 +656,7 @@ export function CatalogoBuilderPage() {
             className="w-full max-w-sm rounded-2xl border border-white/15 bg-[#0d0d14] p-5 shadow-2xl light:border-black/10 light:bg-white"
             onClick={(event) => event.stopPropagation()}
           >
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Mover conteúdo</p>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-300 light:text-brand-700">Mover conteúdo</p>
             <h4 className="mb-3 text-base font-bold">Pra qual coleção?</h4>
             <div className="flex flex-col gap-2">
               {destinoChoice.eixo.colecoes.map((colecao) => (

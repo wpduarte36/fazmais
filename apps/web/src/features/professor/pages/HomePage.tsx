@@ -133,7 +133,7 @@ export function HomePage() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Buscar conteúdos..."
-              className="w-full rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-8 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
+              className="w-full rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-8 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-brand-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
             />
             {searchQuery && (
               <button
@@ -167,7 +167,7 @@ export function HomePage() {
                   <button
                     type="button"
                     onClick={() => navigate('/master')}
-                    className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+                    className="mt-1 block text-[11px] font-semibold text-brand-400 transition hover:text-brand-300 hover:underline light:text-brand-600"
                   >
                     ← Painel Master
                   </button>
@@ -178,7 +178,7 @@ export function HomePage() {
                   <button
                     type="button"
                     onClick={() => navigate('/admin')}
-                    className="mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600"
+                    className="mt-1 block text-[11px] font-semibold text-brand-400 transition hover:text-brand-300 hover:underline light:text-brand-600"
                   >
                     ← Painel Admin
                   </button>
@@ -207,7 +207,7 @@ export function HomePage() {
                 onClick={() => setEixoAtivoId(eixo.id)}
                 className={
                   eixo.id === eixoAtivoId
-                    ? 'shrink-0 whitespace-nowrap border-b-2 border-amber-400 px-3 py-1.5 text-xs font-semibold text-amber-400'
+                    ? 'shrink-0 whitespace-nowrap border-b-2 border-brand-400 px-3 py-1.5 text-xs font-semibold text-brand-400'
                     : 'shrink-0 whitespace-nowrap border-b-2 border-transparent px-3 py-1.5 text-xs font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
                 }
               >
@@ -314,7 +314,7 @@ export function HomePage() {
 
             {!isHome && eixoAtivoDescription && (
               <div
-                className="mb-8 max-w-5xl text-sm leading-relaxed text-neutral-400 [&_a]:text-amber-400 [&_a]:underline [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:text-neutral-200 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-600 light:[&_strong]:text-neutral-800 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
+                className="mb-8 max-w-5xl text-sm leading-relaxed text-neutral-400 [&_a]:text-brand-400 [&_a]:underline [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:text-neutral-200 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-600 light:[&_strong]:text-neutral-800 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(eixoAtivoDescription) }}
               />
             )}
@@ -361,7 +361,7 @@ export function HomePage() {
             type="button"
             onClick={() => setAiChatPergunta('')}
             aria-label="Perguntar ao Fabinho"
-            className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg shadow-amber-500/30 ring-2 ring-amber-400/60 transition hover:scale-105 hover:shadow-amber-500/50"
+            className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-400 to-brand-500 shadow-lg shadow-brand-500/30 ring-2 ring-brand-400/60 transition hover:scale-105 hover:shadow-brand-500/50"
           >
             <img src={fabinhoAvatar} alt="" className="h-full w-full object-cover" />
           </button>

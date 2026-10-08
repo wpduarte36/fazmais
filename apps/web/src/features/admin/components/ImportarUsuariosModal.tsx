@@ -225,7 +225,7 @@ export function ImportarUsuariosModal({ usuariosExistentes, planos, onClose }: I
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Usuários</p>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-300 light:text-brand-700">Usuários</p>
             <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">Importar usuários em massa</h3>
           </div>
           <button
@@ -243,22 +243,22 @@ export function ImportarUsuariosModal({ usuariosExistentes, planos, onClose }: I
             <>
               <ol className="mb-5 flex flex-col gap-2 text-sm text-neutral-300 light:text-neutral-600">
                 <li>
-                  <span className="font-semibold text-amber-400">1.</span> Baixe o modelo e preencha um usuário por linha
+                  <span className="font-semibold text-brand-400">1.</span> Baixe o modelo e preencha um usuário por linha
                   (nome, login, e-mail, WhatsApp, perfil e plano).{' '}
                   <button
                     type="button"
                     onClick={() => baixarModelo(planos)}
-                    className="font-semibold text-amber-400 underline-offset-2 hover:underline light:text-amber-600"
+                    className="font-semibold text-brand-400 underline-offset-2 hover:underline light:text-brand-600"
                   >
                     ↓ Baixar modelo (CSV)
                   </button>
                 </li>
                 <li>
-                  <span className="font-semibold text-amber-400">2.</span> Salve como CSV (no Excel: "CSV UTF-8") e envie
+                  <span className="font-semibold text-brand-400">2.</span> Salve como CSV (no Excel: "CSV UTF-8") e envie
                   abaixo.
                 </li>
                 <li>
-                  <span className="font-semibold text-amber-400">3.</span> Confira a prévia: cada linha é validada antes de
+                  <span className="font-semibold text-brand-400">3.</span> Confira a prévia: cada linha é validada antes de
                   importar.
                 </li>
               </ol>
@@ -273,11 +273,11 @@ export function ImportarUsuariosModal({ usuariosExistentes, planos, onClose }: I
                 onClick={() => inputRef.current?.click()}
                 className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
                   arrastando
-                    ? 'border-amber-400 bg-amber-400/10'
-                    : 'border-white/15 hover:border-amber-400/50 hover:bg-white/[0.03] light:border-black/15 light:hover:bg-black/[0.02]'
+                    ? 'border-brand-400 bg-brand-400/10'
+                    : 'border-white/15 hover:border-brand-400/50 hover:bg-white/[0.03] light:border-black/15 light:hover:bg-black/[0.02]'
                 }`}
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-amber-400">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-400">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                 </svg>
                 <p className="text-sm font-semibold text-neutral-200 light:text-neutral-800">Arraste o arquivo CSV aqui</p>
@@ -325,7 +325,7 @@ export function ImportarUsuariosModal({ usuariosExistentes, planos, onClose }: I
                   <button
                     type="button"
                     onClick={trocarArquivo}
-                    className="text-xs font-semibold text-amber-400 hover:underline light:text-amber-600"
+                    className="text-xs font-semibold text-brand-400 hover:underline light:text-brand-600"
                   >
                     Trocar arquivo
                   </button>
@@ -389,7 +389,7 @@ export function ImportarUsuariosModal({ usuariosExistentes, planos, onClose }: I
         </div>
 
         <div className="flex flex-wrap items-center gap-3 border-t border-white/10 px-6 py-4 light:border-black/10">
-          <p className="mr-auto text-xs text-amber-300/90 light:text-amber-700">
+          <p className="mr-auto text-xs text-brand-300/90 light:text-brand-700">
             ⚠ Importação ainda não disponível: por enquanto dá pra validar a planilha aqui. O cadastro em lote chega em
             breve.
           </p>
@@ -404,7 +404,7 @@ export function ImportarUsuariosModal({ usuariosExistentes, planos, onClose }: I
             type="button"
             disabled
             title="Importação ainda não disponível"
-            className="cursor-not-allowed rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 opacity-50"
+            className="cursor-not-allowed rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 opacity-50"
           >
             Importar {prontos > 0 ? `${prontos} usuário${prontos > 1 ? 's' : ''}` : 'usuários'}
           </button>

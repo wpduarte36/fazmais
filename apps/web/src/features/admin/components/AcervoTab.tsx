@@ -105,7 +105,7 @@ function ToggleSwitch({
       onClick={onChange}
       className={`relative h-6 w-11 shrink-0 rounded-full border transition disabled:cursor-not-allowed disabled:opacity-60 ${
         checked
-          ? 'border-amber-400/60 bg-gradient-to-r from-amber-400 to-amber-500'
+          ? 'border-brand-400/60 bg-gradient-to-r from-brand-400 to-brand-500'
           : 'border-white/15 bg-white/[0.08] light:border-black/15 light:bg-black/[0.08]'
       }`}
     >

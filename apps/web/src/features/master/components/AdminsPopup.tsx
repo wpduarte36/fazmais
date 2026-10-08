@@ -90,7 +90,7 @@ export function AdminsPopup({ tenantId, tenantName, onClose }: AdminsPopupProps)
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5 light:border-black/10">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Administradores</p>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-300 light:text-brand-700">Administradores</p>
             <h3 className="text-base font-bold text-neutral-100 light:text-neutral-900">{tenantName}</h3>
           </div>
           <button
@@ -108,7 +108,7 @@ export function AdminsPopup({ tenantId, tenantName, onClose }: AdminsPopupProps)
             <button
               type="button"
               onClick={() => setCreating((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -140,7 +140,7 @@ export function AdminsPopup({ tenantId, tenantName, onClose }: AdminsPopupProps)
                 <button
                   type="submit"
                   disabled={createAdmin.isPending}
-                  className="rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
+                  className="rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
                 >
                   {createAdmin.isPending ? 'Salvando...' : 'Salvar administrador'}
                 </button>
@@ -211,7 +211,7 @@ export function AdminsPopup({ tenantId, tenantName, onClose }: AdminsPopupProps)
                               <button
                                 type="submit"
                                 disabled={updateAdmin.isPending}
-                                className="rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
+                                className="rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 disabled:opacity-60"
                               >
                                 {updateAdmin.isPending ? 'Salvando...' : 'Salvar'}
                               </button>
@@ -287,7 +287,7 @@ function FormField({ label, value, onChange, type = 'text', placeholder, require
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         required={required}
-        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
+        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
       />
     </div>
   );

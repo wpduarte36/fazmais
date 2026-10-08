@@ -12,7 +12,7 @@ interface RichTextEditorProps {
 
 const toolbarButtonClass =
   'flex h-7 w-7 items-center justify-center text-neutral-400 transition hover:bg-white/[0.06] hover:text-neutral-100 light:hover:bg-black/[0.05] light:hover:text-neutral-900';
-const toolbarButtonActiveClass = 'bg-amber-400/15 text-amber-300 light:bg-amber-400/20 light:text-amber-700';
+const toolbarButtonActiveClass = 'bg-brand-400/15 text-brand-300 light:bg-brand-400/20 light:text-brand-700';
 
 type BlockType = 'paragraph' | 'h1' | 'h2' | 'h3';
 
@@ -51,7 +51,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       attributes: {
         class:
           'min-h-[84px] text-sm text-white outline-none ' +
-          '[&_p]:mb-3 [&_p:last-child]:mb-0 [&_a]:text-amber-400 [&_a]:underline ' +
+          '[&_p]:mb-3 [&_p:last-child]:mb-0 [&_a]:text-brand-400 [&_a]:underline ' +
           '[&_h1]:mb-2 [&_h1]:text-lg [&_h1]:font-bold [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-bold [&_h3]:mb-2 [&_h3]:text-sm [&_h3]:font-bold ' +
           '[&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 ' +
           'light:text-neutral-900',
@@ -91,7 +91,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
   }
 
   return (
-    <div className="w-full rounded-lg border border-white/10 bg-white/5 transition focus-within:border-amber-400/60 focus-within:bg-white/[0.07] focus-within:ring-2 focus-within:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:focus-within:bg-white">
+    <div className="w-full rounded-lg border border-white/10 bg-white/5 transition focus-within:border-brand-400/60 focus-within:bg-white/[0.07] focus-within:ring-2 focus-within:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:focus-within:bg-white">
       <div className="flex items-center gap-0.5 border-b border-white/10 px-1.5 py-1 light:border-black/10">
         <select
           value={currentBlockType}

@@ -30,7 +30,7 @@ export function ResetPasswordModal({ userName, token, expiresAt, onClose }: Rese
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-300 light:text-brand-700">
               Redefinição de senha
             </p>
             <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">{userName}</h3>
@@ -51,7 +51,7 @@ export function ResetPasswordModal({ userName, token, expiresAt, onClose }: Rese
         </p>
 
         <div className="rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 light:border-black/10 light:bg-black/[0.03]">
-          <code className="block break-all text-xs text-amber-300 light:text-amber-700">{link}</code>
+          <code className="block break-all text-xs text-brand-300 light:text-brand-700">{link}</code>
         </div>
 
         <p className="mt-2 text-xs text-neutral-500">Expira em {dateTimeFormatter.format(new Date(expiresAt))}.</p>
@@ -67,7 +67,7 @@ export function ResetPasswordModal({ userName, token, expiresAt, onClose }: Rese
           <button
             type="button"
             onClick={handleCopy}
-            className="flex-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+            className="flex-1 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
           >
             {copied ? 'Copiado!' : 'Copiar link'}
           </button>

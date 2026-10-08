@@ -62,7 +62,7 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
         <div className="p-7">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <span className="mb-1.5 inline-block rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
+              <span className="mb-1.5 inline-block rounded-full bg-brand-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300 light:text-brand-700">
                 📱 App
               </span>
               <h1 className="text-xl font-bold leading-tight">{conteudo.title}</h1>
@@ -102,8 +102,8 @@ export function AppModal({ conteudo, onClose }: AppModalProps) {
                       rel="noopener noreferrer"
                       className={
                         index === 0
-                          ? 'flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-300'
-                          : 'flex flex-1 items-center justify-center gap-2 rounded-xl border border-amber-400/40 px-4 py-2.5 text-sm font-bold text-amber-300 transition hover:bg-amber-400/10 light:text-amber-700'
+                          ? 'flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-brand-300'
+                          : 'flex flex-1 items-center justify-center gap-2 rounded-xl border border-brand-400/40 px-4 py-2.5 text-sm font-bold text-brand-300 transition hover:bg-brand-400/10 light:text-brand-700'
                       }
                     >
                       {PLATFORM_ACTION[platform]}

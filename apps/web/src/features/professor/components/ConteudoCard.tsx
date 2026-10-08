@@ -56,7 +56,7 @@ export function ConteudoCard({
             onClick={(event) => event.stopPropagation()}
             aria-label="Baixar eBook"
             title="Baixar eBook"
-            className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white transition hover:text-amber-400"
+            className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white transition hover:text-brand-400"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 3v12" />
@@ -67,7 +67,7 @@ export function ConteudoCard({
         )}
         {conteudo.progressPercent > 0 && conteudo.progressPercent < 100 && (
           <div className="absolute inset-x-0 bottom-0 h-1 bg-black/40">
-            <div className="h-full bg-amber-400" style={{ width: `${conteudo.progressPercent}%` }} />
+            <div className="h-full bg-brand-400" style={{ width: `${conteudo.progressPercent}%` }} />
           </div>
         )}
       </div>

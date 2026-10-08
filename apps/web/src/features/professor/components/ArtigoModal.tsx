@@ -35,7 +35,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
         <div className="p-7">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <span className="mb-1.5 inline-block rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
+              <span className="mb-1.5 inline-block rounded-full bg-brand-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300 light:text-brand-700">
                 📰 Artigo
               </span>
               <h1 className="text-xl font-bold leading-tight">{conteudo.title}</h1>
@@ -60,7 +60,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
           </div>
 
           <div
-            className="max-h-[65vh] overflow-y-auto text-[15px] leading-relaxed text-neutral-300 [&_a]:text-amber-400 [&_a]:underline [&_em]:text-neutral-500 [&_p]:mb-4 [&_p:last-child]:mb-0 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-700 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
+            className="max-h-[65vh] overflow-y-auto text-[15px] leading-relaxed text-neutral-300 [&_a]:text-brand-400 [&_a]:underline [&_em]:text-neutral-500 [&_p]:mb-4 [&_p:last-child]:mb-0 [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-neutral-100 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-100 [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-neutral-100 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 light:text-neutral-700 light:[&_h1]:text-neutral-900 light:[&_h2]:text-neutral-900 light:[&_h3]:text-neutral-900"
             dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
           />
 
@@ -69,7 +69,7 @@ export function ArtigoModal({ conteudo, onClose }: ArtigoModalProps) {
               href={conteudo.externalUrl ?? undefined}
               target="_blank"
               rel="noopener"
-              className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-300"
+              className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-brand-300"
             >
               Ler matéria inteira
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

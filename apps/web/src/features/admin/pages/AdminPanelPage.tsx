@@ -47,7 +47,7 @@ export function AdminPanelPage() {
           onClick={() => setTab('acervo')}
           className={
             tab === 'acervo'
-              ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
               : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
           }
         >
@@ -58,7 +58,7 @@ export function AdminPanelPage() {
           onClick={() => setTab('usuarios')}
           className={
             tab === 'usuarios'
-              ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
               : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
           }
         >

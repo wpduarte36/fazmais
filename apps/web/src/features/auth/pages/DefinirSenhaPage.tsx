@@ -60,7 +60,7 @@ export function DefinirSenhaPage() {
                 </p>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
                 >
                   Ir para o login
                 </Link>
@@ -73,7 +73,7 @@ export function DefinirSenhaPage() {
                 </p>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
                 >
                   Ir para o login
                 </Link>
@@ -99,7 +99,7 @@ export function DefinirSenhaPage() {
                         value={password}
                         onChange={(e) => setPasswordValue(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
+                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-brand-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
                       />
                     </div>
 
@@ -116,7 +116,7 @@ export function DefinirSenhaPage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
+                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-brand-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
                       />
                     </div>
 
@@ -129,7 +129,7 @@ export function DefinirSenhaPage() {
                     <button
                       type="submit"
                       disabled={setPasswordMutation.isPending}
-                      className="mt-1 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="mt-1 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {setPasswordMutation.isPending ? 'Salvando...' : 'Definir senha'}
                     </button>

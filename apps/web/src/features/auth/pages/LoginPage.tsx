@@ -31,7 +31,7 @@ export function LoginPage() {
         {/* Boas-vindas */}
         <div className="max-w-lg text-center animate-[fadeIn_0.6s_ease-out] md:text-left">
           <h1 className="text-3xl font-bold tracking-tight text-white light:text-neutral-900">
-            Bem-vindo ao portal Faz<span className="text-amber-400">Mais</span>
+            Bem-vindo ao portal Faz<span className="text-brand-400">Mais</span>
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-neutral-300 light:text-neutral-600">
             Nós acreditamos que educação se faz juntos e, por isso, desenvolvemos uma série de materiais que visam
@@ -69,7 +69,7 @@ export function LoginPage() {
                     value={login}
                     onChange={(e) => setLoginValue(e.target.value)}
                     placeholder="seu.login"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-brand-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
                   />
                 </div>
 
@@ -87,7 +87,7 @@ export function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 pr-10 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 pr-10 text-sm text-white placeholder:text-neutral-500 outline-none transition focus:border-brand-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400 light:focus:bg-white"
                     />
                     <button
                       type="button"
@@ -115,7 +115,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={loginMutation.isPending}
-                  className="mt-1 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-1 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loginMutation.isPending && <Spinner />}
                   {loginMutation.isPending ? 'Entrando...' : 'Entrar'}
@@ -126,14 +126,14 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setNotice('A recuperação de senha por e-mail ainda não está disponível nesta versão.')}
-                  className="text-neutral-400 transition hover:text-amber-300 light:text-neutral-500 light:hover:text-amber-600"
+                  className="text-neutral-400 transition hover:text-brand-300 light:text-neutral-500 light:hover:text-brand-600"
                 >
                   Esqueceu sua senha?
                 </button>
                 <button
                   type="button"
                   onClick={() => setNotice('O formulário de solicitação de acesso ainda está em construção.')}
-                  className="text-neutral-400 transition hover:text-amber-300 light:text-neutral-500 light:hover:text-amber-600"
+                  className="text-neutral-400 transition hover:text-brand-300 light:text-neutral-500 light:hover:text-brand-600"
                 >
                   Ainda não tenho acesso
                 </button>

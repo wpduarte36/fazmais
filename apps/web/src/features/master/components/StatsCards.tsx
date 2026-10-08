@@ -10,7 +10,7 @@ const CARDS: Array<{
   {
     key: 'municipios',
     label: 'Municípios',
-    gradient: 'from-amber-400 to-amber-600',
+    gradient: 'from-brand-400 to-brand-600',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1" />

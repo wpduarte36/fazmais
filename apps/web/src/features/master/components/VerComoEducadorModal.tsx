@@ -10,7 +10,7 @@ interface VerComoEducadorModalProps {
 }
 
 const selectClassName =
-  'w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-amber-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:focus:bg-white [&_option]:text-neutral-900';
+  'w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-brand-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-brand-400/20 light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:focus:bg-white [&_option]:text-neutral-900';
 
 // Master não tem município nem plano: pra ver a plataforma como educador ele
 // escolhe os dois aqui, e a Home abre com ?tenant=&plano= (ver HomePage).
@@ -48,7 +48,7 @@ export function VerComoEducadorModal({ onClose, tenantIdInicial }: VerComoEducad
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 light:text-amber-700">Painel Master</p>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-300 light:text-brand-700">Painel Master</p>
             <h3 className="text-lg font-bold text-neutral-100 light:text-neutral-900">Área do Educador</h3>
           </div>
           <button
@@ -121,7 +121,7 @@ export function VerComoEducadorModal({ onClose, tenantIdInicial }: VerComoEducad
             type="button"
             onClick={abrir}
             disabled={!tenantId || !planoId}
-            className="flex-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Abrir
           </button>

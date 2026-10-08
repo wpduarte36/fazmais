@@ -30,7 +30,7 @@ export function MasterPanelPage() {
           onClick={() => setTab('municipios')}
           className={
             tab === 'municipios'
-              ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
               : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
           }
         >
@@ -41,7 +41,7 @@ export function MasterPanelPage() {
           onClick={() => setTab('catalogos')}
           className={
             tab === 'catalogos'
-              ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
               : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
           }
         >
@@ -52,7 +52,7 @@ export function MasterPanelPage() {
           onClick={() => setTab('auditoria')}
           className={
             tab === 'auditoria'
-              ? 'rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
+              ? 'rounded-full bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-1.5 text-sm font-semibold text-neutral-950'
               : 'rounded-full px-4 py-1.5 text-sm font-semibold text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900'
           }
         >

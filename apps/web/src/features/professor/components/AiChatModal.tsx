@@ -114,7 +114,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
                         key={pergunta}
                         type="button"
                         onClick={() => enviarPergunta(pergunta)}
-                        className="rounded-full border border-amber-400/30 bg-amber-400/5 px-3 py-1 text-xs font-medium text-amber-300 transition hover:bg-amber-400/15 light:text-amber-700"
+                        className="rounded-full border border-brand-400/30 bg-brand-400/5 px-3 py-1 text-xs font-medium text-brand-300 transition hover:bg-brand-400/15 light:text-brand-700"
                       >
                         {pergunta}
                       </button>
@@ -137,7 +137,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
               <div
                 className={
                   mensagem.autor === 'usuario'
-                    ? 'max-w-[80%] rounded-2xl rounded-br-sm bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-sm font-medium text-neutral-950'
+                    ? 'max-w-[80%] rounded-2xl rounded-br-sm bg-gradient-to-r from-brand-400 to-brand-500 px-3.5 py-2 text-sm font-medium text-neutral-950'
                     : 'max-w-[85%] rounded-2xl rounded-bl-sm bg-white/[0.06] px-3.5 py-2 text-sm text-neutral-200 light:bg-black/[0.04] light:text-neutral-800'
                 }
               >
@@ -148,7 +148,7 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
                       <div key={sugestao.conteudo.id} className="flex w-44 shrink-0 flex-col items-center gap-1.5">
                         <ConteudoCard conteudo={sugestao.conteudo} index={sugestaoIndex} onOpen={handleAbrirSugestao} />
                         {sugestao.relevancia > 0 && (
-                          <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                          <span className="rounded-full bg-brand-400/10 px-2 py-0.5 text-[10px] font-bold text-brand-400">
                             {sugestao.relevancia}% relevante
                           </span>
                         )}
@@ -189,13 +189,13 @@ export function AiChatModal({ perguntaInicial, feed, onAbrirConteudo, onClose }:
             value={novaPergunta}
             onChange={(event) => setNovaPergunta(event.target.value)}
             placeholder="Pergunte ao Fabinho..."
-            className="w-full flex-1 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
+            className="w-full flex-1 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-brand-400/50 focus:bg-white/[0.07] light:border-black/10 light:bg-black/[0.03] light:text-neutral-900 light:placeholder:text-neutral-400"
           />
           <button
             type="submit"
             disabled={!novaPergunta.trim() || isThinking}
             aria-label="Enviar"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400 text-neutral-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-400 text-neutral-950 transition hover:bg-brand-300 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="m5 12 14-7-4 7 4 7-14-7Z" />

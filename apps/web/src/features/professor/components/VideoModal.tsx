@@ -108,7 +108,7 @@ export function VideoModal({ conteudo, onClose }: VideoModalProps) {
       >
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
-            <span className="mb-1.5 inline-block rounded-full bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
+            <span className="mb-1.5 inline-block rounded-full bg-brand-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300 light:text-brand-700">
               ▶ Vídeo
             </span>
             <h1 className="text-lg font-bold leading-tight">{conteudo.title}</h1>

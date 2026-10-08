@@ -22,7 +22,7 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl', tenantAl
   const isMasterComoAdmin = Boolean(tenantAlvo);
   const [verComoEducadorAberto, setVerComoEducadorAberto] = useState(false);
   const linkClassName =
-    'mt-1 block text-[11px] font-semibold text-amber-400 transition hover:text-amber-300 hover:underline light:text-amber-600';
+    'mt-1 block text-[11px] font-semibold text-brand-400 transition hover:text-brand-300 hover:underline light:text-brand-600';
 
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
@@ -30,9 +30,9 @@ export function AdminShell({ children, maxWidthClassName = 'max-w-5xl', tenantAl
         <div className="flex items-center gap-2.5">
           <FazMaisLegacyLogo className="h-9 w-auto" />
           <span className="text-base font-bold tracking-tight">
-            Faz<span className="text-amber-400">Mais</span>
+            Faz<span className="text-brand-400">Mais</span>
           </span>
-          <span className="ml-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 light:text-amber-700">
+          <span className="ml-1 rounded-full border border-brand-400/25 bg-brand-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300 light:text-brand-700">
             painel admin
           </span>
         </div>

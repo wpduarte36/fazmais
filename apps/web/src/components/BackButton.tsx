@@ -14,7 +14,7 @@ export function BackButton({ onClick, label = 'Voltar', className = '' }: BackBu
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-neutral-300 transition hover:border-amber-400/50 hover:text-amber-400 light:border-black/10 light:bg-black/[0.03] light:text-neutral-600 light:hover:text-amber-600 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-neutral-300 transition hover:border-brand-400/50 hover:text-brand-400 light:border-black/10 light:bg-black/[0.03] light:text-neutral-600 light:hover:text-brand-600 ${className}`}
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M19 12H5M12 19l-7-7 7-7" />

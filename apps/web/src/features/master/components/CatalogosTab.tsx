@@ -43,7 +43,7 @@ export function CatalogosTab() {
         <button
           type="button"
           onClick={() => setModal({ mode: 'create' })}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-sm font-semibold text-neutral-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-400 to-brand-500 px-3.5 py-2 text-sm font-semibold text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:from-brand-300 hover:to-brand-400"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
