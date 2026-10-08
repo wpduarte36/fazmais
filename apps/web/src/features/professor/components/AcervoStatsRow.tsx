@@ -5,7 +5,7 @@ export function AcervoStatsRow({ feed }: { feed: HomeFeed }) {
   const stats = useAcervoStats(feed);
 
   return (
-    <div className="mb-4 grid grid-cols-4 gap-3">
+    <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
       {stats.map((stat) => (
         <div
           key={stat.label}
@@ -20,7 +20,7 @@ export function AcervoStatsRow({ feed }: { feed: HomeFeed }) {
             <p className="truncate text-lg font-bold leading-tight text-neutral-100 light:text-neutral-900">
               {stat.value}
             </p>
-            <p className="truncate text-[11px] text-neutral-400 light:text-neutral-600">{stat.label}</p>
+            <p className="text-[11px] leading-tight text-neutral-400 sm:truncate light:text-neutral-600">{stat.label}</p>
           </div>
         </div>
       ))}

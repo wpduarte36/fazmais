@@ -120,12 +120,14 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-[#07070c] text-neutral-100 light:bg-[#f6f4ef] light:text-neutral-900">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#07070c] light:border-black/10 light:bg-[#f6f4ef]">
-      <div className="flex items-center gap-4 px-7 py-3.5">
-        <div className="flex shrink-0 items-center">
-          <BrandLogo className="h-12 w-auto" />
+      {/* No celular o cabeçalho quebra em duas linhas: logo + usuário em cima,
+          busca embaixo na largura toda. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:flex-nowrap sm:px-7 sm:py-3.5">
+        <div className="order-1 flex shrink-0 items-center">
+          <BrandLogo className="h-10 w-auto sm:h-12" />
         </div>
 
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-2">
+        <div className="order-3 mx-auto flex w-full max-w-2xl items-center gap-2 sm:order-2">
           <div className="relative flex-1">
             <svg
               width="14"
@@ -162,17 +164,17 @@ export function HomePage() {
 
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="order-2 ml-auto flex min-w-0 shrink items-center gap-3 sm:order-3 sm:ml-0 sm:shrink-0">
           <ThemeToggle />
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-xs font-bold text-white">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-xs font-bold text-white">
               {user?.name.charAt(0).toUpperCase()}
             </span>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold">{user?.name}</div>
+            <div className="min-w-0 max-w-[9rem] leading-tight sm:max-w-none">
+              <div className="truncate text-sm font-semibold">{user?.name}</div>
               {isMasterPreview ? (
                 <>
-                  <div className="text-[11px] text-neutral-500">
+                  <div className="truncate text-[11px] text-neutral-500">
                     {feed?.visao ? `${feed.visao.tenantName} · ${feed.visao.planoName}` : 'Área do Educador'}
                   </div>
                   <button
@@ -202,7 +204,7 @@ export function HomePage() {
           <button
             type="button"
             onClick={handleLogout}
-            className="text-sm text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900"
+            className="shrink-0 text-sm text-neutral-400 transition hover:text-neutral-100 light:text-neutral-500 light:hover:text-neutral-900"
           >
             Sair
           </button>
@@ -210,7 +212,7 @@ export function HomePage() {
       </div>
 
         {!isSearching && (
-          <nav className="flex gap-1 overflow-x-auto px-7 pb-2">
+          <nav className="flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:px-7 [&::-webkit-scrollbar]:hidden">
             {eixos.map((eixo) => (
               <button
                 key={eixo.id}
@@ -229,7 +231,7 @@ export function HomePage() {
         )}
       </header>
 
-      <main className="px-7 py-8">
+      <main className="px-4 py-6 sm:px-7 sm:py-8">
         {(isSearching || !isHome) && (
           <div className="mb-6 flex justify-end">
             {isSearching ? (

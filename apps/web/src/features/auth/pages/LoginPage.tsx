@@ -44,8 +44,9 @@ export function LoginPage() {
           </p>
         </div>
 
-        {/* Painel de login */}
-        <div className="w-full max-w-sm shrink-0 animate-[fadeIn_0.6s_ease-out] md:mr-6 lg:mr-14">
+        {/* Painel de login — no celular vem antes do texto de boas-vindas,
+            pra ninguém precisar rolar a tela pra achar onde entrar. */}
+        <div className="order-first w-full max-w-sm shrink-0 animate-[fadeIn_0.6s_ease-out] md:order-none md:mr-6 lg:mr-14">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl light:border-black/10 light:bg-white light:shadow-black/10">
             <div className="mb-6 flex justify-center">
               <BrandLogo className="h-16" />
